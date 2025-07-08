@@ -4,7 +4,8 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct LoopTimeComponent : IComponentData
+    public struct LayerComponent : ISharedComponentData
     {
+        public int LayerIndex;
     }
 }

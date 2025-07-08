@@ -4,8 +4,10 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct TimeComponent : ISharedComponentData
+    public struct TimeComponent : IComponentData
     {
         public float Time;
+
+        public int InterrputedTime;
     }
 }

@@ -1,7 +1,6 @@
 using Unity.Burst;
-using Unity.Collections;
 
-namespace MNP.Core.DataStruct.Animation
+namespace MNP.Core.DataStruct.Animations
 {
     [BurstCompile]
     public struct Animation2DFrame
@@ -9,7 +8,5 @@ namespace MNP.Core.DataStruct.Animation
         public float Time;
 
         public Transform2D Transform;
-
-        public NativeHashMap<int, NativeArray<float>> CustomValues;
     }
 }

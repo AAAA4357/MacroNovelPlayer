@@ -5,7 +5,7 @@ public class MNPRenderPipeline : RenderPipeline
 {
     const string CommandBufferName = "MNP Renderer";
 
-    static ShaderTagId unlitShaderTagId = new ShaderTagId("Opaque");
+    static ShaderTagId unlitShaderTagId = new ShaderTagId("FORWARDBASE");
 
     CommandBuffer commandBuffer = new CommandBuffer()
     {
@@ -22,16 +22,12 @@ public class MNPRenderPipeline : RenderPipeline
     {
         this.context = context;
         camera = cameras[0];
-
         if (!Cull())
         {
             return;
         }
-
         Setup();
-
         DrawVisibleGeometry();
-
         Submit();
     }
 
@@ -73,4 +69,6 @@ public class MNPRenderPipeline : RenderPipeline
         var filteringSettings = new FilteringSettings(RenderQueueRange.all);
         context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
     }
+
+
 }

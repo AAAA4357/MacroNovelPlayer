@@ -4,7 +4,7 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct LoopTimeComponent : IComponentData
+    public struct TimeEnabledComponent : IComponentData
     {
     }
 }

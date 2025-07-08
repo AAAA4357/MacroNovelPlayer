@@ -3,7 +3,10 @@ using Unity.Entities;
 
 namespace MNP.Core.DOTS.Systems
 {
-    partial struct MNPAnimationSystem : ISystem
+    [UpdateInGroup(typeof(MNPSystemGroup))]
+    [UpdateAfter(typeof(TimeSystem))]
+    [UpdateAfter(typeof(Animation2DSystem))]
+    partial struct Animation3DSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)

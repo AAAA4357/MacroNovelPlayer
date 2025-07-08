@@ -1,10 +1,10 @@
 using Unity.Burst;
 using Unity.Collections;
 
-namespace MNP.Core.DataStruct.Animation
+namespace MNP.Core.DataStruct.Animations
 {
     [BurstCompile]
-    public struct Animaion3D
+    public struct Animation3D
     {
         public Animation3DFrame StartFrame;
 

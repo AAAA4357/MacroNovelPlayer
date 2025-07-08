@@ -1,7 +1,7 @@
 using Unity.Burst;
 using Unity.Collections;
 
-namespace MNP.Core.DataStruct.Animation
+namespace MNP.Core.DataStruct.Animations
 {
     [BurstCompile]
     public struct Animation3DFrame
@@ -10,6 +10,6 @@ namespace MNP.Core.DataStruct.Animation
 
         public Transform3D Transform;
 
-        public NativeHashMap<int, NativeArray<float>> CustomValues;
+        public NativeHashMap<int, NativeArray<float>> Properties;
     }
 }

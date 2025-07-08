@@ -1,8 +1,14 @@
+using MNP.Core.DataStruct;
+using Unity.Burst;
 using Unity.Entities;
 
-public struct ElementComponent : IComponentData
+namespace MNP.Core.DOTS.Components
 {
-    public int ID;
+    [BurstCompile]
+    public struct ElementComponent : ICleanupComponentData
+    {
+        public int ID;
 
-    public int LayerIndex;
+        public Transform2D Transform;
+    }
 }
