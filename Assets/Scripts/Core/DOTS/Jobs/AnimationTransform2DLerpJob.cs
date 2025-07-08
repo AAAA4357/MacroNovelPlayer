@@ -40,6 +40,9 @@ namespace MNP.Core.DOTS.Jobs
         public NativeArray<float> TimeDurationArray;
 
         [ReadOnly]
+        public NativeArray<bool> TimeEndedArray;
+
+        [ReadOnly]
         public NativeArray<ElementComponent> Elements;
         [ReadOnly]
         public NativeArray<Entity> Entities;
@@ -118,6 +121,9 @@ namespace MNP.Core.DOTS.Jobs
                 Scale = resultScl
             };
             EcbWriter.SetComponent(index, Entities[index], element);
+
+            if (TimeEndedArray[index])
+                EcbWriter.RemoveComponent(index, Entities[index], typeof(TimeEnabledComponent));
 
             PositionEase.Dispose();
             RotationEase.Dispose();

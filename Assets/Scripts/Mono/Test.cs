@@ -1,17 +1,20 @@
-using System.Linq;
 using MNP.Core.DataStruct;
 using MNP.Core.DataStruct.Animations;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Systems;
+using MNP.Core.DOTS.Systems.Managed;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace MNP.Core.Mono
+namespace MNP.Mono
 {
     public class Test : MonoBehaviour
     {
+        public GameObject Quad;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -105,14 +108,24 @@ namespace MNP.Core.Mono
             };
             World world = World.DefaultGameObjectInjectionWorld;
             EntityManager manager = world.EntityManager;
-            for (int i = 0; i < 20000; i++)
+            const int testCount = 1;
+            QuadInstance[] instances = new QuadInstance[testCount];
+            for (int i = 0; i < testCount; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ElementComponent),
                                                     typeof(AnimationTransform2DArrayComponent),
                                                     typeof(TimeComponent),
                                                     typeof(TimeEnabledComponent));
                 manager.SetComponentData(entity, CreateTest());
+                GameObject gameObject = Instantiate(Quad, new Vector3(0, 0, 0), Quaternion.identity);
+                QuadInstance instance = gameObject.GetComponent<QuadInstance>();
+                instance.manager = manager;
+                instance.entity = entity;
+
+                instances[i] = instance;
             }
+            ManagedUpdateSystem system = world.GetExistingSystemManaged<ManagedUpdateSystem>();
+            system.InstanceList = instances;
             animations.Dispose();
         }
 
@@ -121,32 +134,32 @@ namespace MNP.Core.Mono
             NativeList<float> AnimationFrameStartArray = new(2, Allocator.Persistent)
             {
                 0,
-                10
+                5
             };
             NativeList<float> AnimationFrameDurationArray = new(2, Allocator.Persistent)
             {
-                10,
-                20
+                5,
+                2
             };
             NativeList<float2x3> AnimationPathP0Array = new(2, Allocator.Persistent)
             {
-                new(0, 0, 0, 0, 0, 0),
-                new(2, 0, 0, 0, 0, 0)
+                new(0, 0, 1, 0, 0, 1),
+                new(2, 0, 1, 0, 0, 1)
             };
             NativeList<float2x3> AnimationPathP1Array = new(2, Allocator.Persistent)
             {
-                new(0, 0, 0, 0, 0, 0),
-                new(2, 0, 0, 0, 0, 0)
+                new(0.666666f, 0, 1, 0, 0, 1),
+                new(2, 30, 1, 0.666666f, 0, 1)
             };
             NativeList<float2x3> AnimationPathP2Array = new(2, Allocator.Persistent)
             {
-                new(2, 0, 0, 0, 0, 0),
-                new(2, 2, 0, 0, 0, 0)
+                new(1.333333f, 0, 1, 0, 0, 1),
+                new(2, 60, 1, 1.333333f, 0, 1)
             };
             NativeList<float2x3> AnimationPathP3Array = new(2, Allocator.Persistent)
             {
-                new(2, 0, 0, 0, 0, 0),
-                new(2, 2, 0, 0, 0, 0)
+                new(2, 0, 1, 0, 0, 1),
+                new(2, 90, 1, 2, 0, 1)
             };
             NativeList<float4> AnimationPositionEaseArray = new(2, Allocator.Persistent)
             {

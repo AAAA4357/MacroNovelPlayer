@@ -3,72 +3,13 @@ using UnityEngine.Rendering;
 
 public class MNPRenderPipeline : RenderPipeline
 {
-    const string CommandBufferName = "MNP Renderer";
-
-    static ShaderTagId unlitShaderTagId = new ShaderTagId("FORWARDBASE");
-
-    CommandBuffer commandBuffer = new CommandBuffer()
-    {
-        name = CommandBufferName
-    };
-
-    CullingResults cullingResults;
-
-    private ScriptableRenderContext context;
-
-    private Camera camera;
+    MNPCameraRenderer renderer = new();
 
     protected override void Render(ScriptableRenderContext context, Camera[] cameras)
     {
-        this.context = context;
-        camera = cameras[0];
-        if (!Cull())
+        for (int i = 0; i < cameras.Length; i++)
         {
-            return;
+            renderer.Render(context, cameras[i]);
         }
-        Setup();
-        DrawVisibleGeometry();
-        Submit();
     }
-
-    private void Setup()
-    {
-        commandBuffer.ClearRenderTarget(true, true, Color.clear);
-        commandBuffer.BeginSample(CommandBufferName);
-        ExecuteBuffer();
-        context.SetupCameraProperties(camera);
-    }
-
-    private void Submit()
-    {
-        commandBuffer.EndSample(CommandBufferName);
-        ExecuteBuffer();
-        context.Submit();
-    }
-
-    void ExecuteBuffer()
-    {
-        context.ExecuteCommandBuffer(commandBuffer);
-        commandBuffer.Clear();
-    }
-
-    bool Cull()
-    {
-        if (camera.TryGetCullingParameters(out ScriptableCullingParameters p))
-        {
-            cullingResults = context.Cull(ref p);
-            return true;
-        }
-        return false;
-    }
-
-    void DrawVisibleGeometry()
-    {
-        var sortingSettings = new SortingSettings(camera);
-        var drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings);
-        var filteringSettings = new FilteringSettings(RenderQueueRange.all);
-        context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
-    }
-
-
 }

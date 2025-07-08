@@ -1,4 +1,4 @@
-using MNP.Core.Mono;
+using MNP.Mono;
 using UnityEditor;
 using UnityEngine;
 
