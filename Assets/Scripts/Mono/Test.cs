@@ -18,94 +18,6 @@ namespace MNP.Mono
         // Start is called before the first frame update
         void Start()
         {
-            BezierCurve curve = new()
-            {
-                Dimension = 2,
-                ControlPointP0 = new(new float[] { 0, 0 }, Allocator.Persistent),
-                ControlPointP1 = new(new float[] { 0, 0 }, Allocator.Persistent),
-                ControlPointP2 = new(new float[] { 2, 0 }, Allocator.Persistent),
-                ControlPointP3 = new(new float[] { 2, 0 }, Allocator.Persistent)
-            };
-            EasingFunction function = new()
-            {
-                Segments = new(new float4[] { 0, 1, 1, 1 }, Allocator.Persistent)
-            };
-            AnimationProperty property = new()
-            {
-                Path = curve,
-                Ease = function
-            };
-            BezierCurve curve1 = new()
-            {
-                Dimension = 1,
-                ControlPointP0 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP1 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP2 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP3 = new(new float[] { 0 }, Allocator.Persistent)
-            };
-            EasingFunction function1 = new()
-            {
-                Segments = new(new float4[] { 0, 1, 1, 1 }, Allocator.Persistent)
-            };
-            AnimationProperty property1 = new()
-            {
-                Path = curve1,
-                Ease = function1
-            };
-            BezierCurve curve2 = new()
-            {
-                Dimension = 1,
-                ControlPointP0 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP1 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP2 = new(new float[] { 0 }, Allocator.Persistent),
-                ControlPointP3 = new(new float[] { 0 }, Allocator.Persistent)
-            };
-            EasingFunction function2 = new()
-            {
-                Segments = new(new float4[] { 0, 1, 1, 1 }, Allocator.Persistent)
-            };
-            AnimationProperty property2 = new()
-            {
-                Path = curve2,
-                Ease = function2
-            };
-            Animation2DFrame startFrame = new()
-            {
-                Time = 0,
-                Transform = new()
-                {
-                    Position = new(0, 0),
-                    Rotation = 0,
-                    Scale = new(0, 0)
-                }
-            };
-            Animation2DFrame endFrame = new()
-            {
-                Time = 2,
-                Transform = new()
-                {
-                    Position = new(2, 0),
-                    Rotation = 0,
-                    Scale = new(0, 0)
-                }
-            };
-            Animation2D animation = new()
-            {
-                StartFrame = startFrame,
-                EndFrame = endFrame,
-                PositionProperty = property,
-                RotationProperty = property1,
-                ScaleProperty = property2
-            };
-            NativeList<Animation2D> animations = new(1, Allocator.Temp)
-            {
-                animation
-            };
-            Animation2DArrayComponent component = new()
-            {
-                Animations = animations.AsArray(),
-                AnimationCount = animations.Length
-            };
             World world = World.DefaultGameObjectInjectionWorld;
             EntityManager manager = world.EntityManager;
             const int testCount = 1;
@@ -126,7 +38,6 @@ namespace MNP.Mono
             }
             ManagedUpdateSystem system = world.GetExistingSystemManaged<ManagedUpdateSystem>();
             system.InstanceList = instances;
-            animations.Dispose();
         }
 
         private AnimationTransform2DArrayComponent CreateTest()
