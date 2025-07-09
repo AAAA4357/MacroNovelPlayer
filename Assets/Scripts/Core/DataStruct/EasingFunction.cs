@@ -1,12 +1,10 @@
-using Unity.Burst;
-using Unity.Collections;
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace MNP.Core.DataStruct
 {
-    [BurstCompile]
     public struct EasingFunction
     {
-        public NativeArray<float4> Segments;
+        public List<float4> Segments;
     }
 }

@@ -1,9 +1,5 @@
-using Unity.Burst;
-using Unity.Collections;
-
 namespace MNP.Core.DataStruct.Animations
 {
-    [BurstCompile]
     public struct Animation2D
     {
         public Animation2DFrame StartFrame;

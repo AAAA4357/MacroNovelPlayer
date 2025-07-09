@@ -1,9 +1,7 @@
-using Unity.Burst;
 using Unity.Mathematics;
 
 namespace MNP.Core.DataStruct
 {
-    [BurstCompile]
     public struct Transform3D
     {
         public float3 Position;
