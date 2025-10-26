@@ -7,7 +7,6 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace MNP.Mono
 {
@@ -20,7 +19,7 @@ namespace MNP.Mono
         {
             World world = World.DefaultGameObjectInjectionWorld;
             EntityManager manager = world.EntityManager;
-            const int testCount = 1;
+            const int testCount = 1000;
             QuadInstance[] instances = new QuadInstance[testCount];
             for (int i = 0; i < testCount; i++)
             {
@@ -52,26 +51,30 @@ namespace MNP.Mono
                 5,
                 2
             };
-            NativeList<float2x3> AnimationPathP0Array = new(2, Allocator.Persistent)
-            {
-                new(0, 0, 1, 0, 0, 1),
-                new(2, 0, 1, 0, 0, 1)
-            };
-            NativeList<float2x3> AnimationPathP1Array = new(2, Allocator.Persistent)
-            {
-                new(0.666666f, 0, 1, 0, 0, 1),
-                new(2, 30, 1, 0.666666f, 0, 1)
-            };
-            NativeList<float2x3> AnimationPathP2Array = new(2, Allocator.Persistent)
-            {
-                new(1.333333f, 0, 1, 0, 0, 1),
-                new(2, 60, 1, 1.333333f, 0, 1)
-            };
-            NativeList<float2x3> AnimationPathP3Array = new(2, Allocator.Persistent)
-            {
-                new(2, 0, 1, 0, 0, 1),
-                new(2, 90, 1, 2, 0, 1)
-            };
+            NativeList<float2x3> AnimationPathP0Array = GetRandomAnimationPoint();
+            //new(2, Allocator.Persistent)
+            //{
+            //    new(0, 0, 1, 0, 0, 1),
+            //    new(2, 0, 1, 0, 0, 1)
+            //};
+            NativeList<float2x3> AnimationPathP1Array = GetRandomAnimationPoint();
+            //new(2, Allocator.Persistent)
+            //{
+            //    new(0.666666f, 0, 1, 0, 0, 1),
+            //    new(2, 30, 1, 0.666666f, 0, 1)
+            //};
+            NativeList<float2x3> AnimationPathP2Array = GetRandomAnimationPoint();
+            //new(2, Allocator.Persistent)
+            //{
+            //    new(1.333333f, 0, 1, 0, 0, 1),
+            //    new(2, 60, 1, 1.333333f, 0, 1)
+            //};
+            NativeList<float2x3> AnimationPathP3Array = GetRandomAnimationPoint();
+            //new(2, Allocator.Persistent)
+            //{
+            //    new(2, 0, 1, 0, 0, 1),
+            //    new(2, 90, 1, 2, 0, 1)
+            //};
             NativeList<float4> AnimationPositionEaseArray = new(2, Allocator.Persistent)
             {
                 new(0, 1, 1, 1),
@@ -140,13 +143,32 @@ namespace MNP.Mono
             ref TimeSystem time = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(system);
             time.Interrupt();
         }
-        
+
         public void Resume()
         {
             World world = World.DefaultGameObjectInjectionWorld;
             var system = world.GetExistingSystem<TimeSystem>();
             ref TimeSystem time = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(system);
             time.Resume();
+        }
+        
+        private NativeList<float2x3> GetRandomAnimationPoint()
+        {
+            float posx = UnityEngine.Random.value * 12 - 6;
+            float posy = UnityEngine.Random.value * 6 - 3;
+            float rot = UnityEngine.Random.value * 6 - 3;
+            float sclx = UnityEngine.Random.value * 6 - 3;
+            float scly = UnityEngine.Random.value * 6 - 3;
+            float posx1 = UnityEngine.Random.value * 12 - 6;
+            float posy1 = UnityEngine.Random.value * 6 - 3;
+            float rot1 = UnityEngine.Random.value * 6 - 3;
+            float sclx1 = UnityEngine.Random.value * 6 - 3;
+            float scly1 = UnityEngine.Random.value * 6 - 3;
+            return new(2, Allocator.Persistent)
+            {
+                new(posx, rot * 120, sclx, posy, 0, scly),
+                new(posx1, rot1 * 120, sclx1, posy1, 0, scly1)
+            };
         }
     }
 }
