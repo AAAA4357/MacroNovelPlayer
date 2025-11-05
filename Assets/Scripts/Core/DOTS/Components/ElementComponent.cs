@@ -5,10 +5,9 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct ElementComponent : ICleanupComponentData
+    public struct ElementComponent : IComponentData
     {
         public int ID;
-
-        public Transform2D Transform;
+        public int TextureID;
     }
 }

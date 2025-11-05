@@ -1,14 +1,13 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct Animation3DArrayComponent : IComponentData
+    public struct Animation1DArrayComponent : IComponentData
     {
-        public NativeArray<float3> Anchors;
+        public NativeArray<float> Anchors;
         public NativeArray<int> Indices;
     }
 }

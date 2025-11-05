@@ -8,6 +8,9 @@ namespace MNP.Core.Misc
     [BurstCompile]
     public struct UnmanagedTimer : IDisposable
     {
+#if UNITY_STANDALONE_WIN
+        //Windows only
+        
         [DllImport("kernel32.dll")]
         private static extern bool QueryPerformanceCounter(out long lpPerformanceCount);
 
@@ -16,7 +19,7 @@ namespace MNP.Core.Misc
 
         [DllImport("kernel32.dll")]
         public static extern uint GetTickCount();
-
+#endif
         private bool _initialized;
 
         private long m_StartTime;

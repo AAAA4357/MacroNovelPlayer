@@ -7,8 +7,6 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateBefore(typeof(Animation2DSystem))]
-    [UpdateBefore(typeof(Animation3DSystem))]
     partial struct TimeSystem : ISystem, ISystemStartStop
     {
         private bool Interrupted;

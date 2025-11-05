@@ -404,6 +404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75c817fda3207e343a30226b81d2ba4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  texture2Ds:
+  - {fileID: 2800000, guid: 78ccfe08f3a74644bb180f99c684b452, type: 3}
+  material: {fileID: 2100000, guid: 0dc0702ad01040a409814e5794c95b9d, type: 2}
   Quad: {fileID: 2422353812423002000, guid: b3b63058771c380478b571aa89396122, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

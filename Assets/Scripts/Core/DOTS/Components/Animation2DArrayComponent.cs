@@ -6,9 +6,9 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct Animation3DArrayComponent : IComponentData
+    public struct Animation2DArrayComponent : IComponentData
     {
-        public NativeArray<float3> Anchors;
+        public NativeArray<float2> Anchors;
         public NativeArray<int> Indices;
     }
 }
