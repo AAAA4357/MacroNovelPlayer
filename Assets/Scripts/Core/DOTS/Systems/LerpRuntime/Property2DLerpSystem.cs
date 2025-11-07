@@ -1,11 +1,11 @@
 using Unity.Burst;
 using Unity.Entities;
 
-namespace MNP.Core.DOTS.Systems
+namespace MNP.Core.DOTS.Systems.LerpRuntime
 {
-    [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(PropertyLerpSystemGroup))]
-    partial struct PostProcessingSystem : ISystem
+    [UpdateInGroup(typeof(PropertyLerpSystemGroup))]
+    [UpdateAfter(typeof(Property1DLerpSystem))]
+    partial struct Property2DLerpSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)
