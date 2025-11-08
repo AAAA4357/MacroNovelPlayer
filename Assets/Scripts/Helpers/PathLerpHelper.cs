@@ -1,7 +1,6 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace MNP.Helpers
 {
@@ -60,7 +59,7 @@ namespace MNP.Helpers
             float2 start = pathArray[index].yz;
             float2 end = pathArray[index + 1].yz;
             float2 control1 = pathControlArray[index << 1];
-            float2 control2 = pathControlArray[index << 1 + 1];
+            float2 control2 = pathControlArray[(index << 1) + 1];
             return GetBezierPoint2D(start, control1, control2, end, fixedT);
         }
 

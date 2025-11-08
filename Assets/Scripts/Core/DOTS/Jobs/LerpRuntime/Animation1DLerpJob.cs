@@ -38,9 +38,9 @@ namespace MNP.Core.DOTS.Jobs.LerpRuntime
         [BurstCompile]
         public void Execute(int index)
         {
-            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easekeyframeArray);
+            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easekeyframeArray, Allocator.Temp);
             float ease = EasingFunctionHelper.GetEase(easekeyframeArray, TimeArray[index]);
-            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float2> pathKeyframeArray);
+            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float2> pathKeyframeArray, Allocator.Temp);
             //No Bezier in 1D
             float result = PathLerpHelper.Lerp1DLinear(pathKeyframeArray, ease);
             Property1DComponent component = PropertyArray[index];

@@ -7,6 +7,10 @@ namespace MNP.Helpers
     [BurstCompile]
     public static class UtilityHelper
     {
+        public const string TransormPositionID = "Transform2D_Position";
+        public const string TransormRotationID = "Transform2D_Rotation";
+        public const string TransormScaleID = "Transform2D_Scale";
+
         [BurstCompile]
         public static void GetFloorIndexInArray<T>(in NativeArray<T> valueArray, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : struct
         {
@@ -20,7 +24,7 @@ namespace MNP.Helpers
                 }
                 else
                 {
-                    if (i == valueArray.Length - 1)
+                    if (i >= valueArray.Length - 1)
                     {
                         index = i;
                         break;
@@ -28,6 +32,11 @@ namespace MNP.Helpers
                 }
             }
             resultIndex = index;
+            if (index == valueArray.Length - 1)
+            {
+                fixedT = 1;
+                return;
+            }
             float duration = converter.Invoke(valueArray[index + 1]) - converter.Invoke(valueArray[index]);
             fixedT = (referenceValue - converter.Invoke(valueArray[index])) / duration;
         }

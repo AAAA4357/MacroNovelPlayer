@@ -18,10 +18,14 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
         NativeList<Property2DComponent> properties;
         NativeList<float3> pathKeyframeList;
         NativeList<float2> pathControlList;
+        NativeList<bool> pathLinearList;
+        NativeList<int> pathLinearIndexList;
         NativeList<int> pathIndexList;
         NativeList<float4> easeKeyframeList;
         NativeList<int> easeIndexList;
         NativeList<float> timeList;
+
+        EntityQuery query;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -34,27 +38,48 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
             properties = new(Allocator.Persistent);
             pathKeyframeList = new(Allocator.Persistent);
             pathControlList = new(Allocator.Persistent);
+            pathLinearList = new(Allocator.Persistent);
+            pathLinearIndexList = new(Allocator.Persistent);
             pathIndexList = new(Allocator.Persistent);
             easeKeyframeList = new(Allocator.Persistent);
             easeIndexList = new(Allocator.Persistent);
             timeList = new(Allocator.Persistent);
+
+            query = state.GetEntityQuery(typeof(Animation2DArrayComponent), typeof(Property2DComponent), typeof(TimeComponent));
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityQuery query = state.GetEntityQuery(typeof(Animation2DArrayComponent), typeof(Property2DComponent), typeof(TimeComponent));
             int count = query.CalculateEntityCount();
             
-            entities.Resize(count, NativeArrayOptions.ClearMemory);
-            properties.Resize(count, NativeArrayOptions.ClearMemory);
-            pathKeyframeList.Resize(count, NativeArrayOptions.ClearMemory);
-            pathControlList.Resize(count, NativeArrayOptions.ClearMemory);
-            pathIndexList.Resize(count, NativeArrayOptions.ClearMemory);
-            easeKeyframeList.Resize(count, NativeArrayOptions.ClearMemory);
-            easeIndexList.Resize(count, NativeArrayOptions.ClearMemory);
-            timeList.Resize(count, NativeArrayOptions.ClearMemory);
+            entities.Clear();
+            properties.Clear();
+            pathKeyframeList.Clear();
+            pathControlList.Clear();
+            pathLinearList.Clear();
+            pathLinearIndexList.Clear();
+            pathIndexList.Clear();
+            easeKeyframeList.Clear();
+            easeIndexList.Clear();
+            timeList.Clear();
+            
+            entities.SetCapacity(count);
+            properties.SetCapacity(count);
+            pathKeyframeList.SetCapacity(count);
+            pathControlList.SetCapacity(count);
+            pathLinearList.SetCapacity(count);
+            pathLinearIndexList.SetCapacity(count);
+            pathIndexList.SetCapacity(count);
+            easeKeyframeList.SetCapacity(count);
+            easeIndexList.SetCapacity(count);
+            timeList.SetCapacity(count);
 
+            pathIndexList.Add(0);
+            easeIndexList.Add(0);
+            pathLinearIndexList.Add(0);
+
+            int counter = 1;
             foreach (var (animation2DArrayComponent, property2DComponent, timeComponent, entity) in SystemAPI.Query<RefRO<Animation2DArrayComponent>, RefRO<Property2DComponent>, RefRO<TimeComponent>>().WithEntityAccess())
             {
                 UtilityHelper.GetFloorIndexInArray(animation2DArrayComponent.ValueRO.TimeArray,
@@ -67,31 +92,38 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
                                                   animationIndex,
                                                   out NativeArray<float3> pathKeyframeArray);
                 UtilityHelper.GetFoldedArrayValue(animation2DArrayComponent.ValueRO.PathControlArray,
-                                                  animation2DArrayComponent.ValueRO.PathIndexArray,
+                                                  animation2DArrayComponent.ValueRO.PathLinearIndexArray,
+                                                  2,
                                                   animationIndex,
                                                   out NativeArray<float2> pathControlArray);
                 UtilityHelper.GetFoldedArrayValue(animation2DArrayComponent.ValueRO.PathLinearLerpArray,
-                                                  animation2DArrayComponent.ValueRO.PathIndexArray,
+                                                  animation2DArrayComponent.ValueRO.PathLinearIndexArray,
                                                   animationIndex,
                                                   out NativeArray<bool> pathLinearLerpArray);
                 UtilityHelper.GetFoldedArrayValue(animation2DArrayComponent.ValueRO.EaseKeyframeArray,
                                                   animation2DArrayComponent.ValueRO.EaseIndexArray,
                                                   animationIndex,
-                                                  out NativeArray<float4> easeKeyFrameArray);
+                                                  out NativeArray<float4> easeKeyframeArray);
                 pathKeyframeList.AddRange(pathKeyframeArray);
                 pathControlList.AddRange(pathControlArray);
-                pathIndexList.Add(pathKeyframeArray.Length);
-                easeKeyframeList.AddRange(easeKeyFrameArray);
-                easeIndexList.Add(easeKeyFrameArray.Length);
+                pathLinearList.AddRange(pathLinearLerpArray);
+                pathIndexList.Add(pathKeyframeList.Length);
+                pathLinearIndexList.Add(pathKeyframeList.Length - counter);
+                easeKeyframeList.AddRange(easeKeyframeArray);
+                easeIndexList.Add(easeKeyframeList.Length);
                 timeList.Add(fixedT);
                 entities.Add(entity);
                 properties.Add(property2DComponent.ValueRO);
+                counter++;
             }
+            
             EntityCommandBuffer ecb = new(Allocator.TempJob);
             Animation2DLerpJob Job1D = new()
             {
                 PathKeyframeArray = pathKeyframeList.AsArray(),
                 PathControlArray = pathControlList.AsArray(),
+                PathLinearLerpArray = pathLinearList.AsArray(),
+                PathLinearIndexArray = pathLinearIndexList.AsArray(),
                 PathIndexArray = pathIndexList.AsArray(),
                 EaseKeyframeArray = easeKeyframeList.AsArray(),
                 EaseIndexArray = easeIndexList.AsArray(),
@@ -113,6 +145,8 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
             properties.Dispose();
             pathKeyframeList.Dispose();
             pathControlList.Dispose();
+            pathLinearList.Dispose();
+            pathLinearIndexList.Dispose();
             pathIndexList.Dispose();
             easeKeyframeList.Dispose();
             easeIndexList.Dispose();

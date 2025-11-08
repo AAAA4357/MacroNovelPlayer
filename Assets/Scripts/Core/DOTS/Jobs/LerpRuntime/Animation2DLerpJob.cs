@@ -19,6 +19,8 @@ namespace MNP.Core.DOTS.Jobs
         [ReadOnly]
         public NativeArray<bool> PathLinearLerpArray;
         [ReadOnly]
+        public NativeArray<int> PathLinearIndexArray;
+        [ReadOnly]
         public NativeArray<int> PathIndexArray;
 
         //EasingFunction
@@ -42,13 +44,14 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(int index)
         {
-            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easeKeyframeArray);
+            UtilityHelper.GetFloorIndexInArray(PathKeyframeArray, v => v.x, TimeArray[index], out int segmentIndex, out _);
+            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easeKeyframeArray, Allocator.Temp);
             float ease = EasingFunctionHelper.GetEase(easeKeyframeArray, TimeArray[index]);
-            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float3> pathKeyframeArray);
-            UtilityHelper.GetFoldedArrayValue(PathControlArray, PathIndexArray, 2, index, out NativeArray<float2> pathControlArray);
-            UtilityHelper.GetFoldedArrayValue(PathLinearLerpArray, PathIndexArray, index, out NativeArray<bool> pathLinearLerpArray);
+            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float3> pathKeyframeArray, Allocator.Temp);
+            UtilityHelper.GetFoldedArrayValue(PathControlArray, PathLinearIndexArray, 2, index, out NativeArray<float2> pathControlArray, Allocator.Temp);
+            UtilityHelper.GetFoldedArrayValue(PathLinearLerpArray, PathLinearIndexArray, index, out NativeArray<bool> pathLinearLerpArray, Allocator.Temp);
             float2 result;
-            if (pathLinearLerpArray[index])
+            if (pathLinearLerpArray[segmentIndex])
             {
                 //Linear
                 result = PathLerpHelper.Lerp2DLinear(pathKeyframeArray, ease);

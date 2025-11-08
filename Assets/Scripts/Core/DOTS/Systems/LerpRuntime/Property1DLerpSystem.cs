@@ -21,6 +21,8 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
         NativeList<int> easeIndexList;
         NativeList<float> timeList;
 
+        EntityQuery query;
+
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
@@ -35,21 +37,33 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
             easeKeyframeList = new(Allocator.Persistent);
             easeIndexList = new(Allocator.Persistent);
             timeList = new(Allocator.Persistent);
+            
+            query = state.GetEntityQuery(typeof(Animation1DArrayComponent), typeof(Property1DComponent), typeof(TimeComponent));
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityQuery query = state.GetEntityQuery(typeof(Animation1DArrayComponent), typeof(Property1DComponent), typeof(TimeComponent));
             int count = query.CalculateEntityCount();
+
+            entities.Clear();
+            properties.Clear();
+            pathKeyframeList.Clear();
+            pathIndexList.Clear();
+            easeKeyframeList.Clear();
+            easeIndexList.Clear();
+            timeList.Clear();
             
-            entities.Resize(count, NativeArrayOptions.ClearMemory);
-            properties.Resize(count, NativeArrayOptions.ClearMemory);
-            pathKeyframeList.Resize(count, NativeArrayOptions.ClearMemory);
-            pathIndexList.Resize(count, NativeArrayOptions.ClearMemory);
-            easeKeyframeList.Resize(count, NativeArrayOptions.ClearMemory);
-            easeIndexList.Resize(count, NativeArrayOptions.ClearMemory);
-            timeList.Resize(count, NativeArrayOptions.ClearMemory);
+            entities.SetCapacity(count);
+            properties.SetCapacity(count);
+            pathKeyframeList.SetCapacity(count);
+            pathIndexList.SetCapacity(count);
+            easeKeyframeList.SetCapacity(count);
+            easeIndexList.SetCapacity(count);
+            timeList.SetCapacity(count);
+
+            pathIndexList.Add(0);
+            easeIndexList.Add(0);
 
             foreach (var (animation1DArrayComponent, property1DComponent, timeComponent, entity) in SystemAPI.Query<RefRO<Animation1DArrayComponent>, RefRO<Property1DComponent>, RefRO<TimeComponent>>().WithEntityAccess())
             {
@@ -67,13 +81,14 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
                                                   animationIndex,
                                                   out NativeArray<float4> easeKeyframeArray);
                 pathKeyframeList.AddRange(pathKeyframeArray);
-                pathIndexList.Add(pathKeyframeArray.Length);
+                pathIndexList.Add(pathKeyframeList.Length);
                 easeKeyframeList.AddRange(easeKeyframeArray);
-                easeIndexList.Add(easeKeyframeArray.Length);
+                easeIndexList.Add(easeKeyframeList.Length);
                 timeList.Add(fixedT);
                 entities.Add(entity);
                 properties.Add(property1DComponent.ValueRO);
             }
+
             EntityCommandBuffer ecb = new(Allocator.TempJob);
             Animation1DLerpJob Job1D = new()
             {

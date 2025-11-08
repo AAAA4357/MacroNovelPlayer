@@ -11,6 +11,7 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
         public NativeArray<float3> PathKeyframeArray;
         public NativeArray<float2> PathControlArray;
         public NativeArray<bool> PathLinearLerpArray;
+        public NativeArray<int> PathLinearIndexArray;
         public NativeArray<int> PathIndexArray;
         public NativeArray<float4> EaseKeyframeArray;
         public NativeArray<int> EaseIndexArray;

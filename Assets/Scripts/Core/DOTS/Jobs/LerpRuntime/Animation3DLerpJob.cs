@@ -43,11 +43,11 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(int index)
         {
-            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easeKeyframeArray);
+            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easeKeyframeArray, Allocator.Temp);
             float ease = EasingFunctionHelper.GetEase(easeKeyframeArray, TimeArray[index]);
-            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float4> pathKeyframeArray);
-            UtilityHelper.GetFoldedArrayValue(PathControlArray, PathIndexArray, 2, index, out NativeArray<float3> pathControlArray);
-            UtilityHelper.GetFoldedArrayValue(PathLinearLerpArray, PathIndexArray, index, out NativeArray<bool> pathLinearLerpArray);
+            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float4> pathKeyframeArray, Allocator.Temp);
+            UtilityHelper.GetFoldedArrayValue(PathControlArray, PathIndexArray, 2, index, out NativeArray<float3> pathControlArray, Allocator.Temp);
+            UtilityHelper.GetFoldedArrayValue(PathLinearLerpArray, PathIndexArray, index, out NativeArray<bool> pathLinearLerpArray, Allocator.Temp);
             float3 result;
             if (pathLinearLerpArray[index])
             {

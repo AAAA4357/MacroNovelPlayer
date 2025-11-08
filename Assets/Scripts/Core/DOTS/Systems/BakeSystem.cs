@@ -4,6 +4,7 @@ using MNP.Core.DataStruct.Animation;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Components.Managed;
+using MNP.Helpers;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -19,10 +20,16 @@ namespace MNP.Core.DOTS.Systems
             EntityCommandBuffer ecb = new(Allocator.Temp);
             Entities.WithNone<InitializedPropertyComponent>().ForEach((in Entity entity, in ManagedAnimationListComponent animation) =>
             {
-                ManagedAnimationPropertyListComponent component = new();
+                ManagedAnimationPropertyListComponent component = new()
+                {
+                    Property1DList = new(),
+                    Property2DList = new(),
+                    Property3DList = new()
+                };
                 ecb.AddComponent(entity, component);
                 SeperateAnimationObject(animation, component, ecb);
-                ecb.RemoveComponent<ManagedAnimationListComponent>(entity);
+                //ecb.RemoveComponent<ManagedAnimationListComponent>(entity);
+                ecb.AddComponent(entity, new InitializedPropertyComponent());
             }).WithoutBurst().Run();
             ecb.Playback(EntityManager);
             ecb.Dispose();
@@ -54,20 +61,27 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property1DComponent.Value;
                     continue;
                 }
+
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
-                NativeList<float2> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
+                NativeList<float2> pathKeyframeList = new(animationList.Select(x => x.PathKeyframeList.Count).Sum(), Allocator.Temp);
                 NativeList<int> pathIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float4> easeKeyframeList = new(animationList.Select(x => x.EaseKeyframeList.Count).Sum(), Allocator.Temp);
                 NativeList<int> easeIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float> timeList = new(animationList.Count, Allocator.Temp);
+                NativeList<bool> lerpEnabledList = new(animationList.Count, Allocator.Temp);
+
+                pathIndexList.Add(0);
+                easeIndexList.Add(0);
                 foreach (Animation1D animation in animationList)
                 {
-                    ProcessAnimationPath1D(pathKeyframeList, animation.PathKeyFrameList, animation.StartTime, animation.DurationTime);
-                    pathIndexList.Add(animation.PathKeyFrameList.Count);
+                    ProcessAnimationPath1D(pathKeyframeList, lerpEnabledList, animation.PathKeyframeList);
+                    pathIndexList.Add(pathKeyframeList.Length);
                     ProcessAnimationEase(easeKeyframeList, animation.EaseKeyframeList, animation.StartTime, animation.DurationTime);
-                    easeIndexList.Add(animation.EaseKeyframeList.Count);
+                    easeIndexList.Add(easeKeyframeList.Length);
                     timeList.Add(animation.StartTime);
                 }
+                timeList.Add(animationList[^1].StartTime + animationList[^1].DurationTime);
+
                 Animation1DArrayComponent animation1DArrayComponent = new()
                 {
                     PathKeyframeArray = pathKeyframeList.ToArray(Allocator.Persistent),
@@ -79,7 +93,7 @@ namespace MNP.Core.DOTS.Systems
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };
@@ -92,6 +106,7 @@ namespace MNP.Core.DOTS.Systems
                     Time = 0,
                     InterrputedTime = 0
                 };
+
                 ecb.AddComponent(entity, property1DComponent);
                 ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation1DArrayComponent);
@@ -99,11 +114,13 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
                 ecb.AddComponent(entity, new TimeEnabledComponent());
+
                 pathKeyframeList.Dispose();
                 pathIndexList.Dispose();
                 easeKeyframeList.Dispose();
                 easeIndexList.Dispose();
                 timeList.Dispose();
+                lerpEnabledList.Dispose();
             }
         }
 
@@ -124,27 +141,40 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property2DComponent.Value;
                     continue;
                 }
+
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
                 NativeList<float3> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<float2> pathControlList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum() * 2, Allocator.Temp);
                 NativeList<bool> pathLinearList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
+                NativeList<int> pathLinearIndexList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<int> pathIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float4> easeKeyframeList = new(animationList.Select(x => x.EaseKeyframeList.Count).Sum(), Allocator.Temp);
                 NativeList<int> easeIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float> timeList = new(animationList.Count, Allocator.Temp);
+                NativeList<bool> lerpEnabledList = new(animationList.Count, Allocator.Temp);
+
+                pathLinearIndexList.Add(0);
+                pathIndexList.Add(0);
+                easeIndexList.Add(0);
+                int counter = 1;
                 foreach (Animation2D animation in animationList)
                 {
-                    ProcessAnimationPath2D(pathKeyframeList, pathControlList, pathLinearList, animation.PathKeyFrameList, animation.StartTime, animation.DurationTime);
-                    pathIndexList.Add(animation.PathKeyFrameList.Count);
+                    ProcessAnimationPath2D(pathKeyframeList, pathControlList, pathLinearList, lerpEnabledList, animation.PathKeyFrameList);
+                    pathIndexList.Add(pathKeyframeList.Length);
+                    pathLinearIndexList.Add(pathKeyframeList.Length - counter);
                     ProcessAnimationEase(easeKeyframeList, animation.EaseKeyframeList, animation.StartTime, animation.DurationTime);
-                    easeIndexList.Add(animation.EaseKeyframeList.Count);
+                    easeIndexList.Add(easeKeyframeList.Length);
                     timeList.Add(animation.StartTime);
+                    counter++;
                 }
+                timeList.Add(animationList[^1].StartTime + animationList[^1].DurationTime);
+
                 Animation2DArrayComponent animation2DArrayComponent = new()
                 {
                     PathKeyframeArray = pathKeyframeList.ToArray(Allocator.Persistent),
                     PathControlArray = pathControlList.ToArray(Allocator.Persistent),
                     PathLinearLerpArray = pathLinearList.ToArray(Allocator.Persistent),
+                    PathLinearIndexArray = pathLinearIndexList.ToArray(Allocator.Persistent),
                     PathIndexArray = pathIndexList.ToArray(Allocator.Persistent),
                     EaseKeyframeArray = easeKeyframeList.ToArray(Allocator.Persistent),
                     EaseIndexArray = easeIndexList.ToArray(Allocator.Persistent),
@@ -157,7 +187,7 @@ namespace MNP.Core.DOTS.Systems
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };
@@ -166,6 +196,7 @@ namespace MNP.Core.DOTS.Systems
                     Time = 0,
                     InterrputedTime = 0
                 };
+
                 ecb.AddComponent(entity, property2DComponent);
                 ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation2DArrayComponent);
@@ -173,13 +204,16 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
                 ecb.AddComponent(entity, new TimeEnabledComponent());
+
                 pathKeyframeList.Dispose();
                 pathControlList.Dispose();
                 pathLinearList.Dispose();
+                pathLinearIndexList.Dispose();
                 pathIndexList.Dispose();
                 easeKeyframeList.Dispose();
                 easeIndexList.Dispose();
                 timeList.Dispose();
+                lerpEnabledList.Dispose();
             }
         }
 
@@ -200,22 +234,34 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property3DComponent.Value;
                     continue;
                 }
+
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
                 NativeList<float4> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<float3> pathControlList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum() * 2, Allocator.Temp);
                 NativeList<bool> pathLinearList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
+                NativeList<int> pathLinearIndexList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<int> pathIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float4> easeKeyframeList = new(animationList.Select(x => x.EaseKeyframeList.Count).Sum(), Allocator.Temp);
                 NativeList<int> easeIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float> timeList = new(animationList.Count, Allocator.Temp);
+                NativeList<bool> lerpEnabledList = new(animationList.Count, Allocator.Temp);
+
+                pathLinearIndexList.Add(0);
+                pathIndexList.Add(0);
+                easeIndexList.Add(0);
+                int counter = 1;
                 foreach (Animation3D animation in animationList)
                 {
-                    ProcessAnimationPath3D(pathKeyframeList, pathControlList, pathLinearList, animation.PathKeyFrameList, animation.StartTime, animation.DurationTime);
-                    pathIndexList.Add(animation.PathKeyFrameList.Count);
+                    ProcessAnimationPath3D(pathKeyframeList, pathControlList, pathLinearList, lerpEnabledList, animation.PathKeyFrameList);
+                    pathIndexList.Add(pathKeyframeList.Length);
+                    pathLinearIndexList.Add(pathKeyframeList.Length - counter);
                     ProcessAnimationEase(easeKeyframeList, animation.EaseKeyframeList, animation.StartTime, animation.DurationTime);
-                    easeIndexList.Add(animation.EaseKeyframeList.Count);
+                    easeIndexList.Add(easeKeyframeList.Length);
                     timeList.Add(animation.StartTime);
+                    counter++;
                 }
+                timeList.Add(animationList[^1].StartTime + animationList[^1].DurationTime);
+
                 Animation3DArrayComponent animation3DArrayComponent = new()
                 {
                     PathKeyframeArray = pathKeyframeList.ToArray(Allocator.Persistent),
@@ -233,7 +279,7 @@ namespace MNP.Core.DOTS.Systems
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };
@@ -242,6 +288,7 @@ namespace MNP.Core.DOTS.Systems
                     Time = 0,
                     InterrputedTime = 0
                 };
+
                 ecb.AddComponent(entity, property3DComponent);
                 ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation3DArrayComponent);
@@ -249,6 +296,7 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
                 ecb.AddComponent(entity, new TimeEnabledComponent());
+
                 pathKeyframeList.Dispose();
                 pathControlList.Dispose();
                 pathLinearList.Dispose();
@@ -256,50 +304,60 @@ namespace MNP.Core.DOTS.Systems
                 easeKeyframeList.Dispose();
                 easeIndexList.Dispose();
                 timeList.Dispose();
+                lerpEnabledList.Dispose();
             }
         }
 
-        private void ProcessAnimationPath1D(in NativeList<float2> resultList, List<Animation1DPathSegement> segementList, float startTime, float duration)
+        private void ProcessAnimationPath1D(in NativeList<float2> resultList, in NativeList<bool> enabledList, List<Animation1DPathSegement> segementList)
         {
             float totalWeight = segementList.Select(x => x.Weight).Sum();
+            resultList.Add(new(0, segementList[0].StartValue));
+            float time = 0;
             foreach (Animation1DPathSegement path in segementList)
             {
-                resultList.Add(new(startTime + duration * (path.Weight / totalWeight), path.StartValue));
+                time += path.Weight / totalWeight;
+                resultList.Add(new(time, path.EndValue));
+                enabledList.Add(true);
             }
-            resultList.Add(new(startTime + duration, segementList[^1].EndValue));
         }
 
-        private void ProcessAnimationPath2D(in NativeList<float3> resultPathList, in NativeList<float2> resultEaseList, in NativeList<bool> resultLinearList, List<Animation2DPathSegement> segementList, float startTime, float duration)
+        private void ProcessAnimationPath2D(in NativeList<float3> resultPathList, in NativeList<float2> resultEaseList, in NativeList<bool> resultLinearList, in NativeList<bool> enabledList, List<Animation2DPathSegement> segementList)
         {
             float totalWeight = segementList.Select(x => x.Weight).Sum();
+            resultPathList.Add(new(0, segementList[0].StartValue));
+            float time = 0;
             foreach (Animation2DPathSegement path in segementList)
             {
-                resultPathList.Add(new(startTime + duration * (path.Weight / totalWeight), path.StartValue));
+                time += path.Weight / totalWeight;
+                resultPathList.Add(new(time, path.EndValue));
                 resultEaseList.Add(new(path.Control0Value));
                 resultEaseList.Add(new(path.Control1Value));
                 resultLinearList.Add(path.Linear);
+                enabledList.Add(true);
             }
-            resultPathList.Add(new(startTime + duration, segementList[^1].EndValue));
         }
 
-        private void ProcessAnimationPath3D(in NativeList<float4> resultPathList, in NativeList<float3> resultEaseList, in NativeList<bool> resultLinearList, List<Animation3DPathSegement> segementList, float startTime, float duration)
+        private void ProcessAnimationPath3D(in NativeList<float4> resultPathList, in NativeList<float3> resultEaseList, in NativeList<bool> resultLinearList, in NativeList<bool> enabledList, List<Animation3DPathSegement> segementList)
         {
             float totalWeight = segementList.Select(x => x.Weight).Sum();
+            resultPathList.Add(new(0, segementList[0].StartValue));
+            float time = 0;
             foreach (Animation3DPathSegement path in segementList)
             {
-                resultPathList.Add(new(startTime + duration * (path.Weight / totalWeight), path.StartValue));
+                time += path.Weight / totalWeight;
+                resultPathList.Add(new(time, path.EndValue));
                 resultEaseList.Add(new(path.Control0Value));
                 resultEaseList.Add(new(path.Control1Value));
                 resultLinearList.Add(path.Linear);
+                enabledList.Add(true);
             }
-            resultPathList.Add(new(startTime + duration, segementList[^1].EndValue));
         }
         
         private void ProcessAnimationEase(in NativeList<float4> resultList, List<AnimationEaseKeyframe> easeList, float startTime, float duration)
         {
             foreach (AnimationEaseKeyframe ease in easeList)
             {
-                resultList.Add(new(startTime + ease.KeyTime * duration, ease.Value, ease.InTan, ease.OutTan));
+                resultList.Add(new(ease.KeyTime, ease.Value, ease.InTan, ease.OutTan));
             }
         }
     }
