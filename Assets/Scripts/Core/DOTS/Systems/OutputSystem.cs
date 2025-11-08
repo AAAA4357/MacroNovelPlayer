@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using MNP.Core.DataStruct;
+using MNP.Core.DataStruct.Animation;
 using MNP.Core.DOTS.Components;
+using MNP.Core.DOTS.Components.Managed;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MNP.Core.DOTS.Systems
@@ -36,14 +39,16 @@ namespace MNP.Core.DOTS.Systems
 
         protected override void OnUpdate()
         {
-            foreach (var reference in SystemAPI.Query<RefRO<ElementComponent>>())
+            Entities.ForEach((ManagedAnimationPropertyListComponent managedAnimationPropertyListComponent,
+                              in ElementComponent elementComponent) =>
             {
-                /*
-                Transform2D transform = reference.ValueRO.Transform;
-                Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(transform.Position.x, transform.Position.y, 0),
-                                                 Quaternion.Euler(0, 0, transform.Rotation),
-                                                 new Vector3(transform.Scale.x, transform.Scale.y, 0));
-                _propertyBlock.SetTexture("Texture", Textures[reference.ValueRO.TextureID]);
+                Vector2 position = managedAnimationPropertyListComponent.Property2DList["2DTransform_Position"].Value;
+                float rotation = managedAnimationPropertyListComponent.Property1DList["2DTransform_Rotation"].Value;
+                Vector2 scale = managedAnimationPropertyListComponent.Property2DList["2DTransform_Scale"].Value;
+                Matrix4x4 matrix = Matrix4x4.TRS(position,
+                                                 Quaternion.Euler(0, 0, rotation),
+                                                 scale);
+                _propertyBlock.SetTexture("Texture", Textures[elementComponent.TextureID]);
                 Graphics.DrawMesh(
                     _mesh,
                     matrix,
@@ -53,8 +58,7 @@ namespace MNP.Core.DOTS.Systems
                     0,                               // Submesh index
                     _propertyBlock                   // 实例特有的属性
                 );
-                */
-            }
+            }).WithoutBurst().Run();
         }
 
         private Mesh CreateQuadMesh()

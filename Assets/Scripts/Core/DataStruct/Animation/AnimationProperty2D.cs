@@ -4,7 +4,7 @@ namespace MNP.Core.DataStruct.Animation
 {
     public class AnimationProperty2D
     {
-        public string Name;
+        public string ID;
         public float StartTime;
         public float EndTime;
         public bool IsStatic;

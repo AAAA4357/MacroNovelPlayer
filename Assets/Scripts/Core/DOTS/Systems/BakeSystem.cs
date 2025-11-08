@@ -46,7 +46,7 @@ namespace MNP.Core.DOTS.Systems
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty1D refValue = new();
                 Property1DComponent property1DComponent = new();
-                propertyListComponent.Property1DList.Add(refValue);
+                propertyListComponent.Property1DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property1DComponent.Value = property.StaticValue.Value;
@@ -54,7 +54,7 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property1DComponent.Value;
                     continue;
                 }
-                List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.Name];
+                List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
                 NativeList<float2> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<int> pathIndexList = new(animationList.Count, Allocator.Temp);
                 NativeList<float4> easeKeyframeList = new(animationList.Select(x => x.EaseKeyframeList.Count).Sum(), Allocator.Temp);
@@ -76,6 +76,13 @@ namespace MNP.Core.DOTS.Systems
                     EaseIndexArray = easeIndexList.ToArray(Allocator.Persistent),
                     TimeArray = timeList.ToArray(Allocator.Persistent)
                 };
+                PropertyInfoComponent propertyInfoComponent = new()
+                {
+                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
+                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    StartTime = property.StartTime,
+                    EndTime = property.EndTime
+                };
                 ManagedAnimationProperty1DComponent managedProperty1DComponent = new()
                 {
                     RefValue = refValue
@@ -86,10 +93,12 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
                 ecb.AddComponent(entity, property1DComponent);
+                ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation1DArrayComponent);
                 ecb.AddComponent(entity, managedProperty1DComponent);
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
+                ecb.AddComponent(entity, new TimeEnabledComponent());
                 pathKeyframeList.Dispose();
                 pathIndexList.Dispose();
                 easeKeyframeList.Dispose();
@@ -107,7 +116,7 @@ namespace MNP.Core.DOTS.Systems
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty2D refValue = new();
                 Property2DComponent property2DComponent = new();
-                propertyListComponent.Property2DList.Add(refValue);
+                propertyListComponent.Property2DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property2DComponent.Value = property.StaticValue.Value;
@@ -115,7 +124,7 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property2DComponent.Value;
                     continue;
                 }
-                List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.Name];
+                List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
                 NativeList<float3> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<float2> pathControlList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum() * 2, Allocator.Temp);
                 NativeList<bool> pathLinearList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
@@ -145,16 +154,25 @@ namespace MNP.Core.DOTS.Systems
                 {
                     RefValue = refValue
                 };
+                PropertyInfoComponent propertyInfoComponent = new()
+                {
+                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
+                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    StartTime = property.StartTime,
+                    EndTime = property.EndTime
+                };
                 TimeComponent timeComponent = new()
                 {
                     Time = 0,
                     InterrputedTime = 0
                 };
                 ecb.AddComponent(entity, property2DComponent);
+                ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation2DArrayComponent);
                 ecb.AddComponent(entity, managedProperty2DComponent);
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
+                ecb.AddComponent(entity, new TimeEnabledComponent());
                 pathKeyframeList.Dispose();
                 pathControlList.Dispose();
                 pathLinearList.Dispose();
@@ -174,7 +192,7 @@ namespace MNP.Core.DOTS.Systems
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty3D refValue = new();
                 Property3DComponent property3DComponent = new();
-                propertyListComponent.Property3DList.Add(refValue);
+                propertyListComponent.Property3DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property3DComponent.Value = property.StaticValue.Value;
@@ -182,7 +200,7 @@ namespace MNP.Core.DOTS.Systems
                     refValue.Value = property3DComponent.Value;
                     continue;
                 }
-                List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.Name];
+                List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
                 NativeList<float4> pathKeyframeList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
                 NativeList<float3> pathControlList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum() * 2, Allocator.Temp);
                 NativeList<bool> pathLinearList = new(animationList.Select(x => x.PathKeyFrameList.Count).Sum(), Allocator.Temp);
@@ -212,16 +230,25 @@ namespace MNP.Core.DOTS.Systems
                 {
                     RefValue = refValue
                 };
+                PropertyInfoComponent propertyInfoComponent = new()
+                {
+                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
+                    LerpEnabledArray = new(0, Allocator.Persistent),
+                    StartTime = property.StartTime,
+                    EndTime = property.EndTime
+                };
                 TimeComponent timeComponent = new()
                 {
                     Time = 0,
                     InterrputedTime = 0
                 };
                 ecb.AddComponent(entity, property3DComponent);
+                ecb.AddComponent(entity, propertyInfoComponent);
                 ecb.AddComponent(entity, animation3DArrayComponent);
                 ecb.AddComponent(entity, managedProperty3DComponent);
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
+                ecb.AddComponent(entity, new TimeEnabledComponent());
                 pathKeyframeList.Dispose();
                 pathControlList.Dispose();
                 pathLinearList.Dispose();
