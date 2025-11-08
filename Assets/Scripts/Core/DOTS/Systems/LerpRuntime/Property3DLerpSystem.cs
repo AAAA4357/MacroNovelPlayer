@@ -74,7 +74,7 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
                                                   animation3DArrayComponent.ValueRO.PathIndexArray,
                                                   animationIndex,
                                                   out NativeArray<bool> pathLinearLerpArray);
-                UtilityHelper.GetFoldedArrayValue(animation3DArrayComponent.ValueRO.EaseKeyFrameArray,
+                UtilityHelper.GetFoldedArrayValue(animation3DArrayComponent.ValueRO.EaseKeyframeArray,
                                                   animation3DArrayComponent.ValueRO.EaseIndexArray,
                                                   animationIndex,
                                                   out NativeArray<float4> easeKeyFrameArray);

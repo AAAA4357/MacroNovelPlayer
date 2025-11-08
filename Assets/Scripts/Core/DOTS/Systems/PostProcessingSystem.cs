@@ -1,29 +1,20 @@
 using MNP.Core.DOTS.Components.LerpRuntime;
-using Unity.Burst;
+using MNP.Core.DOTS.Components.Managed;
 using Unity.Entities;
 
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     [UpdateAfter(typeof(PropertyLerpSystemGroup))]
-    partial struct PostprocessingSystem : ISystem
+    partial class PostprocessingSystem : SystemBase
     {
-        [BurstCompile]
-        public void OnCreate(ref SystemState state)
+        protected override void OnUpdate()
         {
-            state.RequireForUpdate<InitializedPropertyComponent>();
-        }
-
-        [BurstCompile]
-        public void OnUpdate(ref SystemState state)
-        {
-
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationProperty1DComponent managedProperty1DComponent,
+                                                                      in Property1DComponent property1DComponent) =>
+            {
+                managedProperty1DComponent.RefValue.Value = property1DComponent.Value;
+            }).WithoutBurst().Run();
         }
     }
 }

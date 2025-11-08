@@ -6,8 +6,9 @@ namespace MNP.Core.DataStruct.Animation
     {
         public Vector3 StartValue;
         public Vector3 EndValue;
-        public Vector3? Control0Value;
-        public Vector3? Control1Value;
+        public Vector3 Control0Value;
+        public Vector3 Control1Value;
+        public bool Linear;
         public float Weight;
     }
 }

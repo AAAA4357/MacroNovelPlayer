@@ -58,11 +58,11 @@ namespace MNP.Core.DOTS.Systems.LerpRuntime
                                                    timeComponent.ValueRO.Time,
                                                    out int animationIndex,
                                                    out float fixedT);
-                UtilityHelper.GetFoldedArrayValue(animation1DArrayComponent.ValueRO.PathKeyFrameArray,
+                UtilityHelper.GetFoldedArrayValue(animation1DArrayComponent.ValueRO.PathKeyframeArray,
                                                   animation1DArrayComponent.ValueRO.PathIndexArray,
                                                   animationIndex,
                                                   out NativeArray<float2> pathKeyframeArray);
-                UtilityHelper.GetFoldedArrayValue(animation1DArrayComponent.ValueRO.EaseKeyFrameArray,
+                UtilityHelper.GetFoldedArrayValue(animation1DArrayComponent.ValueRO.EaseKeyframeArray,
                                                   animation1DArrayComponent.ValueRO.EaseIndexArray,
                                                   animationIndex,
                                                   out NativeArray<float4> easeKeyframeArray);
