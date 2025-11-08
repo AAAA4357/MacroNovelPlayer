@@ -1,4 +1,3 @@
-using MNP.Core.DataStruct;
 using Unity.Burst;
 using Unity.Entities;
 

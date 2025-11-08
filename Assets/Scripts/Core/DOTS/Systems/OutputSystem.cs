@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(PostProcessingSystem))]
+    [UpdateAfter(typeof(PostprocessingSystem))]
     partial class OutputSystem : SystemBase
     {
         public List<Texture2D> Textures;

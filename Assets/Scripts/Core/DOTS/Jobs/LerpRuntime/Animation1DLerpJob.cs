@@ -1,4 +1,3 @@
-using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Helpers;
 using Unity.Burst;
@@ -14,23 +13,19 @@ namespace MNP.Core.DOTS.Jobs.LerpRuntime
     {
         //Path
         [ReadOnly]
-        public NativeArray<float2> AnchorArray;
+        public NativeArray<float2> PathKeyframeArray;
         [ReadOnly]
-        public NativeArray<int> IndexArray;
+        public NativeArray<int> PathIndexArray;
 
         //EasingFunction
         [ReadOnly]
-        public NativeArray<float4> EasingKeyFrameArray;
+        public NativeArray<float4> EaseKeyframeArray;
         [ReadOnly]
-        public NativeArray<int> EasingKeyFrameIndexArray;
+        public NativeArray<int> EaseIndexArray;
 
         //Time
         [ReadOnly]
-        public NativeArray<float> TimeCurrentArray;
-        [ReadOnly]
-        public NativeArray<float> TimeStartArray;
-        [ReadOnly]
-        public NativeArray<float> TimeDurationArray;
+        public NativeArray<float> TimeArray;
 
         //Entity
         [ReadOnly]
@@ -43,15 +38,16 @@ namespace MNP.Core.DOTS.Jobs.LerpRuntime
         [BurstCompile]
         public void Execute(int index)
         {
-            UtilityHelper.GetFoldedArrayValue(EasingKeyFrameArray, EasingKeyFrameIndexArray, index, out NativeArray<float4> keyframeArray);
-            float ease = EasingFunctionHelper.GetEase(keyframeArray, (TimeCurrentArray[index] - TimeStartArray[index]) / TimeDurationArray[index]);
-            UtilityHelper.GetFoldedArrayValue(AnchorArray, IndexArray, index, out NativeArray<float2> pathArray);
-            float result = PathLerpHelper.Lerp1D(pathArray, ease);
+            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easekeyframeArray);
+            float ease = EasingFunctionHelper.GetEase(easekeyframeArray, TimeArray[index]);
+            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float2> pathKeyframeArray);
+            //No Bezier in 1D
+            float result = PathLerpHelper.Lerp1DLinear(pathKeyframeArray, ease);
             Property1DComponent component = PropertyArray[index];
             component.Value = result;
             Writer.SetComponent(index, EntityArray[index], component);
-            keyframeArray.Dispose();
-            pathArray.Dispose();
+            easekeyframeArray.Dispose();
+            pathKeyframeArray.Dispose();
         }
     }
 }

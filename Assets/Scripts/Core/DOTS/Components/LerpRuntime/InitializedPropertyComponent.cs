@@ -4,5 +4,5 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components.LerpRuntime
 {
     [BurstCompile]
-    public struct LerpEnabledComponent : IComponentData { }
+    public struct InitializedPropertyComponent : IComponentData { }
 }

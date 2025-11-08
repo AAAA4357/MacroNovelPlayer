@@ -33,7 +33,7 @@ namespace MNP.Helpers
         }
 
         [BurstCompile]
-        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int index, out NativeArray<T> resultArray) where T : struct
+        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int index, out NativeArray<T> resultArray, Allocator allocator = Allocator.TempJob) where T : struct
         {
             int length;
             int start;
@@ -52,7 +52,7 @@ namespace MNP.Helpers
                 length = indexArray[index + 1] - indexArray[index];
                 start = indexArray[index];
             }
-            NativeArray<T> results = new(length, Allocator.TempJob);
+            NativeArray<T> results = new(length, allocator);
             for (int i = start, j = 0; i < start + length; i++, j++)
             {
                 results[j] = valueArray[i];
@@ -61,14 +61,14 @@ namespace MNP.Helpers
         }
 
         [BurstCompile]
-        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int indexFactor, int index, out NativeArray<T> resultArray) where T : struct
+        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int indexFactor, int index, out NativeArray<T> resultArray, Allocator allocator = Allocator.TempJob) where T : struct
         {
             NativeArray<int> indexs = new(indexArray.Length, Allocator.Temp);
             for (int i = 0; i < indexArray.Length; i++)
             {
                 indexs[i] = indexArray[i] * indexFactor;
             }
-            GetFoldedArrayValue(valueArray, indexs, index, out resultArray);
+            GetFoldedArrayValue(valueArray, indexs, index, out resultArray, allocator);
             indexs.Dispose();
         }
     }

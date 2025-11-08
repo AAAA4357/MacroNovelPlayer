@@ -13,25 +13,23 @@ namespace MNP.Core.DOTS.Jobs
     {
         //Path
         [ReadOnly]
-        public NativeArray<float3> AnchorArray;
+        public NativeArray<float3> PathKeyframeArray;
         [ReadOnly]
-        public NativeArray<float2> ControlArray;
+        public NativeArray<float2> PathControlArray;
         [ReadOnly]
-        public NativeArray<int> IndexArray;
+        public NativeArray<bool> PathLinearLerpArray;
+        [ReadOnly]
+        public NativeArray<int> PathIndexArray;
 
         //EasingFunction
         [ReadOnly]
-        public NativeArray<float4> EasingKeyFrameArray;
+        public NativeArray<float4> EaseKeyframeArray;
         [ReadOnly]
-        public NativeArray<int> EasingKeyFrameIndexArray;
+        public NativeArray<int> EaseIndexArray;
 
         //Time
         [ReadOnly]
-        public NativeArray<float> TimeCurrentArray;
-        [ReadOnly]
-        public NativeArray<float> TimeStartArray;
-        [ReadOnly]
-        public NativeArray<float> TimeDurationArray;
+        public NativeArray<float> TimeArray;
 
         //Entity
         [ReadOnly]
@@ -44,16 +42,29 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(int index)
         {
-            UtilityHelper.GetFoldedArrayValue(EasingKeyFrameArray, EasingKeyFrameIndexArray, index, out NativeArray<float4> keyframeArray);
-            float ease = EasingFunctionHelper.GetEase(keyframeArray, (TimeCurrentArray[index] - TimeStartArray[index]) / TimeDurationArray[index]);
-            UtilityHelper.GetFoldedArrayValue(AnchorArray, IndexArray, index, out NativeArray<float3> pathArray);
-            UtilityHelper.GetFoldedArrayValue(ControlArray, IndexArray, 2, index, out NativeArray<float2> controlArray);
-            float2 result = PathLerpHelper.Lerp2D(pathArray, controlArray, ease);
+            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easeKeyframeArray);
+            float ease = EasingFunctionHelper.GetEase(easeKeyframeArray, TimeArray[index]);
+            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float3> pathKeyframeArray);
+            UtilityHelper.GetFoldedArrayValue(PathControlArray, PathIndexArray, 2, index, out NativeArray<float2> pathControlArray);
+            UtilityHelper.GetFoldedArrayValue(PathLinearLerpArray, PathIndexArray, index, out NativeArray<bool> pathLinearLerpArray);
+            float2 result;
+            if (pathLinearLerpArray[index])
+            {
+                //Linear
+                result = PathLerpHelper.Lerp2DLinear(pathKeyframeArray, ease);
+            }
+            else
+            {
+                //Bezier
+                result = PathLerpHelper.Lerp2DBezier(pathKeyframeArray, pathControlArray, ease);
+            }
             Property2DComponent component = PropertyArray[index];
             component.Value = result;
             Writer.SetComponent(index, EntityArray[index], component);
-            keyframeArray.Dispose();
-            pathArray.Dispose();
+            easeKeyframeArray.Dispose();
+            pathKeyframeArray.Dispose();
+            pathControlArray.Dispose();
+            pathLinearLerpArray.Dispose();
         }
     }
 }

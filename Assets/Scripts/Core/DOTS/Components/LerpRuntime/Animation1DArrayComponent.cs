@@ -8,7 +8,10 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     [BurstCompile]
     public struct Animation1DArrayComponent : IComponentData
     {
-        public NativeArray<float2> KeyFrameArray;
-        public NativeArray<int> IndexArray;
+        public NativeArray<float2> PathKeyFrameArray;
+        public NativeArray<int> PathIndexArray;
+        public NativeArray<float4> EaseKeyFrameArray;
+        public NativeArray<int> EaseIndexArray;
+        public NativeArray<float> TimeArray;
     }
 }

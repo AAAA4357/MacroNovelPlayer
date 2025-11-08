@@ -8,7 +8,5 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     {
         public int PropertyIndex;
         public float Value;
-        public float StartTime;
-        public float EndTime;
     }
 }
