@@ -11,6 +11,7 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Systems.LerpRuntime
 {
     [UpdateInGroup(typeof(PropertyLerpSystemGroup))]
+    [DisableAutoCreation]
     partial struct Property1DLerpSystem : ISystem
     {
         NativeList<Entity> entities;
