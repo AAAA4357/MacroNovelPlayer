@@ -8,93 +8,21 @@ namespace MNP.Helpers
     public static class PathLerpHelper
     {
         [BurstCompile]
-        public static float Lerp1DLinear(in NativeArray<float2> pathArray, float t)
+        public static float Lerp1DLinear(float start, float end, float t)
         {
-            float start;
-            float end;
-            if (t < 0)
-            {
-                start = pathArray[0].y;
-                end = pathArray[1].y;
-                return start * (1 - t) + end * t;
-            }
-            else if (t > 1)
-            {
-                start = pathArray[^2].y;
-                end = pathArray[^1].y;
-                return start * (1 - t) + end * t;
-            }
-            UtilityHelper.GetFloorIndexInArray(pathArray, v => v.x, t, out int index, out float fixedT);
-            start = pathArray[index].y;
-            end = pathArray[index + 1].y;
-            return start * (1 - fixedT) + end * fixedT;
+            return start * (1 - t) + end * t;
         }
 
         [BurstCompile]
-        public static float2 Lerp2DLinear(in NativeArray<float3> pathArray, float t)
+        public static float2 Lerp2DLinear(float2 start, float2 end, float t)
         {
-            float2 start;
-            float2 end;
-            if (t < 0)
-            {
-                start = pathArray[0].yz;
-                end = pathArray[1].yz;
-                return start * (1 - t) + end * t;
-            }
-            else if (t > 1)
-            {
-                start = pathArray[^2].yz;
-                end = pathArray[^1].yz;
-                return start * (1 - t) + end * t;
-            }
-            UtilityHelper.GetFloorIndexInArray(pathArray, v => v.x, t, out int index, out float fixedT);
-            start = pathArray[index].yz;
-            end = pathArray[index + 1].yz;
-            return start * (1 - fixedT) + end * t;
-        }
-
-        public static float2 Lerp2DBezier(in NativeArray<float3> pathArray, in NativeArray<float2> pathControlArray, float t)
-        {
-            UtilityHelper.GetFloorIndexInArray(pathArray, v => v.x, t, out int index, out float fixedT);
-            float2 start = pathArray[index].yz;
-            float2 end = pathArray[index + 1].yz;
-            float2 control1 = pathControlArray[index << 1];
-            float2 control2 = pathControlArray[(index << 1) + 1];
-            return GetBezierPoint2D(start, control1, control2, end, fixedT);
+            return start * (1 - t) + end * t;
         }
 
         [BurstCompile]
-        public static float3 Lerp3DLinear(in NativeArray<float4> pathArray, float t)
+        public static float3 Lerp3DLinear(float3 start, float3 end, float t)
         {
-            float3 start;
-            float3 end;
-            if (t < 0)
-            {
-                start = pathArray[0].yzw;
-                end = pathArray[1].yzw;
-                return start * (1 - t) + end * t;
-            }
-            else if (t > 1)
-            {
-                start = pathArray[^2].yzw;
-                end = pathArray[^1].yzw;
-                return start * (1 - t) + end * t;
-            }
-            UtilityHelper.GetFloorIndexInArray(pathArray, v => v.x, t, out int index, out float fixedT);
-            start = pathArray[index].yzw;
-            end = pathArray[index + 1].yzw;
-            return start * (1 - fixedT) + end * t;
-        }
-
-        [BurstCompile]
-        public static float3 Lerp3DBezier(in NativeArray<float4> pathArray, in NativeArray<float3> pathControlArray, float t)
-        {
-            UtilityHelper.GetFloorIndexInArray(pathArray, v => v.x, t, out int index, out float fixedT);
-            float3 start = pathArray[index].yzw;
-            float3 end = pathArray[index + 1].yzw;
-            float3 control1 = pathControlArray[index << 1];
-            float3 control2 = pathControlArray[index << 1 + 1];
-            return GetBezierPoint3D(start, control1, control2, end, fixedT);
+            return start * (1 - t) + end * t;
         }
         
         [BurstCompile]

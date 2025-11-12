@@ -5,7 +5,7 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(PropertyLerpSystemGroup))]
+    [UpdateAfter(typeof(PropertyLerpSystem))]
     partial class PostprocessingSystem : SystemBase
     {
         protected override void OnUpdate()

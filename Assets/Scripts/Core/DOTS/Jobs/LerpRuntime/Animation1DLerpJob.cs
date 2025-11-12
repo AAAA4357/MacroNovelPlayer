@@ -1,53 +1,21 @@
+using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Helpers;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Mathematics;
 
-namespace MNP.Core.DOTS.Jobs.LerpRuntime
+namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    public partial struct Animation1DLerpJob : IJobParallelFor
+    public partial struct Animation1DLerpJob : IJobEntity
     {
-        //Path
-        [ReadOnly]
-        public NativeArray<float2> PathKeyframeArray;
-        [ReadOnly]
-        public NativeArray<int> PathIndexArray;
-
-        //EasingFunction
-        [ReadOnly]
-        public NativeArray<float4> EaseKeyframeArray;
-        [ReadOnly]
-        public NativeArray<int> EaseIndexArray;
-
-        //Time
-        [ReadOnly]
-        public NativeArray<float> TimeArray;
-
-        //Entity
-        [ReadOnly]
-        public NativeArray<Entity> EntityArray;
-        [ReadOnly]
-        public NativeArray<Property1DComponent> PropertyArray;
-
-        public EntityCommandBuffer.ParallelWriter Writer;
-
         [BurstCompile]
-        public void Execute(int index)
+        public void Execute(DynamicBuffer<Animation1DComponent> animation1DBuffer, ref Property1DComponent property1DComponent, in TimeComponent timeComponent)
         {
-            UtilityHelper.GetFoldedArrayValue(EaseKeyframeArray, EaseIndexArray, index, out NativeArray<float4> easekeyframeArray, Allocator.Temp);
-            float ease = EasingFunctionHelper.GetEase(easekeyframeArray, TimeArray[index]);
-            UtilityHelper.GetFoldedArrayValue(PathKeyframeArray, PathIndexArray, index, out NativeArray<float2> pathKeyframeArray, Allocator.Temp);
-            //No Bezier in 1D
-            float result = PathLerpHelper.Lerp1DLinear(pathKeyframeArray, ease);
-            Property1DComponent component = PropertyArray[index];
-            component.Value = result;
-            Writer.SetComponent(index, EntityArray[index], component);
-            easekeyframeArray.Dispose();
-            pathKeyframeArray.Dispose();
+            UtilityHelper.GetFloorIndexInBuffer(animation1DBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+            float ease = EasingFunctionHelper.GetEase(animation1DBuffer[animationIndex].EaseKeyframeList, fixedT);
+            float result = PathLerpHelper.Lerp1DLinear(animation1DBuffer[animationIndex].StartValue, animation1DBuffer[animationIndex].EndValue, fixedT);
+            property1DComponent.Value = result;
         }
     }
 }

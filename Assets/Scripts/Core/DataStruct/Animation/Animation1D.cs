@@ -4,9 +4,11 @@ namespace MNP.Core.DataStruct.Animation
 {
     public class Animation1D
     {
-        public List<Animation1DPathSegement> PathKeyframeList;
+        public float StartValue;
+        public float EndValue;
         public List<AnimationEaseKeyframe> EaseKeyframeList;
         public float StartTime;
         public float DurationTime;
+        public bool Enabled;
     }
 }

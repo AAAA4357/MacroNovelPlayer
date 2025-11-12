@@ -1,6 +1,7 @@
 using System;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Entities;
 
 namespace MNP.Helpers
 {
@@ -12,19 +13,19 @@ namespace MNP.Helpers
         public const string TransormScaleID = "Transform2D_Scale";
 
         [BurstCompile]
-        public static void GetFloorIndexInArray<T>(in NativeArray<T> valueArray, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : struct
+        public static void GetFloorIndexInBuffer<T>(in DynamicBuffer<T> valueBuffer, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : unmanaged
         {
             int index = 0;
-            for (int i = 1; i < valueArray.Length; i++)
+            for (int i = 1; i < valueBuffer.Length; i++)
             {
-                if (referenceValue.CompareTo(converter.Invoke(valueArray[i])) < 0)
+                if (referenceValue.CompareTo(converter.Invoke(valueBuffer[i])) < 0)
                 {
                     index = i - 1;
                     break;
                 }
                 else
                 {
-                    if (i >= valueArray.Length - 1)
+                    if (i >= valueBuffer.Length - 1)
                     {
                         index = i;
                         break;
@@ -32,53 +33,73 @@ namespace MNP.Helpers
                 }
             }
             resultIndex = index;
-            if (index == valueArray.Length - 1)
+            if (index == valueBuffer.Length - 1)
             {
                 fixedT = 1;
                 return;
             }
-            float duration = converter.Invoke(valueArray[index + 1]) - converter.Invoke(valueArray[index]);
-            fixedT = (referenceValue - converter.Invoke(valueArray[index])) / duration;
+            float duration = converter.Invoke(valueBuffer[index + 1]) - converter.Invoke(valueBuffer[index]);
+            fixedT = (referenceValue - converter.Invoke(valueBuffer[index])) / duration;
         }
 
         [BurstCompile]
-        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int index, out NativeArray<T> resultArray, Allocator allocator = Allocator.TempJob) where T : struct
+        public static void GetFloorIndexInArray<T>(in NativeArray<T> valueSlice, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : struct
         {
-            int length;
-            int start;
-            if (index == 0)
+            int index = 0;
+            for (int i = 1; i < valueSlice.Length - 1; i++)
             {
-                length = indexArray[1];
-                start = 0;
+                if (referenceValue.CompareTo(converter.Invoke(valueSlice[i])) < 0)
+                {
+                    index = i - 1;
+                    break;
+                }
+                else
+                {
+                    if (i >= valueSlice.Length - 2)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
             }
-            else if (index == indexArray.Length - 1)
+            resultIndex = index;
+            if (index == valueSlice.Length - 2)
             {
-                length = valueArray.Length - indexArray[index];
-                start = indexArray[index];
+                fixedT = 1;
+                return;
             }
-            else
-            {
-                length = indexArray[index + 1] - indexArray[index];
-                start = indexArray[index];
-            }
-            NativeArray<T> results = new(length, allocator);
-            for (int i = start, j = 0; i < start + length; i++, j++)
-            {
-                results[j] = valueArray[i];
-            }
-            resultArray = results;
+            float duration = converter.Invoke(valueSlice[index + 1]) - converter.Invoke(valueSlice[index]);
+            fixedT = (referenceValue - converter.Invoke(valueSlice[index])) / duration;
         }
 
         [BurstCompile]
-        public static void GetFoldedArrayValue<T>(in NativeArray<T> valueArray, in NativeArray<int> indexArray, int indexFactor, int index, out NativeArray<T> resultArray, Allocator allocator = Allocator.TempJob) where T : struct
+        public static void GetFloorIndexInSlice<T>(in NativeSlice<T> valueSlice, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : struct
         {
-            NativeArray<int> indexs = new(indexArray.Length, Allocator.Temp);
-            for (int i = 0; i < indexArray.Length; i++)
+            int index = 0;
+            for (int i = 1; i < valueSlice.Length; i++)
             {
-                indexs[i] = indexArray[i] * indexFactor;
+                if (referenceValue.CompareTo(converter.Invoke(valueSlice[i])) < 0)
+                {
+                    index = i - 1;
+                    break;
+                }
+                else
+                {
+                    if (i >= valueSlice.Length - 1)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
             }
-            GetFoldedArrayValue(valueArray, indexs, index, out resultArray, allocator);
-            indexs.Dispose();
+            resultIndex = index;
+            if (index == valueSlice.Length - 1)
+            {
+                fixedT = 1;
+                return;
+            }
+            float duration = converter.Invoke(valueSlice[index + 1]) - converter.Invoke(valueSlice[index]);
+            fixedT = (referenceValue - converter.Invoke(valueSlice[index])) / duration;
         }
     }
 }

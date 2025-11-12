@@ -115,37 +115,35 @@ namespace MNP.Mono
             List<Animation1D> result = new();
             for (int i = 0; i < 2; i++)
             {
-                List<Animation1DPathSegement> segements = new();
                 float last = 0;
                 for (int j = 0; j < 2; j++)
                 {
                     if (j == 0)
                     {
                         last = RandomFloat * 360;
-                        segements.Add(new Animation1DPathSegement()
+                        result.Add(new()
                         {
                             StartValue = RandomFloat * 360,
                             EndValue = last,
-                            Weight = 1
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 0 : 4,
+                            DurationTime = 2,
+                            Enabled = true
                         });
                     }
                     else
                     {
-                        segements.Add(new Animation1DPathSegement()
+                        result.Add(new()
                         {
                             StartValue = last,
                             EndValue = RandomFloat * 360,
-                            Weight = 1
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 2 : 6,
+                            DurationTime = 2,
+                            Enabled = true
                         });
                     }
                 }
-                result.Add(new()
-                {
-                    PathKeyframeList = segements,
-                    EaseKeyframeList = GenerateLinearEaseList(),
-                    StartTime = i == 0 ? 0 : 4,
-                    DurationTime = i == 0 ? 4 : 4
-                });
             }
             return result;
         }
@@ -155,43 +153,41 @@ namespace MNP.Mono
             List<Animation2D> result = new();
             for (int i = 0; i < 2; i++)
             {
-                List<Animation2DPathSegement> segements = new();
                 Vector2 last = Vector2.zero;
                 for (int j = 0; j < 2; j++)
                 {
                     if (j == 0)
                     {
                         last = NoNegative ? RandomVector2NoNegative : RandomVector2;
-                        segements.Add(new Animation2DPathSegement()
+                        result.Add(new()
                         {
                             StartValue = NoNegative ? RandomVector2NoNegative : RandomVector2,
                             EndValue = last,
                             Control0Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
                             Control1Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 0 : 4,
+                            DurationTime = 2,
                             Linear = false,
-                            Weight = 1
+                            Enabled = true
                         });
                     }
                     else
                     {
-                        segements.Add(new Animation2DPathSegement()
+                        result.Add(new()
                         {
                             StartValue = last,
                             EndValue = NoNegative ? RandomVector2NoNegative : RandomVector2,
                             Control0Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
                             Control1Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 2 : 6,
+                            DurationTime = 2,
                             Linear = false,
-                            Weight = 1
+                            Enabled = true
                         });
                     }
                 }
-                result.Add(new()
-                {
-                    PathKeyFrameList = segements,
-                    EaseKeyframeList = GenerateLinearEaseList(),
-                    StartTime = i == 0 ? 0 : 4,
-                    DurationTime = i == 0 ? 4 : 4
-                });
             }
             return result;
         }
