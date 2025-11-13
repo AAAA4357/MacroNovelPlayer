@@ -1,4 +1,3 @@
-using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Jobs;
 using Unity.Burst;
 using Unity.Entities;

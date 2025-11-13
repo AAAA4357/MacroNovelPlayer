@@ -7,6 +7,7 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
+    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
     public partial struct Animation1DLerpJob : IJobEntity
     {
         [BurstCompile]

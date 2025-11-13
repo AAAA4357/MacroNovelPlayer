@@ -49,7 +49,7 @@ namespace MNP.Core.DOTS.Systems
                 {
                     TargetValue = currentTime
                 };
-                job.ScheduleParallel();
+                state.Dependency = job.ScheduleParallel(state.Dependency);
             }
 
             currentLoopTime += elapsedSeconds;
@@ -57,7 +57,8 @@ namespace MNP.Core.DOTS.Systems
             {
                 TargetValue = currentLoopTime
             };
-            loopjob.ScheduleParallel();
+            state.Dependency = loopjob.ScheduleParallel(state.Dependency);
+            state.CompleteDependency();
 
             timer.Start();
         }

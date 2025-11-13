@@ -23,26 +23,23 @@ namespace MNP.Core.DOTS.Systems
 
         protected override void OnUpdate()
         {
-            Entities.ForEach((ManagedAnimationPropertyListComponent managedAnimationPropertyListComponent,
-                              in ElementComponent elementComponent) =>
+            MaterialPropertyBlock propertyBlock = new();
+            Entities.ForEach((in ElementComponent elementComponent) =>
             {
-                Vector2 position = managedAnimationPropertyListComponent.Property2DList[UtilityHelper.TransormPositionID].Value;
-                float rotation = managedAnimationPropertyListComponent.Property1DList[UtilityHelper.TransormRotationID].Value;
-                Vector2 scale = managedAnimationPropertyListComponent.Property2DList[UtilityHelper.TransormScaleID].Value;
-                Matrix4x4 matrix = Matrix4x4.TRS(position,
-                                                 Quaternion.Euler(0, 0, rotation),
-                                                 scale);
-                MaterialPropertyBlock propertyBlock = new();
-                propertyBlock.SetTexture("_MainTex", TestTexture);//Textures[elementComponent.TextureID]
-                Graphics.DrawMesh(
-                    Mesh,
-                    matrix,
-                    Material,
-                    0,                               // Layer
-                    null,                            // Camera (null = 主相机)
-                    0,                               // Submesh index
-                    propertyBlock                   // 实例特有的属性
-                );
+                if (!elementComponent.IsBlocked)
+                {
+                    propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
+                    Graphics.DrawMesh(
+                        Mesh,
+                        elementComponent.TransformMatrix,
+                        Material,
+                        0,                               // Layer
+                        null,                            // Camera (null = 主相机)
+                        0,                               // Submesh index
+                        propertyBlock                   // 实例特有的属性
+                    );
+                    propertyBlock.Clear();
+                }
             }).WithoutBurst().Run();
         }
         

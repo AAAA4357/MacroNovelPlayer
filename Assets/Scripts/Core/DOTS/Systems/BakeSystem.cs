@@ -62,8 +62,6 @@ namespace MNP.Core.DOTS.Systems
                 }
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
-                using NativeList<bool> lerpEnabledList = new(Allocator.Temp);
-                using NativeList<float> timeList = new(Allocator.Temp);
 
                 ecb.AddBuffer<Animation1DComponent>(entity);
                 foreach (Animation1D animation in animationList)
@@ -92,14 +90,10 @@ namespace MNP.Core.DOTS.Systems
                         DurationTime = animation.DurationTime
                     };
                     ecb.AppendToBuffer(entity, component);
-                    timeList.Add(animation.StartTime);
-                    lerpEnabledList.Add(animation.Enabled);
                 }
                 
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
-                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };
@@ -141,8 +135,6 @@ namespace MNP.Core.DOTS.Systems
                 }
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
-                using NativeList<bool> lerpEnabledList = new(Allocator.Temp);
-                using NativeList<float> timeList = new(Allocator.Temp);
 
                 ecb.AddBuffer<Animation2DComponent>(entity);
                 foreach (Animation2D animation in animationList)
@@ -173,8 +165,6 @@ namespace MNP.Core.DOTS.Systems
                         DurationTime = animation.DurationTime
                     };
                     ecb.AppendToBuffer(entity, component);
-                    timeList.Add(animation.StartTime);
-                    lerpEnabledList.Add(animation.Enabled);
                 }
 
                 ManagedAnimationProperty2DComponent managedProperty2DComponent = new()
@@ -183,8 +173,6 @@ namespace MNP.Core.DOTS.Systems
                 };
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
-                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };
@@ -222,8 +210,6 @@ namespace MNP.Core.DOTS.Systems
                 }
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
-                using NativeList<bool> lerpEnabledList = new(Allocator.Temp);
-                using NativeList<float> timeList = new(Allocator.Temp);
 
                 ecb.AddBuffer<Animation3DComponent>(entity);
                 foreach (Animation3D animation in animationList)
@@ -254,8 +240,6 @@ namespace MNP.Core.DOTS.Systems
                         DurationTime = animation.DurationTime
                     };
                     ecb.AppendToBuffer(entity, component);
-                    timeList.Add(animation.StartTime);
-                    lerpEnabledList.Add(animation.Enabled);
                 }
 
                 ManagedAnimationProperty3DComponent managedProperty3DComponent = new()
@@ -264,8 +248,6 @@ namespace MNP.Core.DOTS.Systems
                 };
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
-                    LerpKeyArray = timeList.ToArray(Allocator.Persistent),
-                    LerpEnabledArray = lerpEnabledList.ToArray(Allocator.Persistent),
                     StartTime = property.StartTime,
                     EndTime = property.EndTime
                 };

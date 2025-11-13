@@ -7,7 +7,6 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     [BurstCompile]
     public struct Property2DComponent : IComponentData
     {
-        public int PropertyIndex;
         public float2 Value;
     }
 }

@@ -1,5 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace MNP.Core.DOTS.Components
 {
@@ -8,5 +10,10 @@ namespace MNP.Core.DOTS.Components
     {
         public int ID;
         public int TextureID;
+        public float2 Position;
+        public float Rotation;
+        public float2 Scale;
+        public Matrix4x4 TransformMatrix;
+        public bool IsBlocked;
     }
 }

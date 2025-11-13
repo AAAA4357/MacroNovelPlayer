@@ -2,13 +2,13 @@ using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Helpers;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
+    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
     public partial struct Animation3DLerpJob : IJobEntity
     {
         [BurstCompile]
