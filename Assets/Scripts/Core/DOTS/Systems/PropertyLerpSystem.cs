@@ -11,6 +11,8 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            AnimationTransform2DLerpJob JobTransform = new();
+            state.Dependency = JobTransform.ScheduleParallel(state.Dependency);
             Animation1DLerpJob Job1D = new();
             state.Dependency = Job1D.ScheduleParallel(state.Dependency);
             Animation2DLerpJob Job2D = new();

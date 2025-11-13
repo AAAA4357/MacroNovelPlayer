@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MNP.Core.DataStruct;
 using MNP.Core.DataStruct.Animation;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.Managed;
@@ -28,7 +29,7 @@ namespace MNP.Mono
             system.TestTexture = Texture;
             system.Material = Material;
             system.Mesh = Mesh;
-            const int testCount = 1000;
+            const int testCount = 10000;
             for (int i = 0; i < testCount; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
@@ -55,40 +56,43 @@ namespace MNP.Mono
                 {
                     new AnimationProperty1D()
                     {
-                        ID = UtilityHelper.TransormRotationID,
+                        ID = UtilityHelper.Transorm2DRotationID,
                         StartTime = 0,
                         EndTime = 8,
                         IsStatic = false,
-                        StaticValue = null
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DRotation
                     }
                 },
                 Animation1DDictionary = new()
                 {
-                    {UtilityHelper.TransormRotationID, Generate1DAnimation()}
+                    {UtilityHelper.Transorm2DRotationID, Generate1DAnimation()}
                 },
                 AnimationProperty2DList = new()
                 {
                     new AnimationProperty2D()
                     {
-                        ID = UtilityHelper.TransormPositionID,
+                        ID = UtilityHelper.Transorm2DPositionID,
                         StartTime = 0,
                         EndTime = 8,
                         IsStatic = false,
-                        StaticValue = null
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DPosition
                     },
                     new AnimationProperty2D()
                     {
-                        ID = UtilityHelper.TransormScaleID,
+                        ID = UtilityHelper.Transorm2DScaleID,
                         StartTime = 0,
                         EndTime = 8,
                         IsStatic = false,
-                        StaticValue = null
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DScale
                     }
                 },
                 Animation2DDictionary = new()
                 {
-                    {UtilityHelper.TransormPositionID, Generate2DAnimation(false)},
-                    {UtilityHelper.TransormScaleID, Generate2DAnimation(true)}
+                    {UtilityHelper.Transorm2DPositionID, Generate2DAnimation(false)},
+                    {UtilityHelper.Transorm2DScaleID, Generate2DAnimation(true)}
                 },
                 AnimationProperty3DList = new(),
                 Animation3DDictionary = new()

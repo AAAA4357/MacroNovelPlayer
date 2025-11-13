@@ -1,8 +1,8 @@
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Components.Managed;
-using MNP.Helpers;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MNP.Core.DOTS.Systems
@@ -13,6 +13,13 @@ namespace MNP.Core.DOTS.Systems
     {
         protected override void OnUpdate()
         {
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform2DPropertyComponent managedTransform2DComponent,
+                                                                      in Transform2DPropertyComponent property1DComponent) =>
+            {
+                managedTransform2DComponent.RefValue.Value.Position = property1DComponent.Position;
+                managedTransform2DComponent.RefValue.Value.Rotation = property1DComponent.Rotation;
+                managedTransform2DComponent.RefValue.Value.Scale = property1DComponent.Scale;
+            }).WithoutBurst().Run();
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationProperty1DComponent managedProperty1DComponent,
                                                                       in Property1DComponent property1DComponent) =>
             {
@@ -31,17 +38,10 @@ namespace MNP.Core.DOTS.Systems
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationPropertyListComponent managedAnimationPropertyListComponent,
                                                                       ref ElementComponent elementComponent) =>
             {
-                Vector2 position = managedAnimationPropertyListComponent.Property2DList[UtilityHelper.TransormPositionID].Value;
-                float rotation = managedAnimationPropertyListComponent.Property1DList[UtilityHelper.TransormRotationID].Value;
-                Vector2 scale = managedAnimationPropertyListComponent.Property2DList[UtilityHelper.TransormScaleID].Value;
-                elementComponent.Position = position;
-                elementComponent.Rotation = rotation;
-                elementComponent.Scale = scale;
-                elementComponent.IsBlocked = false;
-            }).WithoutBurst().Run();
-            Entities.WithAll<InitializedPropertyComponent>().ForEach((ref ElementComponent elementComponent) =>
-            {
-                Matrix4x4 matrix = Matrix4x4.TRS(new(elementComponent.Position.x, elementComponent.Position.y, 0), Quaternion.Euler(0, 0, elementComponent.Rotation), new(elementComponent.Scale.x, elementComponent.Scale.y, 1));
+                float2 position = managedAnimationPropertyListComponent.TransformProperty.Value.Position;
+                float rotation = managedAnimationPropertyListComponent.TransformProperty.Value.Rotation;
+                float2 scale = managedAnimationPropertyListComponent.TransformProperty.Value.Scale;
+                Matrix4x4 matrix = Matrix4x4.TRS(new(position.x, position.y, 0), Quaternion.Euler(0, 0, rotation), new(scale.x, scale.y, 1));
                 elementComponent.TransformMatrix = matrix;
             }).WithoutBurst().Run();
         }

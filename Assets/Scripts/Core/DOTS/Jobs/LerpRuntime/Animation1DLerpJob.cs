@@ -8,6 +8,7 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
+    [WithNone(typeof(Transform2DPropertyComponent))]
     public partial struct Animation1DLerpJob : IJobEntity
     {
         [BurstCompile]
@@ -15,7 +16,7 @@ namespace MNP.Core.DOTS.Jobs
         {
             UtilityHelper.GetFloorIndexInBuffer(animation1DBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation1DBuffer[animationIndex].EaseKeyframeList, fixedT);
-            float result = PathLerpHelper.Lerp1DLinear(animation1DBuffer[animationIndex].StartValue, animation1DBuffer[animationIndex].EndValue, fixedT);
+            float result = PathLerpHelper.Lerp1DLinear(animation1DBuffer[animationIndex].StartValue, animation1DBuffer[animationIndex].EndValue, ease);
             property1DComponent.Value = result;
         }
     }

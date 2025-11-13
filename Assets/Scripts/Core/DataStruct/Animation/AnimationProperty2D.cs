@@ -9,5 +9,6 @@ namespace MNP.Core.DataStruct.Animation
         public float EndTime;
         public bool IsStatic;
         public Vector2? StaticValue;
+        public PropertyType Type;
     }
 }

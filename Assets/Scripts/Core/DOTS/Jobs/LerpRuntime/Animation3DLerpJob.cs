@@ -9,6 +9,7 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
+    [WithNone(typeof(Transform2DPropertyComponent))]
     public partial struct Animation3DLerpJob : IJobEntity
     {
         [BurstCompile]
@@ -20,11 +21,11 @@ namespace MNP.Core.DOTS.Jobs
             float3 result;
             if (isLinear)
             {
-                result = PathLerpHelper.Lerp3DLinear(animation3DBuffer[animationIndex].StartValue, animation3DBuffer[animationIndex].EndValue, fixedT);
+                result = PathLerpHelper.Lerp3DLinear(animation3DBuffer[animationIndex].StartValue, animation3DBuffer[animationIndex].EndValue, ease);
             }
             else
             {
-                result = PathLerpHelper.GetBezierPoint3D(animation3DBuffer[animationIndex].StartValue, animation3DBuffer[animationIndex].EndValue, animation3DBuffer[animationIndex].Control0, animation3DBuffer[animationIndex].Control1, fixedT);
+                result = PathLerpHelper.GetBezierPoint3D(animation3DBuffer[animationIndex].StartValue, animation3DBuffer[animationIndex].EndValue, animation3DBuffer[animationIndex].Control0, animation3DBuffer[animationIndex].Control1, ease);
             }
             property3DComponent.Value = result;
         }

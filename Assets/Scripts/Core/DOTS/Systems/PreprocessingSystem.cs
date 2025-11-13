@@ -20,6 +20,12 @@ namespace MNP.Core.DOTS.Systems
         public void OnUpdate(ref SystemState state)
         {
             EntityCommandBuffer ecb = new(Allocator.TempJob);
+            PreprocessTransformJob transformJob = new()
+            {
+                ecbWriter = ecb.AsParallelWriter()
+            };
+            state.Dependency = transformJob.ScheduleParallel(state.Dependency);
+            state.CompleteDependency();
             PreprocessJob job = new()
             {
                 ecbWriter = ecb.AsParallelWriter()

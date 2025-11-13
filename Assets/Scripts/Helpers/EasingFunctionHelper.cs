@@ -33,10 +33,10 @@ namespace MNP.Helpers
                 }
                 else
                 {
-                    float start = keyFrameList[i].x;
-                    float duration = keyFrameList[i + 1].x - start;
+                    float start = keyFrameList[i - 1].x;
+                    float duration = keyFrameList[i].x - start;
                     float fixedT = (t - start) / duration;
-                    return HermiteInterpolate(keyFrameList[i].y, keyFrameList[i + 1].y, keyFrameList[i].w, keyFrameList[i + 1].z, fixedT);
+                    return HermiteInterpolate(keyFrameList[i - 1].y, keyFrameList[i].y, keyFrameList[i - 1].w, keyFrameList[i].z, fixedT);
                 }
             }
             return float.NaN;

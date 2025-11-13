@@ -10,9 +10,9 @@ namespace MNP.Helpers
     [BurstCompile]
     public static class UtilityHelper
     {
-        public const string TransormPositionID = "Transform2D_Position";
-        public const string TransormRotationID = "Transform2D_Rotation";
-        public const string TransormScaleID = "Transform2D_Scale";
+        public const string Transorm2DPositionID = "Transform2D_Position";
+        public const string Transorm2DRotationID = "Transform2D_Rotation";
+        public const string Transorm2DScaleID = "Transform2D_Scale";
 
         [BurstCompile]
         public static void GetFloorIndexInBuffer<T>(in DynamicBuffer<T> valueBuffer, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : unmanaged

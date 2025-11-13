@@ -1,9 +1,13 @@
-using Unity.Collections;
+using Unity.Burst;
 using Unity.Entities;
 
-public struct PropertyInfoComponent : IComponentData
+namespace MNP.Core.DOTS.Components.LerpRuntime
 {
-    public float StartTime;
-    public float EndTime;
-    public bool LerpEnabled;
+    [BurstCompile]
+    public struct PropertyInfoComponent : IComponentData
+    {
+        public float StartTime;
+        public float EndTime;
+        public bool LerpEnabled;
+    }
 }

@@ -7,5 +7,6 @@ namespace MNP.Core.DataStruct.Animation
         public float EndTime;
         public bool IsStatic;
         public float? StaticValue;
+        public PropertyType Type;
     }
 }

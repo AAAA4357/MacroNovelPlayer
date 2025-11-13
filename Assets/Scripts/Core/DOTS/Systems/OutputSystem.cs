@@ -19,6 +19,7 @@ namespace MNP.Core.DOTS.Systems
         protected override void OnCreate()
         {
             RequireForUpdate<ElementComponent>();
+            RequireForUpdate<BakeReadyComponent>();
         }
 
         protected override void OnUpdate()
