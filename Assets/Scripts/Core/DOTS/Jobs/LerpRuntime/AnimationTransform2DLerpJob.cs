@@ -17,7 +17,7 @@ namespace MNP.Core.DOTS.Jobs
             if (transformInfoComponent.PositionLerpEnabled)
             {
                 //Position
-                UtilityHelper.GetFloorIndexInBuffer(positionBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+                UtilityHelper.GetFloorIndexInBufferWithLength(positionBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
                 float ease = EasingFunctionHelper.GetEase(positionBuffer[animationIndex].EaseKeyframeList, fixedT);
                 bool isLinear = positionBuffer[animationIndex].Linear;
                 float2 result;
@@ -34,7 +34,7 @@ namespace MNP.Core.DOTS.Jobs
             if (transformInfoComponent.RotationLerpEnabled)
             {
                 //Rotation
-                UtilityHelper.GetFloorIndexInBuffer(rotationBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+                UtilityHelper.GetFloorIndexInBufferWithLength(rotationBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
                 float ease = EasingFunctionHelper.GetEase(rotationBuffer[animationIndex].EaseKeyframeList, fixedT);
                 float result = PathLerpHelper.Lerp1DLinear(rotationBuffer[animationIndex].StartValue, rotationBuffer[animationIndex].EndValue, ease);
                 transformComponent.Rotation = result;
@@ -42,7 +42,7 @@ namespace MNP.Core.DOTS.Jobs
             if (transformInfoComponent.ScaleLerpEnabled)
             {
                 //Scale
-                UtilityHelper.GetFloorIndexInBuffer(scaleBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+                UtilityHelper.GetFloorIndexInBufferWithLength(scaleBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
                 float ease = EasingFunctionHelper.GetEase(scaleBuffer[animationIndex].EaseKeyframeList, fixedT);
                 bool isLinear = scaleBuffer[animationIndex].Linear;
                 float2 result;

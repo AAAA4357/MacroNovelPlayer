@@ -15,7 +15,7 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(DynamicBuffer<Animation3DComponent> animation3DBuffer, ref Property3DComponent property3DComponent, in TimeComponent timeComponent)
         {
-            UtilityHelper.GetFloorIndexInBuffer(animation3DBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+            UtilityHelper.GetFloorIndexInBufferWithLength(animation3DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation3DBuffer[animationIndex].EaseKeyframeList, fixedT);
             bool isLinear = animation3DBuffer[animationIndex].Linear;
             float3 result;

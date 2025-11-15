@@ -15,12 +15,12 @@ namespace MNP.Helpers
         public const string Transorm2DScaleID = "Transform2D_Scale";
 
         [BurstCompile]
-        public static void GetFloorIndexInBuffer<T>(in DynamicBuffer<T> valueBuffer, Func<T, float> converter, float referenceValue, out int resultIndex, out float fixedT) where T : unmanaged
+        public static void GetFloorIndexInBufferWithLength<T>(in DynamicBuffer<T> valueBuffer, Func<T, float> startConverter, Func<T, float> lengthConverter, float referenceValue, out int resultIndex, out float fixedT) where T : unmanaged
         {
             int index = 0;
             for (int i = 1; i < valueBuffer.Length; i++)
             {
-                if (referenceValue.CompareTo(converter.Invoke(valueBuffer[i])) < 0)
+                if (referenceValue.CompareTo(startConverter.Invoke(valueBuffer[i])) < 0)
                 {
                     index = i - 1;
                     break;
@@ -35,13 +35,8 @@ namespace MNP.Helpers
                 }
             }
             resultIndex = index;
-            if (index == valueBuffer.Length - 1)
-            {
-                fixedT = 1;
-                return;
-            }
-            float duration = converter.Invoke(valueBuffer[index + 1]) - converter.Invoke(valueBuffer[index]);
-            fixedT = (referenceValue - converter.Invoke(valueBuffer[index])) / duration;
+            float duration = lengthConverter.Invoke(valueBuffer[index]);
+            fixedT = (referenceValue - startConverter.Invoke(valueBuffer[index])) / duration;
         }
 
         [BurstCompile]

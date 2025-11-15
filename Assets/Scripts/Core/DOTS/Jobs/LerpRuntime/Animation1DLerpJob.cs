@@ -14,7 +14,7 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(DynamicBuffer<Animation1DComponent> animation1DBuffer, ref Property1DComponent property1DComponent, in TimeComponent timeComponent)
         {
-            UtilityHelper.GetFloorIndexInBuffer(animation1DBuffer, v => v.StartTime, timeComponent.Time, out int animationIndex, out float fixedT);
+            UtilityHelper.GetFloorIndexInBufferWithLength(animation1DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation1DBuffer[animationIndex].EaseKeyframeList, fixedT);
             float result = PathLerpHelper.Lerp1DLinear(animation1DBuffer[animationIndex].StartValue, animation1DBuffer[animationIndex].EndValue, ease);
             property1DComponent.Value = result;

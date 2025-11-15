@@ -29,7 +29,7 @@ namespace MNP.Mono
             system.TestTexture = Texture;
             system.Material = Material;
             system.Mesh = Mesh;
-            const int testCount = 10000;
+            const int testCount = 2;
             for (int i = 0; i < testCount; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
@@ -101,12 +101,12 @@ namespace MNP.Mono
 
         private Vector2 RandomVector2
         {
-            get => new(RandomFloat * 4f - 2f, RandomFloat * 2f - 1f);
+            get => new(RandomFloat * 4f, RandomFloat * 4f);
         }
 
         private Vector2 RandomVector2NoNegative
         {
-            get => new(RandomFloat * 2f, RandomFloat);
+            get => new(RandomFloat * 8f - 4f, RandomFloat * 8f - 4f);
         }
 
         private float RandomFloat
@@ -162,13 +162,13 @@ namespace MNP.Mono
                 {
                     if (j == 0)
                     {
-                        last = NoNegative ? RandomVector2NoNegative : RandomVector2;
+                        last = NoNegative ? RandomVector2 : RandomVector2;
                         result.Add(new()
                         {
-                            StartValue = NoNegative ? RandomVector2NoNegative : RandomVector2,
+                            StartValue = NoNegative ? RandomVector2 : RandomVector2,
                             EndValue = last,
-                            Control0Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
-                            Control1Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
+                            Control0Value = NoNegative ? RandomVector2 : RandomVector2,
+                            Control1Value = NoNegative ? RandomVector2 : RandomVector2,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
@@ -181,9 +181,9 @@ namespace MNP.Mono
                         result.Add(new()
                         {
                             StartValue = last,
-                            EndValue = NoNegative ? RandomVector2NoNegative : RandomVector2,
-                            Control0Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
-                            Control1Value = NoNegative ? RandomVector2NoNegative : RandomVector2,
+                            EndValue = NoNegative ? RandomVector2 : RandomVector2,
+                            Control0Value = NoNegative ? RandomVector2 : RandomVector2,
+                            Control1Value = NoNegative ? RandomVector2 : RandomVector2,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
