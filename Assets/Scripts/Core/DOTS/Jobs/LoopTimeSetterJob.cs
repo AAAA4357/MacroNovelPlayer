@@ -8,12 +8,12 @@ namespace MNP.Core.DOTS.Jobs
     [WithAll(typeof(TimeComponent), typeof(LoopTimeComponent))]
     public partial struct LoopTimeSetterJob : IJobEntity
     {
-        public float TargetValue;
+        public float DeltaValue;
 
         [BurstCompile]
         public void Execute(ref TimeComponent time)
         {
-            time.Time = TargetValue;
+            time.Time += DeltaValue;
         }
     }
 }

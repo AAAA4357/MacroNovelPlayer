@@ -29,7 +29,7 @@ namespace MNP.Mono
             system.TestTexture = Texture;
             system.Material = Material;
             system.Mesh = Mesh;
-            const int testCount = 2;
+            const int testCount = 20;
             for (int i = 0; i < testCount; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
@@ -37,6 +37,14 @@ namespace MNP.Mono
                 manager.SetComponentData(entity, GetInstance());
                 manager.SetComponentData(entity, GenerateAnimation());
             }
+        }
+        
+        public void ResumePlay()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.ResumeAll();
         }
 
         private ElementComponent GetInstance()
@@ -61,7 +69,11 @@ namespace MNP.Mono
                         EndTime = 8,
                         IsStatic = false,
                         StaticValue = null,
-                        Type = PropertyType.Transform2DRotation
+                        Type = PropertyType.Transform2DRotation,
+                        AnimationInterruptTimeList = new()
+                        {
+                            4
+                        }
                     }
                 },
                 Animation1DDictionary = new()
@@ -77,7 +89,11 @@ namespace MNP.Mono
                         EndTime = 8,
                         IsStatic = false,
                         StaticValue = null,
-                        Type = PropertyType.Transform2DPosition
+                        Type = PropertyType.Transform2DPosition,
+                        AnimationInterruptTimeList = new()
+                        {
+                            4
+                        }
                     },
                     new AnimationProperty2D()
                     {
@@ -86,7 +102,11 @@ namespace MNP.Mono
                         EndTime = 8,
                         IsStatic = false,
                         StaticValue = null,
-                        Type = PropertyType.Transform2DScale
+                        Type = PropertyType.Transform2DScale,
+                        AnimationInterruptTimeList = new()
+                        {
+                            4
+                        }
                     }
                 },
                 Animation2DDictionary = new()

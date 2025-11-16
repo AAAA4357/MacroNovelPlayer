@@ -9,12 +9,17 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithNone(typeof(Transform2DPropertyComponent))]
+    [WithNone(typeof(PosTransform2DPropertyComponent), typeof(SclTransform2DPropertyComponent))]
+    [WithPresent(typeof(InterruptComponent))]
     public partial struct Animation2DLerpJob : IJobEntity
     {
         [BurstCompile]
-        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent)
+        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent)
         {
+            if (interruptComponent.ValueRO) 
+            {
+                return;
+            }
             UtilityHelper.GetFloorIndexInBufferWithLength(animation2DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation2DBuffer[animationIndex].EaseKeyframeList, fixedT);
             bool isLinear = animation2DBuffer[animationIndex].Linear;

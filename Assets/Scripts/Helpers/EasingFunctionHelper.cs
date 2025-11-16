@@ -8,17 +8,6 @@ namespace MNP.Helpers
     public static class EasingFunctionHelper
     {
         [BurstCompile]
-        public static float GetEase(in NativeSlice<float4> keyframeArray, float t)
-        {
-            if (t <= 0)
-                return 0;
-            if (t >= 1)
-                return 1;
-            UtilityHelper.GetFloorIndexInSlice(keyframeArray, v => v.x, t, out int index, out float fixedT);
-            return HermiteInterpolate(keyframeArray[index].x, keyframeArray[index + 1].y, keyframeArray[index].w, keyframeArray[index + 1].z, fixedT);
-        }
-
-        [BurstCompile]
         public static float GetEase(FixedList128Bytes<float4> keyFrameList, float t)
         {
             for (int i = 0; i < keyFrameList.Capacity; i++)

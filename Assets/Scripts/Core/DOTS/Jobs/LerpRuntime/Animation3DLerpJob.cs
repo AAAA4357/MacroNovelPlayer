@@ -9,12 +9,16 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithNone(typeof(Transform2DPropertyComponent))]
+    [WithPresent(typeof(InterruptComponent))]
     public partial struct Animation3DLerpJob : IJobEntity
     {
         [BurstCompile]
-        public void Execute(DynamicBuffer<Animation3DComponent> animation3DBuffer, ref Property3DComponent property3DComponent, in TimeComponent timeComponent)
+        public void Execute(DynamicBuffer<Animation3DComponent> animation3DBuffer, ref Property3DComponent property3DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent)
         {
+            if (interruptComponent.ValueRO) 
+            {
+                return;
+            }
             UtilityHelper.GetFloorIndexInBufferWithLength(animation3DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation3DBuffer[animationIndex].EaseKeyframeList, fixedT);
             bool isLinear = animation3DBuffer[animationIndex].Linear;

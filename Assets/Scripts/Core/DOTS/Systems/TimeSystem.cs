@@ -2,28 +2,26 @@ using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Jobs;
 using MNP.Core.Misc;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     partial struct TimeSystem : ISystem, ISystemStartStop
     {
-        private bool Interrupted;
-
-        private float currentLoopTime;
-
-        private float currentTime;
-
         public UnmanagedTimer timer;
 
+        bool resumeAllInterrupt;
+        NativeArray<JobHandle> resumeJobs;
+        
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<TimeEnabledComponent>();
 
-            currentLoopTime = 0;
-            currentTime = 0;
+            resumeJobs = new(4, Allocator.Persistent);
 
             timer.Initialize();
             timer.Reset();
@@ -42,20 +40,42 @@ namespace MNP.Core.DOTS.Systems
 
             float elapsedSeconds = timer.GetElapsedSeconds();
 
-            if (!Interrupted)
+            if (resumeAllInterrupt)
             {
-                currentTime += elapsedSeconds;
-                TimeSetterJob job = new()
-                {
-                    TargetValue = currentTime
-                };
-                state.Dependency = job.ScheduleParallel(state.Dependency);
+                resumeJobs[0] = new ResumeAllPosTransform2DInterruptJob().ScheduleParallel(state.Dependency);
+                resumeJobs[1] = new ResumeAllRotTransform2DInterruptJob().ScheduleParallel(state.Dependency);
+                resumeJobs[2] = new ResumeAllSclTransform2DInterruptJob().ScheduleParallel(state.Dependency);
+                resumeJobs[3] = new ResumeAllInterruptJob().ScheduleParallel(state.Dependency);
+                state.Dependency = JobHandle.CombineDependencies(resumeJobs);
+                state.CompleteDependency();
+                resumeAllInterrupt = false;
             }
 
-            currentLoopTime += elapsedSeconds;
+            PosTransform2DTimeSetterJob posTransform2DJob = new()
+            {
+                DeltaValue = elapsedSeconds
+            };
+            RotTransform2DTimeSetterJob rotTransform2DJob = new()
+            {
+                DeltaValue = elapsedSeconds
+            };
+            SclTransform2DTimeSetterJob sclTransform2DJob = new()
+            {
+                DeltaValue = elapsedSeconds
+            };
+            JobHandle pos2DJob = posTransform2DJob.ScheduleParallel(state.Dependency);
+            JobHandle rot2DJob = rotTransform2DJob.ScheduleParallel(state.Dependency);
+            JobHandle scl2DJob = sclTransform2DJob.ScheduleParallel(state.Dependency);
+            state.Dependency = JobHandle.CombineDependencies(pos2DJob, rot2DJob, scl2DJob);
+            TimeSetterJob job = new()
+            {
+                DeltaValue = elapsedSeconds
+            };
+            state.Dependency = job.ScheduleParallel(state.Dependency);
+
             LoopTimeSetterJob loopjob = new()
             {
-                TargetValue = currentLoopTime
+                DeltaValue = elapsedSeconds
             };
             state.Dependency = loopjob.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
@@ -77,12 +97,17 @@ namespace MNP.Core.DOTS.Systems
 
         public void Interrupt()
         {
-            Interrupted = true;
+            
         }
 
         public void Resume()
         {
-            Interrupted = false;
+            
+        }
+
+        public void ResumeAll()
+        {
+            resumeAllInterrupt = true;
         }
     }
 }

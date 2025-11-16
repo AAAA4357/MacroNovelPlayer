@@ -12,11 +12,11 @@ namespace MNP.Core.DOTS.Jobs
         public EntityCommandBuffer.ParallelWriter ecbWriter;
 
         [BurstCompile]
-        public void Execute(ref TransformPropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent, in Entity entity, [ChunkIndexInQuery] int chunkIndexInQuery)
+        public void Execute(ref TransformPropertyInfoComponent propertyInfoComponent, in PosTransform2DTimeComponent posTimeComponent, in RotTransform2DTimeComponent rotTimeComponent, in SclTransform2DTimeComponent sclTimeComponent, in Entity entity, [ChunkIndexInQuery] int chunkIndexInQuery)
         {
-            bool pos = CheckPos(ref propertyInfoComponent, in timeComponent);
-            bool rot = CheckRot(ref propertyInfoComponent, in timeComponent);
-            bool scl = CheckScl(ref propertyInfoComponent, in timeComponent);
+            bool pos = CheckPos(ref propertyInfoComponent, in posTimeComponent);
+            bool rot = CheckRot(ref propertyInfoComponent, in rotTimeComponent);
+            bool scl = CheckScl(ref propertyInfoComponent, in sclTimeComponent);
             if (pos || rot || scl)
             {
                 if (propertyInfoComponent.PositionLerpEnabled ||
@@ -39,7 +39,7 @@ namespace MNP.Core.DOTS.Jobs
             }
         }
 
-        private bool CheckPos(ref TransformPropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent)
+        private bool CheckPos(ref TransformPropertyInfoComponent propertyInfoComponent, in PosTransform2DTimeComponent timeComponent)
         {
             if (timeComponent.Time < propertyInfoComponent.PositionStartTime ||
                 timeComponent.Time > propertyInfoComponent.PositionEndTime)
@@ -54,7 +54,7 @@ namespace MNP.Core.DOTS.Jobs
             }
         }
 
-        private bool CheckRot(ref TransformPropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent)
+        private bool CheckRot(ref TransformPropertyInfoComponent propertyInfoComponent, in RotTransform2DTimeComponent timeComponent)
         {
             if (timeComponent.Time < propertyInfoComponent.RotationStartTime ||
                 timeComponent.Time > propertyInfoComponent.RotationEndTime)
@@ -69,7 +69,7 @@ namespace MNP.Core.DOTS.Jobs
             }
         }
 
-        private bool CheckScl(ref TransformPropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent)
+        private bool CheckScl(ref TransformPropertyInfoComponent propertyInfoComponent, in SclTransform2DTimeComponent timeComponent)
         {
             if (timeComponent.Time < propertyInfoComponent.ScaleStartTime ||
                 timeComponent.Time > propertyInfoComponent.ScaleEndTime)

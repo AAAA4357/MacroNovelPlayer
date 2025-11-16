@@ -14,11 +14,19 @@ namespace MNP.Core.DOTS.Systems
         protected override void OnUpdate()
         {
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform2DPropertyComponent managedTransform2DComponent,
-                                                                      in Transform2DPropertyComponent property1DComponent) =>
+                                                                      in PosTransform2DPropertyComponent propertyComponent) =>
             {
-                managedTransform2DComponent.RefValue.Value.Position = property1DComponent.Position;
-                managedTransform2DComponent.RefValue.Value.Rotation = property1DComponent.Rotation;
-                managedTransform2DComponent.RefValue.Value.Scale = property1DComponent.Scale;
+                managedTransform2DComponent.RefValue.Value.Position = propertyComponent.Value;
+            }).WithoutBurst().Run();
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform2DPropertyComponent managedTransform2DComponent,
+                                                                      in RotTransform2DPropertyComponent propertyComponent) =>
+            {
+                managedTransform2DComponent.RefValue.Value.Rotation = propertyComponent.Value;
+            }).WithoutBurst().Run();
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform2DPropertyComponent managedTransform2DComponent,
+                                                                      in SclTransform2DPropertyComponent propertyComponent) =>
+            {
+                managedTransform2DComponent.RefValue.Value.Scale = propertyComponent.Value;
             }).WithoutBurst().Run();
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationProperty1DComponent managedProperty1DComponent,
                                                                       in Property1DComponent property1DComponent) =>

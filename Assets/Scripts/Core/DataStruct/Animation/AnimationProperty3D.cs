@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MNP.Core.DataStruct.Animation
@@ -10,5 +11,6 @@ namespace MNP.Core.DataStruct.Animation
         public bool IsStatic;
         public Vector3? StaticValue;
         public PropertyType Type;
+        public List<float> AnimationInterruptTimeList;
     }
 }

@@ -12,7 +12,7 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(TimeSystem))]
+    [UpdateAfter(typeof(InputSystem))]
     partial class BakeSystem : SystemBase
     {
         protected override void OnUpdate()
@@ -52,8 +52,31 @@ namespace MNP.Core.DOTS.Systems
                                                EntityCommandBuffer ecb)
         {
             Entity entity = ecb.CreateEntity();
-            Transform2DPropertyComponent propertyComponent = new();
-            ecb.AddComponent(entity, propertyComponent);
+            PosTransform2DPropertyComponent posPropertyComponent = new();
+            ecb.AddComponent(entity, posPropertyComponent);
+            RotTransform2DPropertyComponent rotPropertyComponent = new();
+            ecb.AddComponent(entity, rotPropertyComponent);
+            SclTransform2DPropertyComponent sclPropertyComponent = new();
+            ecb.AddComponent(entity, sclPropertyComponent);
+
+            PosTransform2DTimeComponent posTimeComponent = new()
+            {
+                Time = 0,
+                InterrputedTime = 0
+            };
+            RotTransform2DTimeComponent rotTimeComponent = new()
+            {
+                Time = 0,
+                InterrputedTime = 0
+            };
+            SclTransform2DTimeComponent sclTimeComponent = new()
+            {
+                Time = 0,
+                InterrputedTime = 0
+            };
+            ecb.AddComponent(entity, posTimeComponent);
+            ecb.AddComponent(entity, rotTimeComponent);
+            ecb.AddComponent(entity, sclTimeComponent);
             
             AnimationProperty2D posProperty = animationListComponent.AnimationProperty2DList.Find(x => x.Type == PropertyType.Transform2DPosition);
             AnimationProperty1D rotProperty = animationListComponent.AnimationProperty1DList.Find(x => x.Type == PropertyType.Transform2DRotation);
@@ -67,8 +90,8 @@ namespace MNP.Core.DOTS.Systems
 
             if (posProperty.IsStatic)
             {
-                propertyComponent.Position = posProperty.StaticValue.Value;
-                refValue.Value.Position = propertyComponent.Position;
+                posPropertyComponent.Value = posProperty.StaticValue.Value;
+                refValue.Value.Position = posPropertyComponent.Value;
             }
             else
             {
@@ -103,8 +126,8 @@ namespace MNP.Core.DOTS.Systems
 
             if (rotProperty.IsStatic)
             {
-                propertyComponent.Rotation = rotProperty.StaticValue.Value;
-                refValue.Value.Rotation = propertyComponent.Rotation;
+                rotPropertyComponent.Value = rotProperty.StaticValue.Value;
+                refValue.Value.Rotation = rotPropertyComponent.Value;
             }
             else
             {
@@ -137,8 +160,8 @@ namespace MNP.Core.DOTS.Systems
             
             if (sclProperty.IsStatic)
             {
-                propertyComponent.Scale = sclProperty.StaticValue.Value;
-                refValue.Value.Scale = propertyComponent.Scale;
+                sclPropertyComponent.Value = sclProperty.StaticValue.Value;
+                refValue.Value.Scale = sclPropertyComponent.Value;
             }
             else
             {
@@ -170,6 +193,36 @@ namespace MNP.Core.DOTS.Systems
                     ecb.AppendToBuffer(entity, component);
                 }
             }
+                
+            ecb.AddBuffer<PosTransformInterruptTimeComponent>(entity);
+            for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
+            {
+                PosTransformInterruptTimeComponent component = new()
+                {
+                    InterruptTime = posProperty.AnimationInterruptTimeList[i]
+                };
+                ecb.AppendToBuffer(entity, component);
+            }
+                
+            ecb.AddBuffer<RotTransformInterruptTimeComponent>(entity);
+            for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
+            {
+                RotTransformInterruptTimeComponent component = new()
+                {
+                    InterruptTime = posProperty.AnimationInterruptTimeList[i]
+                };
+                ecb.AppendToBuffer(entity, component);
+            }
+                
+            ecb.AddBuffer<SclTransformInterruptTimeComponent>(entity);
+            for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
+            {
+                SclTransformInterruptTimeComponent component = new()
+                {
+                    InterruptTime = posProperty.AnimationInterruptTimeList[i]
+                };
+                ecb.AppendToBuffer(entity, component);
+            }
 
             ManagedAnimationTransform2DPropertyComponent managedPropertyTransform2DComponent = new()
             {
@@ -184,18 +237,17 @@ namespace MNP.Core.DOTS.Systems
                 ScaleStartTime = sclProperty.StartTime,
                 ScaleEndTime = sclProperty.EndTime
             };
-            TimeComponent timeComponent = new()
-            {
-                Time = 0,
-                InterrputedTime = 0
-            };
 
-            ecb.AddComponent(entity, propertyComponent);
             ecb.AddComponent(entity, propertyInfoComponent);
             ecb.AddComponent(entity, managedPropertyTransform2DComponent);
-            ecb.AddComponent(entity, timeComponent);
             ecb.AddComponent(entity, new InitializedPropertyComponent());
             ecb.AddComponent(entity, new TimeEnabledComponent());
+            ecb.AddComponent(entity, new PosTransform2DInterruptComponent());
+            ecb.AddComponent(entity, new RotTransform2DInterruptComponent());
+            ecb.AddComponent(entity, new SclTransform2DInterruptComponent());
+            ecb.SetComponentEnabled<PosTransform2DInterruptComponent>(entity, false);
+            ecb.SetComponentEnabled<RotTransform2DInterruptComponent>(entity, false);
+            ecb.SetComponentEnabled<SclTransform2DInterruptComponent>(entity, false);
         }
 
         private void SeperateCustom1DProperty(ManagedAnimationListComponent animationListComponent,
@@ -251,6 +303,16 @@ namespace MNP.Core.DOTS.Systems
                     ecb.AppendToBuffer(entity, component);
                 }
                 
+                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
+                {
+                    InterruptTimeComponent component = new()
+                    {
+                        InterruptTime = property.AnimationInterruptTimeList[i]
+                    };
+                    ecb.AppendToBuffer(entity, component);
+                }
+                
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     StartTime = property.StartTime,
@@ -272,6 +334,7 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
                 ecb.AddComponent(entity, new TimeEnabledComponent());
+                ecb.AddComponent(entity, new InterruptComponent());
             }
         }
 
@@ -329,6 +392,16 @@ namespace MNP.Core.DOTS.Systems
                     };
                     ecb.AppendToBuffer(entity, component);
                 }
+                
+                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
+                {
+                    InterruptTimeComponent component = new()
+                    {
+                        InterruptTime = property.AnimationInterruptTimeList[i]
+                    };
+                    ecb.AppendToBuffer(entity, component);
+                }
 
                 ManagedAnimationProperty2DComponent managedProperty2DComponent = new()
                 {
@@ -351,6 +424,7 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddComponent(entity, timeComponent);
                 ecb.AddComponent(entity, new InitializedPropertyComponent());
                 ecb.AddComponent(entity, new TimeEnabledComponent());
+                ecb.AddComponent(entity, new InterruptComponent());
             }
         }
 
@@ -401,6 +475,16 @@ namespace MNP.Core.DOTS.Systems
                         EaseKeyframeList = easeList,
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
+                    };
+                    ecb.AppendToBuffer(entity, component);
+                }
+                
+                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
+                {
+                    InterruptTimeComponent component = new()
+                    {
+                        InterruptTime = property.AnimationInterruptTimeList[i]
                     };
                     ecb.AppendToBuffer(entity, component);
                 }

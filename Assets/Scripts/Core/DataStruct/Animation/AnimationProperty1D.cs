@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace MNP.Core.DataStruct.Animation
 {
     public class AnimationProperty1D
@@ -8,5 +10,6 @@ namespace MNP.Core.DataStruct.Animation
         public bool IsStatic;
         public float? StaticValue;
         public PropertyType Type;
+        public List<float> AnimationInterruptTimeList;
     }
 }
