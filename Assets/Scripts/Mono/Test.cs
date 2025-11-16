@@ -16,6 +16,8 @@ namespace MNP.Mono
         public Material Material;
         public Mesh Mesh;
 
+        const int testCount = 20;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -29,13 +31,12 @@ namespace MNP.Mono
             system.TestTexture = Texture;
             system.Material = Material;
             system.Mesh = Mesh;
-            const int testCount = 20;
             for (int i = 0; i < testCount; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
                                                      typeof(ElementComponent));
                 manager.SetComponentData(entity, GetInstance());
-                manager.SetComponentData(entity, GenerateAnimation());
+                manager.SetComponentData(entity, GenerateAnimation(i));
             }
         }
         
@@ -56,7 +57,7 @@ namespace MNP.Mono
             };
         }
 
-        private ManagedAnimationListComponent GenerateAnimation()
+        private ManagedAnimationListComponent GenerateAnimation(int num)
         {
             return new()
             {
@@ -72,7 +73,8 @@ namespace MNP.Mono
                         Type = PropertyType.Transform2DRotation,
                         AnimationInterruptTimeList = new()
                         {
-                            4
+                            3,
+                            num > testCount / 2 ? 5 : 7
                         }
                     }
                 },
@@ -92,7 +94,8 @@ namespace MNP.Mono
                         Type = PropertyType.Transform2DPosition,
                         AnimationInterruptTimeList = new()
                         {
-                            4
+                            3,
+                            num > testCount / 2 ? 5 : 7
                         }
                     },
                     new AnimationProperty2D()
@@ -105,7 +108,8 @@ namespace MNP.Mono
                         Type = PropertyType.Transform2DScale,
                         AnimationInterruptTimeList = new()
                         {
-                            4
+                            3,
+                            num > testCount / 2 ? 5 : 7
                         }
                     }
                 },
