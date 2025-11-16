@@ -111,22 +111,27 @@ namespace MNP.Mono
                 },
                 Animation2DDictionary = new()
                 {
-                    {UtilityHelper.Transorm2DPositionID, Generate2DAnimation(false)},
-                    {UtilityHelper.Transorm2DScaleID, Generate2DAnimation(true)}
+                    {UtilityHelper.Transorm2DPositionID, Generate2DAnimation(true)},
+                    {UtilityHelper.Transorm2DScaleID, Generate2DAnimation(false)}
                 },
                 AnimationProperty3DList = new(),
                 Animation3DDictionary = new()
             };
         }
 
-        private Vector2 RandomVector2
+        private Vector2 RandomPosition
         {
-            get => new(RandomFloat * 4f, RandomFloat * 4f);
+            get => new(RandomFloat * 16f - 8f, RandomFloat * 9f - 4.5f);
         }
 
-        private Vector2 RandomVector2NoNegative
+        private float RandomRotation
         {
-            get => new(RandomFloat * 8f - 4f, RandomFloat * 8f - 4f);
+            get => Random.value * 360f - 180f;
+        }
+
+        private Vector2 RandomScale
+        {
+            get => new(RandomFloat * 2f, RandomFloat * 2f);
         }
 
         private float RandomFloat
@@ -144,10 +149,10 @@ namespace MNP.Mono
                 {
                     if (j == 0)
                     {
-                        last = RandomFloat * 360;
+                        last = RandomRotation;
                         result.Add(new()
                         {
-                            StartValue = RandomFloat * 360,
+                            StartValue = RandomRotation,
                             EndValue = last,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
@@ -160,7 +165,7 @@ namespace MNP.Mono
                         result.Add(new()
                         {
                             StartValue = last,
-                            EndValue = RandomFloat * 360,
+                            EndValue = RandomRotation,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
@@ -172,7 +177,7 @@ namespace MNP.Mono
             return result;
         }
         
-        private List<Animation2D> Generate2DAnimation(bool NoNegative)
+        private List<Animation2D> Generate2DAnimation(bool Position)
         {
             List<Animation2D> result = new();
             for (int i = 0; i < 2; i++)
@@ -182,13 +187,13 @@ namespace MNP.Mono
                 {
                     if (j == 0)
                     {
-                        last = NoNegative ? RandomVector2 : RandomVector2;
+                        last = Position ? RandomPosition : RandomScale;
                         result.Add(new()
                         {
-                            StartValue = NoNegative ? RandomVector2 : RandomVector2,
+                            StartValue = Position ? RandomPosition : RandomScale,
                             EndValue = last,
-                            Control0Value = NoNegative ? RandomVector2 : RandomVector2,
-                            Control1Value = NoNegative ? RandomVector2 : RandomVector2,
+                            Control0Value = Position ? RandomPosition : RandomScale,
+                            Control1Value = Position ? RandomPosition : RandomScale,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
@@ -201,9 +206,9 @@ namespace MNP.Mono
                         result.Add(new()
                         {
                             StartValue = last,
-                            EndValue = NoNegative ? RandomVector2 : RandomVector2,
-                            Control0Value = NoNegative ? RandomVector2 : RandomVector2,
-                            Control1Value = NoNegative ? RandomVector2 : RandomVector2,
+                            EndValue = Position ? RandomPosition : RandomScale,
+                            Control0Value = Position ? RandomPosition : RandomScale,
+                            Control1Value = Position ? RandomPosition : RandomScale,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
