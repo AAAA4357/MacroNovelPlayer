@@ -1,5 +1,6 @@
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Jobs;
+using MNP.Core.DOTS.Jobs.Transform2D;
 using MNP.Core.Misc;
 using Unity.Burst;
 using Unity.Collections;

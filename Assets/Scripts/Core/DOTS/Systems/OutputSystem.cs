@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using MNP.Core.DOTS.Components;
-using MNP.Core.DOTS.Components.Managed;
-using MNP.Helpers;
 using Unity.Entities;
 using UnityEngine;
 

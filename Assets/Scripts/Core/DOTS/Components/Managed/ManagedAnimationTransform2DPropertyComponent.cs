@@ -5,6 +5,6 @@ namespace MNP.Core.DOTS.Components.Managed
 {
     public class ManagedAnimationTransform2DPropertyComponent : IComponentData
     {
-        public RefAnimationTransformProperty RefValue;
+        public RefAnimationTransform2DProperty RefValue;
     }
 }

@@ -3,7 +3,9 @@ using MNP.Core.DataStruct;
 using MNP.Core.DataStruct.Animation;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
+using MNP.Core.DOTS.Components.LerpRuntime.Transform2D;
 using MNP.Core.DOTS.Components.Managed;
+using MNP.Core.DOTS.Components.Transform2D;
 using MNP.Helpers;
 using Unity.Collections;
 using Unity.Entities;
@@ -20,7 +22,7 @@ namespace MNP.Core.DOTS.Systems
             EntityCommandBuffer ecb = new(Allocator.Temp);
             Entities.WithNone<InitializedPropertyComponent>().ForEach((in Entity entity, in ManagedAnimationListComponent animation) =>
             {
-                ManagedAnimationPropertyListComponent component = new()
+                ManagedAnimation2DPropertyListComponent component = new()
                 {
                     Property1DList = new(),
                     Property2DList = new(),
@@ -36,7 +38,7 @@ namespace MNP.Core.DOTS.Systems
         }
 
         private void SeperateAnimationObject(ManagedAnimationListComponent animationListComponent,
-                                             ManagedAnimationPropertyListComponent propertyListComponent,
+                                             ManagedAnimation2DPropertyListComponent propertyListComponent,
                                              EntityCommandBuffer ecb,
                                              Entity entity)
         {
@@ -48,7 +50,7 @@ namespace MNP.Core.DOTS.Systems
         }
 
         private void SeperateTransformProperty(ManagedAnimationListComponent animationListComponent,
-                                               ManagedAnimationPropertyListComponent propertyListComponent,
+                                               ManagedAnimation2DPropertyListComponent propertyListComponent,
                                                EntityCommandBuffer ecb)
         {
             Entity entity = ecb.CreateEntity();
@@ -82,11 +84,11 @@ namespace MNP.Core.DOTS.Systems
             AnimationProperty1D rotProperty = animationListComponent.AnimationProperty1DList.Find(x => x.Type == PropertyType.Transform2DRotation);
             AnimationProperty2D sclProperty = animationListComponent.AnimationProperty2DList.Find(x => x.Type == PropertyType.Transform2DScale);
             
-            RefAnimationTransformProperty refValue = new()
+            RefAnimationTransform2DProperty refValue = new()
             {
                 Value = new()
             };
-            propertyListComponent.TransformProperty = refValue;
+            propertyListComponent.Transform2DProperty = refValue;
 
             if (posProperty.IsStatic)
             {
@@ -194,30 +196,30 @@ namespace MNP.Core.DOTS.Systems
                 }
             }
                 
-            ecb.AddBuffer<PosTransformInterruptTimeComponent>(entity);
+            ecb.AddBuffer<PosTransform2DInterruptTimeComponent>(entity);
             for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
             {
-                PosTransformInterruptTimeComponent component = new()
+                PosTransform2DInterruptTimeComponent component = new()
                 {
                     InterruptTime = posProperty.AnimationInterruptTimeList[i]
                 };
                 ecb.AppendToBuffer(entity, component);
             }
                 
-            ecb.AddBuffer<RotTransformInterruptTimeComponent>(entity);
+            ecb.AddBuffer<RotTransform2DInterruptTimeComponent>(entity);
             for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
             {
-                RotTransformInterruptTimeComponent component = new()
+                RotTransform2DInterruptTimeComponent component = new()
                 {
                     InterruptTime = posProperty.AnimationInterruptTimeList[i]
                 };
                 ecb.AppendToBuffer(entity, component);
             }
                 
-            ecb.AddBuffer<SclTransformInterruptTimeComponent>(entity);
+            ecb.AddBuffer<SclTransform2DInterruptTimeComponent>(entity);
             for (int i = 0; i < posProperty.AnimationInterruptTimeList.Count; i++)
             {
-                SclTransformInterruptTimeComponent component = new()
+                SclTransform2DInterruptTimeComponent component = new()
                 {
                     InterruptTime = posProperty.AnimationInterruptTimeList[i]
                 };
@@ -228,7 +230,7 @@ namespace MNP.Core.DOTS.Systems
             {
                 RefValue = refValue
             };
-            TransformPropertyInfoComponent propertyInfoComponent = new()
+            Transform2DPropertyInfoComponent propertyInfoComponent = new()
             {
                 PositionStartTime = posProperty.StartTime,
                 PositionEndTime = posProperty.EndTime,
@@ -251,7 +253,7 @@ namespace MNP.Core.DOTS.Systems
         }
 
         private void SeperateCustom1DProperty(ManagedAnimationListComponent animationListComponent,
-                                              ManagedAnimationPropertyListComponent propertyListComponent,
+                                              ManagedAnimation2DPropertyListComponent propertyListComponent,
                                               EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
@@ -339,7 +341,7 @@ namespace MNP.Core.DOTS.Systems
         }
 
         private void SeperateCustom2DProperty(ManagedAnimationListComponent animationListComponent,
-                                              ManagedAnimationPropertyListComponent propertyListComponent,
+                                              ManagedAnimation2DPropertyListComponent propertyListComponent,
                                               EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
@@ -429,7 +431,7 @@ namespace MNP.Core.DOTS.Systems
         }
 
         private void SeperateCustom3DProperty(ManagedAnimationListComponent animationListComponent,
-                                              ManagedAnimationPropertyListComponent propertyListComponent,
+                                              ManagedAnimation2DPropertyListComponent propertyListComponent,
                                               EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)

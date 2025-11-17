@@ -1,6 +1,7 @@
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Jobs;
+using MNP.Core.DOTS.Jobs.Transform2D;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
