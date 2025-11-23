@@ -9,7 +9,6 @@ namespace MNP.Core.DOTS.Jobs.Transform3D
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent))]
-    [WithNone(typeof(LoopTimeComponent))]
     [WithPresent(typeof(SclTransform3DInterruptComponent))]
     public partial struct SclTransform3DTimeSetterJob : IJobEntity
     {

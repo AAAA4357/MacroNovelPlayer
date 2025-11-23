@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
 using Unity.Entities;
 using UnityEngine;
@@ -12,7 +13,8 @@ namespace MNP.Core.DOTS.Systems
         public Texture2D TestTexture;
         public List<Texture2D> Textures;
         public Material Material;
-        public Mesh Mesh;
+        public Mesh Mesh2D;
+        public Mesh Mesh3D;
 
         protected override void OnCreate()
         {
@@ -25,19 +27,42 @@ namespace MNP.Core.DOTS.Systems
             MaterialPropertyBlock propertyBlock = new();
             Entities.ForEach((in ElementComponent elementComponent) =>
             {
-                if (!elementComponent.IsBlocked)
+                switch (elementComponent.ObjectType)
                 {
-                    propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
-                    Graphics.DrawMesh(
-                        Mesh,
-                        elementComponent.TransformMatrix,
-                        Material,
-                        0,                               // Layer
-                        null,                            // Camera (null = 主相机)
-                        0,                               // Submesh index
-                        propertyBlock                   // 实例特有的属性
-                    );
-                    propertyBlock.Clear();
+                    case ObjectType.Object2D:
+                        if (!elementComponent.IsBlocked)
+                        {
+                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
+                            Graphics.DrawMesh(
+                                Mesh2D,
+                                elementComponent.TransformMatrix,
+                                Material,
+                                0,                               // Layer
+                                null,                            // Camera (null = 主相机)
+                                0,                               // Submesh index
+                                propertyBlock                   // 实例特有的属性
+                            );
+                            propertyBlock.Clear();
+                        }
+                        break;
+                    case ObjectType.Object3D:
+                        if (!elementComponent.IsBlocked)
+                        {
+                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
+                            Graphics.DrawMesh(
+                                Mesh3D,
+                                elementComponent.TransformMatrix,
+                                Material,
+                                0,                               // Layer
+                                null,                            // Camera (null = 主相机)
+                                0,                               // Submesh index
+                                propertyBlock                   // 实例特有的属性
+                            );
+                            propertyBlock.Clear();
+                        }
+                        break;
+                    case ObjectType.Text:
+                        break;
                 }
             }).WithoutBurst().Run();
         }

@@ -9,7 +9,6 @@ namespace MNP.Core.DOTS.Jobs.Transform2D
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent))]
-    [WithNone(typeof(LoopTimeComponent))]
     [WithPresent(typeof(PosTransform2DInterruptComponent))]
     public partial struct PosTransform2DTimeSetterJob : IJobEntity
     {

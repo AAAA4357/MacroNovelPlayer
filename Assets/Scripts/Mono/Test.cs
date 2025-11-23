@@ -14,9 +14,13 @@ namespace MNP.Mono
     {
         public Texture2D Texture;
         public Material Material;
-        public Mesh Mesh;
+        public Mesh Mesh2D;
+        public Mesh Mesh3D;
 
-        const int testCount = 20;
+        [Range(0, 10000)]
+        public int testCount2D = 20;
+        [Range(0, 2000)]
+        public int testCount3D = 20;
 
         // Start is called before the first frame update
         void Start()
@@ -30,13 +34,21 @@ namespace MNP.Mono
             };
             system.TestTexture = Texture;
             system.Material = Material;
-            system.Mesh = Mesh;
-            for (int i = 0; i < testCount; i++)
+            system.Mesh2D = Mesh2D;
+            system.Mesh3D = Mesh3D;
+            for (int i = 0; i < testCount2D; i++)
             {
                 Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
                                                      typeof(ElementComponent));
-                manager.SetComponentData(entity, GetInstance());
-                manager.SetComponentData(entity, GenerateAnimation(i));
+                manager.SetComponentData(entity, GetInstance2D());
+                manager.SetComponentData(entity, GenerateAnimation2D(i));
+            }
+            for (int i = 0; i < testCount3D; i++)
+            {
+                Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
+                                                     typeof(ElementComponent));
+                manager.SetComponentData(entity, GetInstance3D());
+                manager.SetComponentData(entity, GenerateAnimation3D(i));
             }
         }
         
@@ -48,16 +60,27 @@ namespace MNP.Mono
             timeSystem.ResumeAll();
         }
 
-        private ElementComponent GetInstance()
+        private ElementComponent GetInstance2D()
         {
             return new()
             {
                 ID = new System.Random().Next(int.MinValue, int.MaxValue),
-                TextureID = 0
+                TextureID = 0,
+                ObjectType = ObjectType.Object3D
             };
         }
 
-        private ManagedAnimationListComponent GenerateAnimation(int num)
+        private ElementComponent GetInstance3D()
+        {
+            return new()
+            {
+                ID = new System.Random().Next(int.MinValue, int.MaxValue),
+                TextureID = 0,
+                ObjectType = ObjectType.Object3D
+            };
+        }
+
+        private ManagedAnimationListComponent GenerateAnimation2D(int num)
         {
             return new()
             {
@@ -72,10 +95,6 @@ namespace MNP.Mono
                         StaticValue = null,
                         Type = PropertyType.Transform2DRotation,
                         AnimationInterruptTimeList = new()
-                        {
-                            3,
-                            num > testCount / 2 ? 5 : 7
-                        }
                     }
                 },
                 Animation1DDictionary = new()
@@ -93,10 +112,6 @@ namespace MNP.Mono
                         StaticValue = null,
                         Type = PropertyType.Transform2DPosition,
                         AnimationInterruptTimeList = new()
-                        {
-                            3,
-                            num > testCount / 2 ? 5 : 7
-                        }
                     },
                     new AnimationProperty2D()
                     {
@@ -107,10 +122,6 @@ namespace MNP.Mono
                         StaticValue = null,
                         Type = PropertyType.Transform2DScale,
                         AnimationInterruptTimeList = new()
-                        {
-                            3,
-                            num > testCount / 2 ? 5 : 7
-                        }
                     }
                 },
                 Animation2DDictionary = new()
@@ -121,29 +132,105 @@ namespace MNP.Mono
                 AnimationProperty3DList = new(),
                 Animation3DDictionary = new(),
                 AnimationProperty4DList = new(),
+                Animation4DDictionary = new(),
+                ObjectType = ObjectType.Object2D
+            };
+        }
+        
+
+        private ManagedAnimationListComponent GenerateAnimation3D(int num)
+        {
+            return new()
+            {
+                AnimationProperty1DList = new(),
+                Animation1DDictionary = new(),
+                AnimationProperty2DList = new(),
+                Animation2DDictionary = new(),
+                AnimationProperty3DList = new()
+                {
+                    new AnimationProperty3D()
+                    {
+                        ID = UtilityHelper.Transorm3DPositionID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DPosition,
+                        AnimationInterruptTimeList = new()
+                    },
+                    new AnimationProperty3D()
+                    {
+                        ID = UtilityHelper.Transorm3DScaleID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DScale,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                Animation3DDictionary = new()
+                {
+                    {UtilityHelper.Transorm3DPositionID, Generate3DAnimation(true)},
+                    {UtilityHelper.Transorm3DScaleID, Generate3DAnimation(false)}
+                },
+                AnimationProperty4DList = new()
+                {
+                    new AnimationProperty4D()
+                    {
+                        ID = UtilityHelper.Transorm3DRotationID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DRotation,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
                 Animation4DDictionary = new()
+                {
+                    {UtilityHelper.Transorm3DRotationID, Generate4DAnimation()}
+                },
+                ObjectType = ObjectType.Object3D
             };
         }
 
-        private Vector2 RandomPosition
+        private Vector2 RandomPosition2D
         {
             get => new(RandomFloat * 16f - 8f, RandomFloat * 9f - 4.5f);
         }
 
-        private float RandomRotation
+        private float RandomRotation2D
         {
             get => Random.value * 360f - 180f;
         }
 
-        private Vector2 RandomScale
+        private Vector2 RandomScale2D
         {
             get => new(RandomFloat * 2f, RandomFloat * 2f);
+        }
+
+        private Vector3 RandomPosition3D
+        {
+            get => new(RandomFloat * 16f - 8f, RandomFloat * 9f - 4.5f, RandomFloat * 9f - 4.5f);
+        }
+
+        private Vector4 RandomRotation3D
+        {
+            get => ToVector4(Quaternion.Euler(RandomFloat * 360f - 180f, RandomFloat * 360f - 180f, RandomFloat * 360f - 180f));
+        }
+
+        private Vector3 RandomScale3D
+        {
+            get => new(RandomFloat * 2f, RandomFloat * 2f, RandomFloat * 2f);
         }
 
         private float RandomFloat
         {
             get => Random.value;
         }
+
+        Vector4 ToVector4(Quaternion quaternion) => new(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 
         private List<Animation1D> Generate1DAnimation()
         {
@@ -155,10 +242,10 @@ namespace MNP.Mono
                 {
                     if (j == 0)
                     {
-                        last = RandomRotation;
+                        last = RandomRotation2D;
                         result.Add(new()
                         {
-                            StartValue = RandomRotation,
+                            StartValue = RandomRotation2D,
                             EndValue = last,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
@@ -171,7 +258,7 @@ namespace MNP.Mono
                         result.Add(new()
                         {
                             StartValue = last,
-                            EndValue = RandomRotation,
+                            EndValue = RandomRotation2D,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
@@ -193,13 +280,13 @@ namespace MNP.Mono
                 {
                     if (j == 0)
                     {
-                        last = Position ? RandomPosition : RandomScale;
+                        last = Position ? RandomPosition2D : RandomScale2D;
                         result.Add(new()
                         {
-                            StartValue = Position ? RandomPosition : RandomScale,
+                            StartValue = Position ? RandomPosition2D : RandomScale2D,
                             EndValue = last,
-                            Control0Value = Position ? RandomPosition : RandomScale,
-                            Control1Value = Position ? RandomPosition : RandomScale,
+                            Control0Value = Position ? RandomPosition2D : RandomScale2D,
+                            Control1Value = Position ? RandomPosition2D : RandomScale2D,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
@@ -212,9 +299,9 @@ namespace MNP.Mono
                         result.Add(new()
                         {
                             StartValue = last,
-                            EndValue = Position ? RandomPosition : RandomScale,
-                            Control0Value = Position ? RandomPosition : RandomScale,
-                            Control1Value = Position ? RandomPosition : RandomScale,
+                            EndValue = Position ? RandomPosition2D : RandomScale2D,
+                            Control0Value = Position ? RandomPosition2D : RandomScale2D,
+                            Control1Value = Position ? RandomPosition2D : RandomScale2D,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
@@ -227,6 +314,94 @@ namespace MNP.Mono
             return result;
         }
         
+        private List<Animation3D> Generate3DAnimation(bool Position)
+        {
+            List<Animation3D> result = new();
+            for (int i = 0; i < 2; i++)
+            {
+                Vector3 last = Vector3.zero;
+                for (int j = 0; j < 2; j++)
+                {
+                    if (j == 0)
+                    {
+                        last = Position ? RandomPosition3D : RandomScale3D;
+                        result.Add(new()
+                        {
+                            StartValue = Position ? RandomPosition3D : RandomScale3D,
+                            EndValue = last,
+                            Control0Value = Position ? RandomPosition3D : RandomScale3D,
+                            Control1Value = Position ? RandomPosition3D : RandomScale3D,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 0 : 4,
+                            DurationTime = 2,
+                            Linear = false,
+                            Enabled = true
+                        });
+                    }
+                    else
+                    {
+                        result.Add(new()
+                        {
+                            StartValue = last,
+                            EndValue = Position ? RandomPosition3D : RandomScale3D,
+                            Control0Value = Position ? RandomPosition3D : RandomScale3D,
+                            Control1Value = Position ? RandomPosition3D : RandomScale3D,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 2 : 6,
+                            DurationTime = 2,
+                            Linear = false,
+                            Enabled = true
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+        
+        private List<Animation4D> Generate4DAnimation()
+        {
+            List<Animation4D> result = new();
+            for (int i = 0; i < 2; i++)
+            {
+                Vector4 last = Vector4.zero;
+                for (int j = 0; j < 2; j++)
+                {
+                    if (j == 0)
+                    {
+                        last = RandomRotation3D;
+                        result.Add(new()
+                        {
+                            StartValue = RandomRotation3D,
+                            EndValue = last,
+                            Control0Value = RandomRotation3D,
+                            Control1Value = RandomRotation3D,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 0 : 4,
+                            DurationTime = 2,
+                            LerpType = UtilityHelper.Quaternion_PathLerp,
+                            Enabled = true
+                        });
+                    }
+                    else
+                    {
+                        result.Add(new()
+                        {
+                            StartValue = last,
+                            EndValue = RandomRotation3D,
+                            Control0Value = RandomRotation3D,
+                            Control1Value = RandomRotation3D,
+                            EaseKeyframeList = GenerateLinearEaseList(),
+                            StartTime = i == 0 ? 2 : 6,
+                            DurationTime = 2,
+                            LerpType = UtilityHelper.Quaternion_PathLerp,
+                            Enabled = true
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+
         private List<AnimationEaseKeyframe> GenerateLinearEaseList()
         {
             return new()

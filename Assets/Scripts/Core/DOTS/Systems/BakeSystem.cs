@@ -31,7 +31,8 @@ namespace MNP.Core.DOTS.Systems
                         {
                             Property1DList = new(),
                             Property2DList = new(),
-                            Property3DList = new()
+                            Property3DList = new(),
+                            Property4DList = new()
                         };
                         ecb.AddComponent(entity, component2D);
                         SeperateAnimationObject2D(animation, component2D, ecb, entity);
@@ -41,7 +42,8 @@ namespace MNP.Core.DOTS.Systems
                         {
                             Property1DList = new(),
                             Property2DList = new(),
-                            Property3DList = new()
+                            Property3DList = new(),
+                            Property4DList = new()
                         };
                         ecb.AddComponent(entity, component3D);
                         SeperateAnimationObject3D(animation, component3D, ecb, entity);
@@ -747,7 +749,8 @@ namespace MNP.Core.DOTS.Systems
             {
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[UtilityHelper.Transorm3DRotationID];
 
-                ecb.AddBuffer<Transform2DRotationAnimationComponent>(entity);
+                ecb.AddBuffer<Transform3DRotationAnimationComponent>(entity);
+                ecb.AddBuffer<Transform3DRotationBakeDataComponent>(entity);
                 int dataIndex = 0;
                 foreach (Animation4D animation in animationList)
                 {
@@ -779,7 +782,7 @@ namespace MNP.Core.DOTS.Systems
                         float4 b = QuaternionHelper.Mul(animation.StartValue.Inverse(), animation.Control0Value); //q01
                         float4 c = QuaternionHelper.Mul(b.Inverse(), q12); //q01^-1*q12
                         float4 d = QuaternionHelper.Mul(c.Inverse(), q23); //q01^-1*q12
-                        Animation4DBakeDataComponent bakeDataComponent = new()
+                        Transform3DRotationBakeDataComponent bakeDataComponent = new()
                         {
                             q0 = a,
                             q01 = b,
@@ -859,7 +862,7 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AppendToBuffer(entity, component);
             }
 
-            ManagedAnimationTransform3DPropertyComponent managedPropertyTransform2DComponent = new()
+            ManagedAnimationTransform3DPropertyComponent managedPropertyTransform3DComponent = new()
             {
                 RefValue = refValue
             };
@@ -874,15 +877,15 @@ namespace MNP.Core.DOTS.Systems
             };
 
             ecb.AddComponent(entity, propertyInfoComponent);
-            ecb.AddComponent(entity, managedPropertyTransform2DComponent);
+            ecb.AddComponent(entity, managedPropertyTransform3DComponent);
             ecb.AddComponent(entity, new InitializedPropertyComponent());
             ecb.AddComponent(entity, new TimeEnabledComponent());
-            ecb.AddComponent(entity, new PosTransform2DInterruptComponent());
-            ecb.AddComponent(entity, new RotTransform2DInterruptComponent());
-            ecb.AddComponent(entity, new SclTransform2DInterruptComponent());
-            ecb.SetComponentEnabled<PosTransform2DInterruptComponent>(entity, false);
-            ecb.SetComponentEnabled<RotTransform2DInterruptComponent>(entity, false);
-            ecb.SetComponentEnabled<SclTransform2DInterruptComponent>(entity, false);
+            ecb.AddComponent(entity, new PosTransform3DInterruptComponent());
+            ecb.AddComponent(entity, new RotTransform3DInterruptComponent());
+            ecb.AddComponent(entity, new SclTransform3DInterruptComponent());
+            ecb.SetComponentEnabled<PosTransform3DInterruptComponent>(entity, false);
+            ecb.SetComponentEnabled<RotTransform3DInterruptComponent>(entity, false);
+            ecb.SetComponentEnabled<SclTransform3DInterruptComponent>(entity, false);
         }
         
         private void SeperateCustom1DProperty3D(ManagedAnimationListComponent animationListComponent,
@@ -891,10 +894,6 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
-                if (property.Type == PropertyType.Transform2DRotation)
-                {
-                    continue;
-                }
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty1D refValue = new();
                 Property1DComponent property1DComponent = new();
@@ -979,10 +978,6 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
-                if (property.Type == PropertyType.Transform2DPosition || property.Type == PropertyType.Transform2DScale)
-                {
-                    continue;
-                }
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty2D refValue = new();
                 Property2DComponent property2DComponent = new();
@@ -1069,6 +1064,10 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
+                if (property.Type == PropertyType.Transform3DPosition || property.Type == PropertyType.Transform3DScale)
+                {
+                    continue;
+                }
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty3D refValue = new();
                 Property3DComponent property3DComponent = new();
@@ -1154,6 +1153,10 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
+                if (property.Type == PropertyType.Transform3DRotation)
+                {
+                    continue;
+                }
                 Entity entity = ecb.CreateEntity();
                 RefAnimationProperty4D refValue = new();
                 Property4DComponent property4DComponent = new();

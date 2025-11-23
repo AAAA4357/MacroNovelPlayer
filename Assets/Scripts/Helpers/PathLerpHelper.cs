@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Entities.UniversalDelegates;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -88,6 +89,10 @@ namespace MNP.Helpers
         [BurstCompile]
         public static float4 GetBezierPoint4D(in float4 q0, in float4 q01, in float4 q01_1q12, in float4 q12_1q23, float t)
         {
+            if (t == 0)
+            {
+                return q0;
+            }
             float4 ct = q01_1q12.Pow(t);
             float4 dtt = q12_1q23.Pow(t*t);
             float4 bctdttt = QuaternionHelper.Mul(q01, QuaternionHelper.Mul(ct, dtt)).Pow(t);

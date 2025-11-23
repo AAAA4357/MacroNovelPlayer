@@ -30,20 +30,20 @@ namespace MNP.Core.DOTS.Systems
             {
                 managedTransform2DComponent.RefValue.Value.Scale = propertyComponent.Value;
             }).WithoutBurst().Run();
-            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform2DComponent,
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform3DComponent,
                                                                       in PosTransform3DPropertyComponent propertyComponent) =>
             {
-                managedTransform2DComponent.RefValue.Value.Position = propertyComponent.Value;
+                managedTransform3DComponent.RefValue.Value.Position = propertyComponent.Value;
             }).WithoutBurst().Run();
-            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform2DComponent,
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform3DComponent,
                                                                       in RotTransform3DPropertyComponent propertyComponent) =>
             {
-                managedTransform2DComponent.RefValue.Value.Rotation = new(propertyComponent.Value.x, propertyComponent.Value.y, propertyComponent.Value.z, propertyComponent.Value.w);
+                managedTransform3DComponent.RefValue.Value.Rotation = propertyComponent.Value;
             }).WithoutBurst().Run();
-            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform2DComponent,
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationTransform3DPropertyComponent managedTransform3DComponent,
                                                                       in SclTransform3DPropertyComponent propertyComponent) =>
             {
-                managedTransform2DComponent.RefValue.Value.Scale = propertyComponent.Value;
+                managedTransform3DComponent.RefValue.Value.Scale = propertyComponent.Value;
             }).WithoutBurst().Run();
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationProperty1DComponent managedProperty1DComponent,
                                                                       in Property1DComponent property1DComponent) =>
