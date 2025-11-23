@@ -119,7 +119,9 @@ namespace MNP.Mono
                     {UtilityHelper.Transorm2DScaleID, Generate2DAnimation(false)}
                 },
                 AnimationProperty3DList = new(),
-                Animation3DDictionary = new()
+                Animation3DDictionary = new(),
+                AnimationProperty4DList = new(),
+                Animation4DDictionary = new()
             };
         }
 

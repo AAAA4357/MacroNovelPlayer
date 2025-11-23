@@ -3,16 +3,16 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace MNP.Core.DOTS.Components.LerpRuntime.Transform3D
+namespace MNP.Core.DOTS.Components.LerpRuntime
 {
     [BurstCompile]
-    public struct Transform3DRotationAnimationComponent : IBufferElementData
+    public struct Animation4DComponent : IBufferElementData
     {
         public float4 StartValue;
         public float4 EndValue;
         public float4 Control0;
         public float4 Control1;
-        //float4(4*4=16)*8=128, 7keys, 6segments
+        //float4(4*4=16)*8=128, 7keys, 6segmentsx
         public FixedList128Bytes<float4> EaseKeyframeList;
         public float StartTime;
         public float DurationTime;

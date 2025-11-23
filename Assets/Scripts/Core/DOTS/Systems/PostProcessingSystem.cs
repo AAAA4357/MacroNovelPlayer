@@ -60,6 +60,11 @@ namespace MNP.Core.DOTS.Systems
             {
                 managedProperty3DComponent.RefValue.Value = property3DComponent.Value;
             }).WithoutBurst().Run();
+            Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimationProperty4DComponent managedProperty4DComponent,
+                                                                      in Property4DComponent property4DComponent) =>
+            {
+                managedProperty4DComponent.RefValue.Value = property4DComponent.Value;
+            }).WithoutBurst().Run();
             Entities.WithAll<InitializedPropertyComponent>().ForEach((ManagedAnimation2DPropertyListComponent managedAnimationPropertyListComponent,
                                                                       ref ElementComponent elementComponent) =>
             {
@@ -73,9 +78,9 @@ namespace MNP.Core.DOTS.Systems
                                                                       ref ElementComponent elementComponent) =>
             {
                 Vector3 position = managedAnimationPropertyListComponent.Transform3DProperty.Value.Position;
-                Quaternion rotation = managedAnimationPropertyListComponent.Transform3DProperty.Value.Rotation;
+                Vector4 rotation = managedAnimationPropertyListComponent.Transform3DProperty.Value.Rotation;
                 Vector3 scale = managedAnimationPropertyListComponent.Transform3DProperty.Value.Scale;
-                Matrix4x4 matrix = Matrix4x4.TRS(position, rotation, scale);
+                Matrix4x4 matrix = Matrix4x4.TRS(position, new(rotation.x, rotation.y, rotation.z, rotation.w), scale);
                 elementComponent.TransformMatrix = matrix;
             }).WithoutBurst().Run();
         }

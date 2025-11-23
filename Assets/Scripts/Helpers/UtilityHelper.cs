@@ -10,6 +10,13 @@ namespace MNP.Helpers
         public const string Transorm2DPositionID = "Transform2D_Position";
         public const string Transorm2DRotationID = "Transform2D_Rotation";
         public const string Transorm2DScaleID = "Transform2D_Scale";
+        public const string Transorm3DPositionID = "Transform3D_Position";
+        public const string Transorm3DRotationID = "Transform3D_Rotation";
+        public const string Transorm3DScaleID = "Transform3D_Scale";
+
+        public const int Quaternion_LinearLerp = 0;
+        public const int Quaternion_LinearSLerp = 1;
+        public const int Quaternion_PathLerp = 2;
 
         public const float InterruptTorloance = 0.005f;
 
