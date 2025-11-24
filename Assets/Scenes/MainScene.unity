@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &204289107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 204289106}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2322d6819cc28624fbc2a5b225eea2d8, type: 3}
   m_Name: 
@@ -495,14 +495,17 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1297654936}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f3254030efb5fa46b97120917b21381, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Texture: {fileID: 2800000, guid: 78ccfe08f3a74644bb180f99c684b452, type: 3}
   Material: {fileID: 2100000, guid: 89e3e0fa8e500a24a8645067f944288a, type: 2}
-  Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  Mesh2D: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  Mesh3D: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  testCount2D: 1
+  testCount3D: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

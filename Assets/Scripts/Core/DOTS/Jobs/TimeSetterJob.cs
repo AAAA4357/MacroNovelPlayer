@@ -7,6 +7,7 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent))]
+    [WithPresent(typeof(InterruptComponent))]
     public partial struct TimeSetterJob : IJobEntity
     {
         public float DeltaValue;

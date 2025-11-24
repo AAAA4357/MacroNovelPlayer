@@ -1,7 +1,5 @@
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Jobs;
-using MNP.Core.DOTS.Jobs.Transform2D;
-using MNP.Core.DOTS.Jobs.Transform3D;
 using MNP.Core.Misc;
 using Unity.Burst;
 using Unity.Collections;
@@ -46,55 +44,16 @@ namespace MNP.Core.DOTS.Systems
 
             if (resumeAllInterrupt)
             {
-                resumeJobs[0] = new ResumeAllPosTransform2DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[1] = new ResumeAllRotTransform2DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[2] = new ResumeAllSclTransform2DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[3] = new ResumeAllPosTransform3DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[4] = new ResumeAllRotTransform3DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[5] = new ResumeAllSclTransform3DInterruptJob().ScheduleParallel(state.Dependency);
-                resumeJobs[6] = new ResumeAllInterruptJob().ScheduleParallel(state.Dependency);
-                state.Dependency = JobHandle.CombineDependencies(resumeJobs);
+                state.Dependency = new ResumeAllInterruptJob().ScheduleParallel(state.Dependency);
                 state.CompleteDependency();
                 resumeAllInterrupt = false;
             }
 
-            PosTransform2DTimeSetterJob posTransform2DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            RotTransform2DTimeSetterJob rotTransform2DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            SclTransform2DTimeSetterJob sclTransform2DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            PosTransform3DTimeSetterJob posTransform3DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            RotTransform3DTimeSetterJob rotTransform3DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            SclTransform3DTimeSetterJob sclTransform3DJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
             TimeSetterJob setterJob = new()
             {
                 DeltaValue = elapsedSeconds
             };
-
-            setterJobs[0] = posTransform2DJob.ScheduleParallel(state.Dependency);
-            setterJobs[1] = rotTransform2DJob.ScheduleParallel(state.Dependency);
-            setterJobs[2] = sclTransform2DJob.ScheduleParallel(state.Dependency);
-            setterJobs[3] = posTransform3DJob.ScheduleParallel(state.Dependency);
-            setterJobs[4] = rotTransform3DJob.ScheduleParallel(state.Dependency);
-            setterJobs[5] = sclTransform3DJob.ScheduleParallel(state.Dependency);
-            setterJobs[6] = setterJob.ScheduleParallel(state.Dependency);
-            state.Dependency = JobHandle.CombineDependencies(setterJobs);
+            state.Dependency = setterJob.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
 
             timer.Start();

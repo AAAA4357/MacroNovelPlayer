@@ -1,6 +1,5 @@
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
-using MNP.Core.DOTS.Components.Transform2D;
 using MNP.Helpers;
 using Unity.Burst;
 using Unity.Entities;
@@ -9,7 +8,6 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithNone(typeof(RotTransform2DPropertyComponent))]
     [WithPresent(typeof(InterruptComponent))]
     public partial struct Animation1DLerpJob : IJobEntity
     {
