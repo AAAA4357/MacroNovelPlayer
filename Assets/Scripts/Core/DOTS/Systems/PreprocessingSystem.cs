@@ -11,6 +11,9 @@ namespace MNP.Core.DOTS.Systems
     [UpdateAfter(typeof(BakeSystem))]
     partial struct PreprocessingSystem : ISystem
     {
+        public JobHandle TimeHandle;
+        public bool BufferB;
+        
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
@@ -20,15 +23,19 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new(Allocator.TempJob);
-            PreprocessJob job = new()
+            if (!BufferB)
             {
-                ecbWriter = ecb.AsParallelWriter()
-            };
-            state.Dependency = job.ScheduleParallel(state.Dependency);
-            state.CompleteDependency();
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
+                state.Dependency = new PreprocessBufferAJob().ScheduleParallel(TimeHandle);
+            }
+            else
+            {
+                state.Dependency = new PreprocessBufferBJob().ScheduleParallel(TimeHandle);
+            }
+            
+            SystemHandle handle = state.WorldUnmanaged.GetExistingUnmanagedSystem<PropertyLerpSystem>();
+            ref PropertyLerpSystem system = ref state.WorldUnmanaged.GetUnsafeSystemRef<PropertyLerpSystem>(handle);
+            system.PreprocessHandle = state.Dependency;
+            system.BufferB = BufferB;
         }
 
         [BurstCompile]

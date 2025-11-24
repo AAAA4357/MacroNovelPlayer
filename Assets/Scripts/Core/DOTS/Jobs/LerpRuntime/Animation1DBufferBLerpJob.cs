@@ -7,14 +7,15 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithPresent(typeof(InterruptComponent))]
-    public partial struct Animation1DLerpJob : IJobEntity
+    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent), typeof(PipelineBufferBComponent))]
+    [WithNone(typeof(PipelineBufferAComponent))]
+    [WithPresent(typeof(InterruptComponent), typeof(PipelineBufferReadyComponent))]
+    public partial struct Animation1DBufferBLerpJob : IJobEntity
     {
         [BurstCompile]
-        public void Execute(DynamicBuffer<Animation1DComponent> animation1DBuffer, ref Property1DComponent property1DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent)
+        public void Execute(DynamicBuffer<Animation1DComponent> animation1DBuffer, ref Property1DComponent property1DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent, EnabledRefRO<PipelineBufferReadyComponent> readyComponent)
         {
-            if (interruptComponent.ValueRO) 
+            if (interruptComponent.ValueRO || readyComponent.ValueRO) 
             {
                 return;
             }

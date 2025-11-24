@@ -8,14 +8,15 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithPresent(typeof(InterruptComponent))]
-    public partial struct Animation2DLerpJob : IJobEntity
+    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent), typeof(PipelineBufferBComponent))]
+    [WithNone(typeof(PipelineBufferAComponent))]
+    [WithPresent(typeof(InterruptComponent), typeof(PipelineBufferReadyComponent))]
+    public partial struct Animation2DBufferBLerpJob : IJobEntity
     {
         [BurstCompile]
-        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent)
+        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent, EnabledRefRO<PipelineBufferReadyComponent> readyComponent)
         {
-            if (interruptComponent.ValueRO) 
+            if (interruptComponent.ValueRO || readyComponent.ValueRO) 
             {
                 return;
             }

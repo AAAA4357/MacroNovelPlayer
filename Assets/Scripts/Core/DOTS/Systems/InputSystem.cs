@@ -4,7 +4,6 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(TimeSystem))]
     partial struct InputSystem : ISystem
     {
         [BurstCompile]

@@ -9,13 +9,20 @@ using Unity.Jobs;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
+    [UpdateAfter(typeof(BakeSystem))]
     partial struct TimeSystem : ISystem, ISystemStartStop
     {
         public UnmanagedTimer timer;
 
+        public JobHandle LerpHandle;
+        public bool BufferB;
+
         bool resumeAllInterrupt;
         NativeArray<JobHandle> resumeJobs;
         NativeArray<JobHandle> setterJobs;
+
+        bool first;
+        float TotalTime;
         
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -27,6 +34,8 @@ namespace MNP.Core.DOTS.Systems
 
             timer.Initialize();
             timer.Reset();
+
+            first = false;
         }
 
         [BurstCompile]
@@ -39,22 +48,57 @@ namespace MNP.Core.DOTS.Systems
         public void OnUpdate(ref SystemState state)
         {
             timer.Stop();
-
             float elapsedSeconds = timer.GetElapsedSeconds();
+            TotalTime += elapsedSeconds;
 
-            if (resumeAllInterrupt)
+            LerpHandle.Complete();
+            if (!BufferB && first)
             {
-                state.Dependency = new ResumeAllInterruptJob().ScheduleParallel(state.Dependency);
-                state.CompleteDependency();
-                resumeAllInterrupt = false;
+                state.Dependency = new SetBufferAReadyJob().ScheduleParallel(state.Dependency);
+            }
+            else if (first)
+            {
+                state.Dependency = new SetBufferBReadyJob().ScheduleParallel(state.Dependency);
+            }
+            state.CompleteDependency();
+
+            BufferB = !BufferB;
+
+            if (!BufferB)
+            {
+                if (resumeAllInterrupt)
+                {
+                    state.Dependency = new ResumeAllInterruptBufferAJob().ScheduleParallel(state.Dependency);
+                    resumeAllInterrupt = false;
+                }
+                state.Dependency = new SetBufferADirtyJob().ScheduleParallel(state.Dependency);
+                TimeSetterBufferAJob setterJob = new()
+                {
+                    TargetValue = TotalTime
+                };
+                state.Dependency = setterJob.ScheduleParallel(state.Dependency);
+            }
+            else
+            {
+                if (resumeAllInterrupt)
+                {
+                    state.Dependency = new ResumeAllInterruptBufferBJob().ScheduleParallel(state.Dependency);
+                    resumeAllInterrupt = false;
+                }
+                state.Dependency = new SetBufferBDirtyJob().ScheduleParallel(state.Dependency);
+                TimeSetterBufferBJob setterJob = new()
+                {
+                    TimeValue = TotalTime
+                };
+                state.Dependency = setterJob.ScheduleParallel(state.Dependency);
             }
 
-            TimeSetterJob setterJob = new()
-            {
-                DeltaValue = elapsedSeconds
-            };
-            state.Dependency = setterJob.ScheduleParallel(state.Dependency);
-            state.CompleteDependency();
+            SystemHandle handle = state.WorldUnmanaged.GetExistingUnmanagedSystem<PreprocessingSystem>();
+            ref PreprocessingSystem system = ref state.WorldUnmanaged.GetUnsafeSystemRef<PreprocessingSystem>(handle);
+            system.TimeHandle = state.Dependency;
+            system.BufferB = BufferB;
+
+            first = true;
 
             timer.Start();
         }
@@ -62,6 +106,7 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnStopRunning(ref SystemState state)
         {
+            TotalTime = 0;
             timer.Stop();
         }
 

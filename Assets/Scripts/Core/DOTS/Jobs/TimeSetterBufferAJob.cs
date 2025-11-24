@@ -6,11 +6,12 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent))]
+    [WithAll(typeof(TimeEnabledComponent), typeof(PipelineBufferAComponent))]
+    [WithNone(typeof(PipelineBufferBComponent))]
     [WithPresent(typeof(InterruptComponent))]
-    public partial struct TimeSetterJob : IJobEntity
+    public partial struct TimeSetterBufferAJob : IJobEntity
     {
-        public float DeltaValue;
+        public float TargetValue;
 
         [BurstCompile]
         public void Execute(DynamicBuffer<InterruptTimeComponent> interruptTimeBuffer, ref TimeComponent timeComponent, EnabledRefRW<InterruptComponent> interruptComponent)
@@ -19,7 +20,7 @@ namespace MNP.Core.DOTS.Jobs
             {
                 return;
             }
-            timeComponent.Time += DeltaValue;
+            timeComponent.Time = TargetValue;
             for (int i = 0; i < interruptTimeBuffer.Length; i++)
             {
                 if (!interruptTimeBuffer[i].Interrupted &&

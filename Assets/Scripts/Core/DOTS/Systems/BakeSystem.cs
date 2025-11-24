@@ -71,6 +71,7 @@ namespace MNP.Core.DOTS.Systems
             property2DListComponent.Transform2DProperty = transform2DProperty;
             ecb.AddComponent(entity, new BakeReadyComponent());
         }
+
         private void SeperateCustom1DProperty2D(ManagedAnimationListComponent animationListComponent,
                                                 ManagedAnimation2DPropertyListComponent propertyListComponent,
                                                 RefAnimationTransform2DProperty refTransform2D,
@@ -78,21 +79,31 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty1D refValue = new();
                 Property1DComponent property1DComponent = new();
-                propertyListComponent.Property1DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property1DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property1DComponent);
-                    refValue.Value = property1DComponent.Value;
+                    ManagedAnimationProperty1DComponent managedProperty1DComponent = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property1DComponent);
+                    ecb.AddComponent(entityA, managedProperty1DComponent);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
+                }
+                Entity entityB = ecb.CreateEntity();
+                if (property.Type != PropertyType.Transform2DRotation)
+                {
+                    propertyListComponent.Property1DList.Add(property.ID, refValue);
                 }
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation1DComponent>(entity);
+                ecb.AddBuffer<Animation1DComponent>(entityA);
+                ecb.AddBuffer<Animation1DComponent>(entityB);
                 foreach (Animation1D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -113,17 +124,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -137,13 +151,29 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property1DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property1DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property1DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
 
                 if (property.Type == PropertyType.Transform2DRotation)
                 {
@@ -151,8 +181,11 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform2D
                     };
-                    ecb.AddComponent(entity, managedTransform2DComponent);
-                    ecb.AddComponent(entity, new Transform2DRotationComponent());
+                    ecb.AddComponent(entityA, managedTransform2DComponent);
+                    ecb.AddComponent(entityA, new Transform2DRotationComponent());
+
+                    ecb.AddComponent(entityB, managedTransform2DComponent);
+                    ecb.AddComponent(entityB, new Transform2DRotationComponent());
                 }
                 else
                 {
@@ -160,7 +193,8 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refValue
                     };
-                    ecb.AddComponent(entity, managedProperty1DComponent);
+                    ecb.AddComponent(entityA, managedProperty1DComponent);
+                    ecb.AddComponent(entityB, managedProperty1DComponent);
                 }
             }
         }
@@ -172,21 +206,31 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty2D refValue = new();
                 Property2DComponent property2DComponent = new();
-                propertyListComponent.Property2DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property2DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property2DComponent);
-                    refValue.Value = property2DComponent.Value;
+                    ManagedAnimationProperty2DComponent managedProperty2DComponent = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property2DComponent);
+                    ecb.AddComponent(entityA, managedProperty2DComponent);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
+                }
+                Entity entityB = ecb.CreateEntity();
+                if (property.Type != PropertyType.Transform2DPosition && property.Type != PropertyType.Transform2DScale)
+                {
+                    propertyListComponent.Property2DList.Add(property.ID, refValue);
                 }
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation2DComponent>(entity);
+                ecb.AddBuffer<Animation2DComponent>(entityA);
+                ecb.AddBuffer<Animation2DComponent>(entityB);
                 foreach (Animation2D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -209,17 +253,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -233,13 +280,29 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property2DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property2DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property2DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
                 
 
                 if (property.Type == PropertyType.Transform2DPosition)
@@ -248,8 +311,10 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform2D
                     };
-                    ecb.AddComponent(entity, managedTransform2DComponent);
-                    ecb.AddComponent(entity, new Transform2DPositionComponent());
+                    ecb.AddComponent(entityA, managedTransform2DComponent);
+                    ecb.AddComponent(entityA, new Transform2DPositionComponent());
+                    ecb.AddComponent(entityB, managedTransform2DComponent);
+                    ecb.AddComponent(entityB, new Transform2DPositionComponent());
                 }
                 else if (property.Type == PropertyType.Transform2DScale)
                 {
@@ -257,8 +322,10 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform2D
                     };
-                    ecb.AddComponent(entity, managedTransform2DComponent);
-                    ecb.AddComponent(entity, new Transform2DScaleComponent());
+                    ecb.AddComponent(entityA, managedTransform2DComponent);
+                    ecb.AddComponent(entityA, new Transform2DScaleComponent());
+                    ecb.AddComponent(entityB, managedTransform2DComponent);
+                    ecb.AddComponent(entityB, new Transform2DScaleComponent());
                 }
                 else
                 {
@@ -266,7 +333,8 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refValue
                     };
-                    ecb.AddComponent(entity, managedProperty2DComponent);
+                    ecb.AddComponent(entityA, managedProperty2DComponent);
+                    ecb.AddComponent(entityB, managedProperty2DComponent);
                 }
             }
         }
@@ -277,21 +345,27 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty3D refValue = new();
                 Property3DComponent property3DComponent = new();
-                propertyListComponent.Property3DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property3DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property3DComponent);
-                    refValue.Value = property3DComponent.Value;
+                    ManagedAnimationProperty3DComponent managedProperty3DComponent1 = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property3DComponent);
+                    ecb.AddComponent(entityA, managedProperty3DComponent1);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
                 }
+                Entity entityB = ecb.CreateEntity();
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation3DComponent>(entity);
+                ecb.AddBuffer<Animation3DComponent>(entityA);
+                ecb.AddBuffer<Animation3DComponent>(entityB);
                 foreach (Animation3D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -314,17 +388,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
                 ManagedAnimationProperty3DComponent managedProperty3DComponent = new()
@@ -342,14 +419,31 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property3DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, managedProperty3DComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property3DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, managedProperty3DComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property3DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, managedProperty3DComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
             }
         }
 
@@ -359,22 +453,29 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty4D refValue = new();
                 Property4DComponent property4DComponent = new();
-                propertyListComponent.Property4DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property4DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property4DComponent);
-                    refValue.Value = property4DComponent.Value;
+                    ManagedAnimationProperty4DComponent managedProperty4DComponent1 = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property4DComponent);
+                    ecb.AddComponent(entityA, managedProperty4DComponent1);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
                 }
+                Entity entityB = ecb.CreateEntity();
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation4DComponent>(entity);
-                ecb.AddBuffer<Animation4DBakeDataComponent>(entity);
+                ecb.AddBuffer<Animation4DComponent>(entityA);
+                ecb.AddBuffer<Animation4DComponent>(entityB);
+                ecb.AddBuffer<Animation4DBakeDataComponent>(entityA);
+                ecb.AddBuffer<Animation4DBakeDataComponent>(entityB);
                 int dataIndex = 0;
                 foreach (Animation4D animation in animationList)
                 {
@@ -415,23 +516,27 @@ namespace MNP.Core.DOTS.Systems
                             q01_1q12 = c,
                             q12_1q23 = d
                         };
-                        ecb.AppendToBuffer(entity, bakeDataComponent);
+                        ecb.AppendToBuffer(entityA, bakeDataComponent);
+                        ecb.AppendToBuffer(entityB, bakeDataComponent);
                         dataIndex++;
                     }
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
-                ManagedAnimationProperty4DComponent managedProperty3DComponent = new()
+                ManagedAnimationProperty4DComponent managedProperty4DComponent = new()
                 {
                     RefValue = refValue
                 };
@@ -446,14 +551,31 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property4DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, managedProperty3DComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property4DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, managedProperty4DComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property4DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, managedProperty4DComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
             }
         }
 
@@ -485,21 +607,27 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty1D refValue = new();
                 Property1DComponent property1DComponent = new();
-                propertyListComponent.Property1DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property1DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property1DComponent);
-                    refValue.Value = property1DComponent.Value;
+                    ManagedAnimationProperty1DComponent managedProperty1DComponent1 = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property1DComponent);
+                    ecb.AddComponent(entityA, managedProperty1DComponent1);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
                 }
+                Entity entityB = ecb.CreateEntity();
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation1DComponent>(entity);
+                ecb.AddBuffer<Animation1DComponent>(entityA);
+                ecb.AddBuffer<Animation1DComponent>(entityB);
                 foreach (Animation1D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -520,17 +648,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -548,14 +679,31 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property1DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, managedProperty1DComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property1DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, managedProperty1DComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property1DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, managedProperty1DComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
             }
         }
 
@@ -565,21 +713,27 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty2D refValue = new();
                 Property2DComponent property2DComponent = new();
-                propertyListComponent.Property2DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property2DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property2DComponent);
-                    refValue.Value = property2DComponent.Value;
+                    ManagedAnimationProperty2DComponent managedProperty2DComponent1 = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property2DComponent);
+                    ecb.AddComponent(entityA, managedProperty2DComponent1);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
                 }
+                Entity entityB = ecb.CreateEntity();
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation2DComponent>(entity);
+                ecb.AddBuffer<Animation2DComponent>(entityA);
+                ecb.AddBuffer<Animation2DComponent>(entityB);
                 foreach (Animation2D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -602,17 +756,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
                 ManagedAnimationProperty2DComponent managedProperty2DComponent = new()
@@ -630,14 +787,31 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property2DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, managedProperty2DComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property2DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, managedProperty2DComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property2DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, managedProperty2DComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
             }
         }
 
@@ -648,21 +822,31 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty3D refValue = new();
                 Property3DComponent property3DComponent = new();
-                propertyListComponent.Property3DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property3DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property3DComponent);
-                    refValue.Value = property3DComponent.Value;
+                    ManagedAnimationProperty3DComponent managedProperty3DComponent = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property3DComponent);
+                    ecb.AddComponent(entityA, managedProperty3DComponent);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
+                }
+                Entity entityB = ecb.CreateEntity();
+                if (property.Type != PropertyType.Transform3DPosition && property.Type != PropertyType.Transform3DScale)
+                {
+                    propertyListComponent.Property3DList.Add(property.ID, refValue);
                 }
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation3DComponent>(entity);
+                ecb.AddBuffer<Animation3DComponent>(entityA);
+                ecb.AddBuffer<Animation3DComponent>(entityB);
                 foreach (Animation3D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -685,17 +869,20 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -709,13 +896,29 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property3DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property3DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property3DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
 
                 if (property.Type == PropertyType.Transform3DPosition)
                 {
@@ -723,8 +926,10 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform3D
                     };
-                    ecb.AddComponent(entity, managedTransform3DComponent);
-                    ecb.AddComponent(entity, new Transform3DPositionComponent());
+                    ecb.AddComponent(entityA, managedTransform3DComponent);
+                    ecb.AddComponent(entityA, new Transform3DPositionComponent());
+                    ecb.AddComponent(entityB, managedTransform3DComponent);
+                    ecb.AddComponent(entityB, new Transform3DPositionComponent());
                 }
                 else if (property.Type == PropertyType.Transform3DScale)
                 {
@@ -732,8 +937,10 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform3D
                     };
-                    ecb.AddComponent(entity, managedTransform3DComponent);
-                    ecb.AddComponent(entity, new Transform3DScaleComponent());
+                    ecb.AddComponent(entityA, managedTransform3DComponent);
+                    ecb.AddComponent(entityA, new Transform3DScaleComponent());
+                    ecb.AddComponent(entityB, managedTransform3DComponent);
+                    ecb.AddComponent(entityB, new Transform3DScaleComponent());
                 }
                 else
                 {
@@ -741,7 +948,8 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refValue
                     };
-                    ecb.AddComponent(entity, managedProperty3DComponent);
+                    ecb.AddComponent(entityA, managedProperty3DComponent);
+                    ecb.AddComponent(entityB, managedProperty3DComponent);
                 }
             }
         }
@@ -753,22 +961,33 @@ namespace MNP.Core.DOTS.Systems
         {
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
-                Entity entity = ecb.CreateEntity();
+                Entity entityA = ecb.CreateEntity();
                 RefAnimationProperty4D refValue = new();
                 Property4DComponent property4DComponent = new();
-                propertyListComponent.Property4DList.Add(property.ID, refValue);
                 if (property.IsStatic)
                 {
                     property4DComponent.Value = property.StaticValue.Value;
-                    ecb.AddComponent(entity, property4DComponent);
-                    refValue.Value = property4DComponent.Value;
+                    ManagedAnimationProperty4DComponent managedProperty4DComponent = new()
+                    {
+                        RefValue = refValue
+                    };
+                    ecb.AddComponent(entityA, property4DComponent);
+                    ecb.AddComponent(entityA, managedProperty4DComponent);
+                    ecb.AddComponent(entityA, new InitializedPropertyComponent());
                     continue;
+                }
+                Entity entityB = ecb.CreateEntity();
+                if (property.Type != PropertyType.Transform3DPosition && property.Type != PropertyType.Transform3DScale)
+                {
+                    propertyListComponent.Property4DList.Add(property.ID, refValue);
                 }
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation4DComponent>(entity);
-                ecb.AddBuffer<Animation4DBakeDataComponent>(entity);
+                ecb.AddBuffer<Animation4DComponent>(entityA);
+                ecb.AddBuffer<Animation4DBakeDataComponent>(entityA);
+                ecb.AddBuffer<Animation4DComponent>(entityB);
+                ecb.AddBuffer<Animation4DBakeDataComponent>(entityB);
                 int dataIndex = 0;
                 foreach (Animation4D animation in animationList)
                 {
@@ -809,20 +1028,24 @@ namespace MNP.Core.DOTS.Systems
                             q01_1q12 = c,
                             q12_1q23 = d
                         };
-                        ecb.AppendToBuffer(entity, bakeDataComponent);
+                        ecb.AppendToBuffer(entityA, bakeDataComponent);
+                        ecb.AppendToBuffer(entityB, bakeDataComponent);
                         dataIndex++;
                     }
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
                 
-                ecb.AddBuffer<InterruptTimeComponent>(entity);
+                ecb.AddBuffer<InterruptTimeComponent>(entityA);
+                ecb.AddBuffer<InterruptTimeComponent>(entityB);
                 for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
                 {
                     InterruptTimeComponent component = new()
                     {
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
-                    ecb.AppendToBuffer(entity, component);
+                    ecb.AppendToBuffer(entityA, component);
+                    ecb.AppendToBuffer(entityB, component);
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -836,13 +1059,29 @@ namespace MNP.Core.DOTS.Systems
                     InterrputedTime = 0
                 };
 
-                ecb.AddComponent(entity, property4DComponent);
-                ecb.AddComponent(entity, propertyInfoComponent);
-                ecb.AddComponent(entity, timeComponent);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-                ecb.AddComponent(entity, new TimeEnabledComponent());
-                ecb.AddComponent(entity, new InterruptComponent());
-                ecb.SetComponentEnabled<InterruptComponent>(entity, false);
+                ecb.AddComponent(entityA, property4DComponent);
+                ecb.AddComponent(entityA, propertyInfoComponent);
+                ecb.AddComponent(entityA, timeComponent);
+                ecb.AddComponent(entityA, new LerpEnabledComponent());
+                ecb.AddComponent(entityA, new InitializedPropertyComponent());
+                ecb.AddComponent(entityA, new TimeEnabledComponent());
+                ecb.AddComponent(entityA, new InterruptComponent());
+                ecb.AddComponent(entityA, new PipelineBufferAComponent());
+                ecb.AddComponent(entityA, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityA, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityA, false);
+
+                ecb.AddComponent(entityB, property4DComponent);
+                ecb.AddComponent(entityB, propertyInfoComponent);
+                ecb.AddComponent(entityB, timeComponent);
+                ecb.AddComponent(entityB, new LerpEnabledComponent());
+                ecb.AddComponent(entityB, new InitializedPropertyComponent());
+                ecb.AddComponent(entityB, new TimeEnabledComponent());
+                ecb.AddComponent(entityB, new InterruptComponent());
+                ecb.AddComponent(entityB, new PipelineBufferBComponent());
+                ecb.AddComponent(entityB, new PipelineBufferReadyComponent());
+                ecb.SetComponentEnabled<InterruptComponent>(entityB, false);
+                ecb.SetComponentEnabled<PipelineBufferReadyComponent>(entityB, false);
                 
                 if (property.Type == PropertyType.Transform3DRotation)
                 {
@@ -850,8 +1089,10 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refTransform3D
                     };
-                    ecb.AddComponent(entity, managedTransform3DComponent);
-                    ecb.AddComponent(entity, new Transform3DRotationComponent());
+                    ecb.AddComponent(entityA, managedTransform3DComponent);
+                    ecb.AddComponent(entityA, new Transform3DRotationComponent());
+                    ecb.AddComponent(entityB, managedTransform3DComponent);
+                    ecb.AddComponent(entityB, new Transform3DRotationComponent());
                 }
                 else
                 {
@@ -859,7 +1100,8 @@ namespace MNP.Core.DOTS.Systems
                     {
                         RefValue = refValue
                     };
-                    ecb.AddComponent(entity, managedProperty3DComponent);
+                    ecb.AddComponent(entityA, managedProperty3DComponent);
+                    ecb.AddComponent(entityB, managedProperty3DComponent);
                 }
             }
         }

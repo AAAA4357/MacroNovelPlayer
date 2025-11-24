@@ -11,8 +11,9 @@ namespace MNP.Core.DOTS.Systems
     partial struct PropertyLerpSystem : ISystem
     {
         NativeArray<JobHandle> jobs;
-        JobHandle prevHandle;
-        bool hasPrevHandle;
+
+        public JobHandle PreprocessHandle;
+        public bool BufferB;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -23,17 +24,23 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            if (hasPrevHandle)
+            if (!BufferB)
             {
-                state.Dependency = prevHandle;
-                state.CompleteDependency();
+                jobs[0] = new Animation1DBufferALerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[1] = new Animation2DBufferALerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[2] = new Animation3DBufferALerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[3] = new Animation4DBufferALerpJob().ScheduleParallel(PreprocessHandle);
             }
-            jobs[0] = new Animation1DLerpJob().ScheduleParallel(state.Dependency);
-            jobs[1] = new Animation2DLerpJob().ScheduleParallel(state.Dependency);
-            jobs[2] = new Animation3DLerpJob().ScheduleParallel(state.Dependency);
-            jobs[3] = new Animation4DLerpJob().ScheduleParallel(state.Dependency);
-            prevHandle = JobHandle.CombineDependencies(jobs);
-            hasPrevHandle = true;
+            else
+            {
+                jobs[0] = new Animation1DBufferBLerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[1] = new Animation2DBufferBLerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[2] = new Animation3DBufferBLerpJob().ScheduleParallel(PreprocessHandle);
+                jobs[3] = new Animation4DBufferBLerpJob().ScheduleParallel(PreprocessHandle);
+            }
+            SystemHandle handle = state.WorldUnmanaged.GetExistingUnmanagedSystem<TimeSystem>();
+            ref TimeSystem system = ref state.WorldUnmanaged.GetUnsafeSystemRef<TimeSystem>(handle);
+            system.LerpHandle = JobHandle.CombineDependencies(jobs);
         }
 
         [BurstCompile]

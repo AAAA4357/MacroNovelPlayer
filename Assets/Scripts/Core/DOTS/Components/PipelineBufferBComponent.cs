@@ -4,5 +4,5 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct PiplineBufferBComponent : IComponentData { }
+    public struct PipelineBufferBComponent : IComponentData { }
 }

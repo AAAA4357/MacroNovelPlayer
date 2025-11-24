@@ -1,6 +1,8 @@
+using Unity.Burst;
 using Unity.Entities;
 
-public struct PiplineBufferAComponent : IComponentData
+namespace MNP.Core.DOTS.Components
 {
-    
+    [BurstCompile]
+    public struct PipelineBufferAComponent : IComponentData { }
 }
