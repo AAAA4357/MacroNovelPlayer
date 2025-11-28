@@ -14,8 +14,9 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
         public float2 Control1;
         //float4(4*4=16)*8=128, 7keys, 6segments
         public FixedList128Bytes<float4> EaseKeyframeList;
-        public bool Linear;
         public float StartTime;
         public float DurationTime;
+        public int LerpType;
+        public int BezierDataIndex;
     }
 }

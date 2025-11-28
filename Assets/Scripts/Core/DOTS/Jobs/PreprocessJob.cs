@@ -12,7 +12,7 @@ namespace MNP.Core.DOTS.Jobs
         public EntityCommandBuffer.ParallelWriter ecbWriter;
 
         [BurstCompile]
-        public void Execute(ref PropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent, in Entity entity, [ChunkIndexInQuery] int chunkIndexInQuery)
+        public void Execute(ref PropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent, in Entity entity, [EntityIndexInQuery] int entityIndexInQuery)
         {
             if (timeComponent.Time < propertyInfoComponent.StartTime ||
                 timeComponent.Time > propertyInfoComponent.EndTime)
@@ -21,7 +21,7 @@ namespace MNP.Core.DOTS.Jobs
                 {
                     return;
                 }
-                ecbWriter.RemoveComponent<LerpEnabledComponent>(chunkIndexInQuery, entity);
+                ecbWriter.RemoveComponent<LerpEnabledComponent>(entityIndexInQuery, entity);
                 propertyInfoComponent.LerpEnabled = false;
             }
             else
@@ -30,7 +30,7 @@ namespace MNP.Core.DOTS.Jobs
                 {
                     return;
                 }
-                ecbWriter.AddComponent<LerpEnabledComponent>(chunkIndexInQuery, entity);
+                ecbWriter.AddComponent<LerpEnabledComponent>(entityIndexInQuery, entity);
                 propertyInfoComponent.LerpEnabled = true;
             }
         }

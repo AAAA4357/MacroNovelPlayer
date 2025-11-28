@@ -11,8 +11,6 @@ namespace MNP.Core.DOTS.Systems
     partial struct PropertyLerpSystem : ISystem
     {
         NativeArray<JobHandle> jobs;
-        JobHandle prevHandle;
-        bool hasPrevHandle;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -23,17 +21,12 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            if (hasPrevHandle)
-            {
-                state.Dependency = prevHandle;
-                state.CompleteDependency();
-            }
             jobs[0] = new Animation1DLerpJob().ScheduleParallel(state.Dependency);
             jobs[1] = new Animation2DLerpJob().ScheduleParallel(state.Dependency);
             jobs[2] = new Animation3DLerpJob().ScheduleParallel(state.Dependency);
             jobs[3] = new Animation4DLerpJob().ScheduleParallel(state.Dependency);
-            prevHandle = JobHandle.CombineDependencies(jobs);
-            hasPrevHandle = true;
+            state.Dependency = JobHandle.CombineDependencies(jobs);
+            state.CompleteDependency();
         }
 
         [BurstCompile]

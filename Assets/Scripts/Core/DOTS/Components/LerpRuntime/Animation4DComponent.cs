@@ -17,6 +17,7 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
         public float StartTime;
         public float DurationTime;
         public int LerpType;
-        public int DataIndex;
+        public int BezierDataIndex;
+        public int SquadDataIndex;
     }
 }

@@ -9,6 +9,7 @@ using Unity.Jobs;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
+    [UpdateAfter(typeof(BakeSystem))]
     partial struct TimeSystem : ISystem, ISystemStartStop
     {
         public UnmanagedTimer timer;

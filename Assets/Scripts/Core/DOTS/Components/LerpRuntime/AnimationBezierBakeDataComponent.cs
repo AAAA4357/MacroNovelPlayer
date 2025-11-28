@@ -1,13 +1,13 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace MNP.Core.DOTS.Components.LerpRuntime
 {
     [BurstCompile]
-    public struct Property4DComponent : IComponentData
+    public struct AnimationBezierBakeDataComponent : IBufferElementData
     {
-        public float4 Value;
-        public int Index;
+        public float BezierLength;
     }
 }

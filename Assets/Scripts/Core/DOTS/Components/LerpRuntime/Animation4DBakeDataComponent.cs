@@ -1,12 +1,11 @@
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace MNP.Core.DOTS.Components.LerpRuntime
 {
     [BurstCompile]
-    public struct Animation4DBakeDataComponent : IBufferElementData
+    public struct AnimationSquadBakeDataComponent : IBufferElementData
     {
         public float4 q0;       //q0
         public float4 q01;      //q01

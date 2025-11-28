@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
+using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MNP.Core.DOTS.Systems
@@ -24,18 +26,27 @@ namespace MNP.Core.DOTS.Systems
 
         protected override void OnUpdate()
         {
+            SystemHandle handle = World.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
+            ref PostprocessingSystem system = ref World.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(handle);
             MaterialPropertyBlock propertyBlock = new();
-            Entities.ForEach((in ElementComponent elementComponent) =>
+            foreach (var elementComponent in SystemAPI.Query<RefRO<ElementComponent>>())
             {
-                switch (elementComponent.ObjectType)
+                float4 position = system.PropertyArray[elementComponent.ValueRO.TransformPositionIndex];
+                float4 rotation = system.PropertyArray[elementComponent.ValueRO.TransformRotationIndex];
+                float4 scale = system.PropertyArray[elementComponent.ValueRO.TransformScaleIndex];
+                Matrix4x4 matrix;
+                switch (elementComponent.ValueRO.ObjectType)
                 {
                     case ObjectType.Object2D:
-                        if (!elementComponent.IsBlocked)
+                        if (!elementComponent.ValueRO.IsBlocked)
                         {
-                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
+                            matrix = Matrix4x4.TRS((Vector2)position.xy, 
+                                                   Quaternion.Euler(0, 0, rotation.x), 
+                                                   (Vector2)scale.xy);
+                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.ValueRO.TextureID]);
                             Graphics.DrawMesh(
                                 Mesh2D,
-                                elementComponent.TransformMatrix,
+                                matrix,
                                 Material,
                                 0,                               // Layer
                                 null,                            // Camera (null = 主相机)
@@ -46,12 +57,15 @@ namespace MNP.Core.DOTS.Systems
                         }
                         break;
                     case ObjectType.Object3D:
-                        if (!elementComponent.IsBlocked)
+                        if (!elementComponent.ValueRO.IsBlocked)
                         {
-                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.TextureID]);
+                            matrix = Matrix4x4.TRS(position.xyz, 
+                                                   new Quaternion(rotation.x, rotation.y, rotation.z, rotation.w), 
+                                                   scale.xyz);
+                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.ValueRO.TextureID]);
                             Graphics.DrawMesh(
                                 Mesh3D,
-                                elementComponent.TransformMatrix,
+                                matrix,
                                 Material,
                                 0,                               // Layer
                                 null,                            // Camera (null = 主相机)
@@ -64,7 +78,7 @@ namespace MNP.Core.DOTS.Systems
                     case ObjectType.Text:
                         break;
                 }
-            }).WithoutBurst().Run();
+            }
         }
         
         protected override void OnDestroy()

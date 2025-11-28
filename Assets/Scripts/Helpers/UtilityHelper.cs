@@ -14,9 +14,19 @@ namespace MNP.Helpers
         public const string Transorm3DRotationID = "Transform3D_Rotation";
         public const string Transorm3DScaleID = "Transform3D_Scale";
 
-        public const int Quaternion_LinearLerp = 0;
-        public const int Quaternion_LinearSLerp = 1;
-        public const int Quaternion_PathLerp = 2;
+        public const int Float2_LinearLerp = 0;
+        public const int Float2_BezierLerp = 1;
+        public const int Float2_AverageBezierLerp = 2;
+
+        public const int Float3_LinearLerp = 0;
+        public const int Float3_BezierLerp = 1;
+        public const int Float3_AverageBezierLerp = 2;
+
+        public const int Float4_LinearLerp = 0;
+        public const int Float4_LinearSLerp = 1;
+        public const int Float4_BezierLerp = 2;
+        public const int Float4_AverageBezierLerp = 3;
+        public const int Float4_SquadLerp = 4;
 
         public const float InterruptTorloance = 0.005f;
 

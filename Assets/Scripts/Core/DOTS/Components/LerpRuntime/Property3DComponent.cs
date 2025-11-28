@@ -8,5 +8,6 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     public struct Property3DComponent : IComponentData
     {
         public float3 Value;
+        public int Index;
     }
 }
