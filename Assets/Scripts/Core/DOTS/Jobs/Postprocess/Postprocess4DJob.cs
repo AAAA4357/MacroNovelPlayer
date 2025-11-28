@@ -15,7 +15,7 @@ namespace MNP.Core.DOTS.Jobs
         [WriteOnly] public NativeArray<float4> OutputArray;
 
         [BurstCompile]
-        public void Execute(in Property1DComponent property4DComponent)
+        public void Execute(in Property4DComponent property4DComponent)
         {
             OutputArray[property4DComponent.Index] = property4DComponent.Value;
         }

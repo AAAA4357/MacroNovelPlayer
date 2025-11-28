@@ -1,6 +1,7 @@
 using MNP.Core.DataStruct;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace MNP.Core.DOTS.Components
 {
@@ -14,5 +15,6 @@ namespace MNP.Core.DOTS.Components
         public int TransformPositionIndex;
         public int TransformRotationIndex;
         public int TransformScaleIndex;
+        public float4x4 TransformMatrix;
     }
 }

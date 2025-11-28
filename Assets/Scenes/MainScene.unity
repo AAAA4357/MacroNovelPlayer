@@ -408,8 +408,8 @@ MonoBehaviour:
   Material: {fileID: 2100000, guid: 89e3e0fa8e500a24a8645067f944288a, type: 2}
   Mesh2D: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   Mesh3D: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  testCount2D: 10000
-  testCount3D: 0
+  testCount2D: 1000
+  testCount3D: 200
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

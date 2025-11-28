@@ -31,6 +31,14 @@ namespace MNP.Core.DOTS.Systems
             {
                 OutputArray = PropertyArray
             }.ScheduleParallel(state.Dependency);
+            state.Dependency = new PostprocessTransform2DJob()
+            {
+                InputArray = PropertyArray
+            }.ScheduleParallel(state.Dependency);
+            state.Dependency = new PostprocessTransform3DJob()
+            {
+                InputArray = PropertyArray
+            }.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
         }
     }

@@ -633,7 +633,7 @@ namespace MNP.Core.DOTS.Systems
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
-                ecb.AddBuffer<Animation2DComponent>(entity);
+                ecb.AddBuffer<Animation3DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
                 foreach (Animation3D animation in animationList)
                 {
