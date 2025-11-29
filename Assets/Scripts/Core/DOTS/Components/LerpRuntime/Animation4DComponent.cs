@@ -1,3 +1,4 @@
+using MNP.Core.DataStruct;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -16,7 +17,7 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
         public FixedList128Bytes<float4> EaseKeyframeList;
         public float StartTime;
         public float DurationTime;
-        public int LerpType;
+        public Float4LerpType LerpType;
         public int BezierDataIndex;
         public int SquadDataIndex;
     }

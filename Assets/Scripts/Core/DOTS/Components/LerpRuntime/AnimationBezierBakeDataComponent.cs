@@ -8,6 +8,7 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     [BurstCompile]
     public struct AnimationBezierBakeDataComponent : IBufferElementData
     {
-        public float BezierLength;
+        //float2(4*2=8)*16=128, 15keys, 14segments
+        public FixedList128Bytes<float2> BezierLengthMap;
     }
 }

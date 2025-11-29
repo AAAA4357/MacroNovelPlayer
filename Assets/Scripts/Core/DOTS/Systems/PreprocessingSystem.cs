@@ -7,7 +7,7 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(InputSystem))]
+    [UpdateAfter(typeof(TimeSystem))]
     partial struct PreprocessingSystem : ISystem
     {
         [BurstCompile]

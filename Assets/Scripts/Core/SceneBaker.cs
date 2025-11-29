@@ -10,22 +10,24 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace MNP.Core.DOTS.Systems
+namespace MNP.Core
 {
-    [UpdateInGroup(typeof(MNPSystemGroup))]
-    partial class BakeSystem : SystemBase
+    /*
+    partial class SceneBaker
     {
         int counter;
 
-        protected override void OnCreate()
+        protected void OnCreate()
         {
             counter = 0;
         }
 
-        protected override void OnUpdate()
+        protected void OnUpdate()
         {
+            World world = World.DefaultGameObjectInjectionWorld;
             EntityCommandBuffer ecb = new(Allocator.Temp);
-            Entities.WithNone<InitializedPropertyComponent>().ForEach((ref ElementComponent element, in Entity entity, in ManagedAnimationListComponent animation) =>
+            
+            foreach ((elementComponent, entity) in )
             {
                 switch (animation.ObjectType)
                 {
@@ -162,6 +164,7 @@ namespace MNP.Core.DOTS.Systems
 
                 ecb.AddBuffer<Animation2DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
+                int dataIndex = 0;
                 foreach (Animation2D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -174,15 +177,6 @@ namespace MNP.Core.DOTS.Systems
                         }
                         easeList.Add(new(animation.EaseKeyframeList[i].KeyTime, animation.EaseKeyframeList[i].Value, animation.EaseKeyframeList[i].InTan, animation.EaseKeyframeList[i].OutTan));
                     }
-                    if (animation.LerpType == UtilityHelper.Float2_AverageBezierLerp)
-                    {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
-                        AnimationBezierBakeDataComponent bakeDataComponent = new()
-                        {
-                            BezierLength = curveLength
-                        };
-                        ecb.AppendToBuffer(entity, bakeDataComponent);
-                    }
                     Animation2DComponent component = new()
                     {
                         StartValue = animation.StartValue,
@@ -192,8 +186,37 @@ namespace MNP.Core.DOTS.Systems
                         EaseKeyframeList = easeList,
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime,
-                        LerpType = animation.LerpType
+                        LerpType = animation.LerpType,
+                        BezierDataIndex = dataIndex
                     };
+                    if (animation.LerpType == Float2LerpType.AverageBezier)
+                    {
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
+                        AnimationBezierBakeDataComponent bakeDataComponent = new()
+                        {
+                            BezierLengthMap = lengthMap
+                        };
+                        ecb.AppendToBuffer(entity, bakeDataComponent);
+                        dataIndex++;
+                    }
                     ecb.AppendToBuffer(entity, component);
                 }
                 
@@ -261,6 +284,7 @@ namespace MNP.Core.DOTS.Systems
 
                 ecb.AddBuffer<Animation3DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
+                int dataIndex = 0;
                 foreach (Animation3D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -273,15 +297,6 @@ namespace MNP.Core.DOTS.Systems
                         }
                         easeList.Add(new(animation.EaseKeyframeList[i].KeyTime, animation.EaseKeyframeList[i].Value, animation.EaseKeyframeList[i].InTan, animation.EaseKeyframeList[i].OutTan));
                     }
-                    if (animation.LerpType == UtilityHelper.Float3_AverageBezierLerp)
-                    {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
-                        AnimationBezierBakeDataComponent bakeDataComponent = new()
-                        {
-                            BezierLength = curveLength
-                        };
-                        ecb.AppendToBuffer(entity, bakeDataComponent);
-                    }
                     Animation3DComponent component = new()
                     {
                         StartValue = animation.StartValue,
@@ -291,8 +306,37 @@ namespace MNP.Core.DOTS.Systems
                         EaseKeyframeList = easeList,
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime,
-                        LerpType = animation.LerpType
+                        LerpType = animation.LerpType,
+                        BezierDataIndex = dataIndex
                     };
+                    if (animation.LerpType == Float3LerpType.AverageBezier)
+                    {
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
+                        AnimationBezierBakeDataComponent bakeDataComponent = new()
+                        {
+                            BezierLengthMap = lengthMap
+                        };
+                        ecb.AppendToBuffer(entity, bakeDataComponent);
+                        dataIndex++;
+                    }
                     ecb.AppendToBuffer(entity, component);
                 }
                 
@@ -349,7 +393,8 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddBuffer<Animation4DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
                 ecb.AddBuffer<AnimationSquadBakeDataComponent>(entity);
-                int dataIndex = 0;
+                int bezierDataIndex = 0;
+                int squadDataIndex = 0;
                 foreach (Animation4D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -372,18 +417,38 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime,
                         LerpType = animation.LerpType,
-                        SquadDataIndex = dataIndex
+                        BezierDataIndex = bezierDataIndex,
+                        SquadDataIndex = squadDataIndex
                     };
-                    if (animation.LerpType == UtilityHelper.Float4_AverageBezierLerp)
+                    if (animation.LerpType == Float4LerpType.AverageBezier)
                     {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
                         AnimationBezierBakeDataComponent bakeDataComponent = new()
                         {
-                            BezierLength = curveLength
+                            BezierLengthMap = lengthMap
                         };
                         ecb.AppendToBuffer(entity, bakeDataComponent);
+                        bezierDataIndex++;
                     }
-                    else if (animation.LerpType == UtilityHelper.Float4_SquadLerp)
+                    else if (animation.LerpType == Float4LerpType.Squad)
                     {
                         float4 q12 = QuaternionHelper.Mul(animation.Control0Value.Inverse(), animation.Control1Value);
                         float4 q23 = QuaternionHelper.Mul(animation.Control1Value.Inverse(), animation.EndValue);
@@ -399,7 +464,7 @@ namespace MNP.Core.DOTS.Systems
                             q12_1q23 = d
                         };
                         ecb.AppendToBuffer(entity, bakeDataComponent);
-                        dataIndex++;
+                        squadDataIndex++;
                     }
                     ecb.AppendToBuffer(entity, component);
                 }
@@ -547,6 +612,7 @@ namespace MNP.Core.DOTS.Systems
 
                 ecb.AddBuffer<Animation2DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
+                int dataIndex = 0;
                 foreach (Animation2D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -559,14 +625,33 @@ namespace MNP.Core.DOTS.Systems
                         }
                         easeList.Add(new(animation.EaseKeyframeList[i].KeyTime, animation.EaseKeyframeList[i].Value, animation.EaseKeyframeList[i].InTan, animation.EaseKeyframeList[i].OutTan));
                     }
-                    if (animation.LerpType == UtilityHelper.Float2_AverageBezierLerp)
+                    if (animation.LerpType == Float2LerpType.AverageBezier)
                     {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter2D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
                         AnimationBezierBakeDataComponent bakeDataComponent = new()
                         {
-                            BezierLength = curveLength
+                            BezierLengthMap = lengthMap
                         };
                         ecb.AppendToBuffer(entity, bakeDataComponent);
+                        dataIndex++;
                     }
                     Animation2DComponent component = new()
                     {
@@ -635,6 +720,7 @@ namespace MNP.Core.DOTS.Systems
 
                 ecb.AddBuffer<Animation3DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
+                int dataIndex = 0;
                 foreach (Animation3D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -647,14 +733,33 @@ namespace MNP.Core.DOTS.Systems
                         }
                         easeList.Add(new(animation.EaseKeyframeList[i].KeyTime, animation.EaseKeyframeList[i].Value, animation.EaseKeyframeList[i].InTan, animation.EaseKeyframeList[i].OutTan));
                     }
-                    if (animation.LerpType == UtilityHelper.Float3_AverageBezierLerp)
+                    if (animation.LerpType == Float3LerpType.AverageBezier)
                     {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter3D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
                         AnimationBezierBakeDataComponent bakeDataComponent = new()
                         {
-                            BezierLength = curveLength
+                            BezierLengthMap = lengthMap
                         };
                         ecb.AppendToBuffer(entity, bakeDataComponent);
+                        dataIndex++;
                     }
                     Animation3DComponent component = new()
                     {
@@ -735,7 +840,8 @@ namespace MNP.Core.DOTS.Systems
                 ecb.AddBuffer<Animation4DComponent>(entity);
                 ecb.AddBuffer<AnimationBezierBakeDataComponent>(entity);
                 ecb.AddBuffer<AnimationSquadBakeDataComponent>(entity);
-                int dataIndex = 0;
+                int bezierDataIndex = 0;
+                int squadDataIndex = 0;
                 foreach (Animation4D animation in animationList)
                 {
                     FixedList128Bytes<float4> easeList = new();
@@ -748,15 +854,6 @@ namespace MNP.Core.DOTS.Systems
                         }
                         easeList.Add(new(animation.EaseKeyframeList[i].KeyTime, animation.EaseKeyframeList[i].Value, animation.EaseKeyframeList[i].InTan, animation.EaseKeyframeList[i].OutTan));
                     }
-                    if (animation.LerpType == UtilityHelper.Float4_AverageBezierLerp)
-                    {
-                        float curveLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
-                        AnimationBezierBakeDataComponent bakeDataComponent = new()
-                        {
-                            BezierLength = curveLength
-                        };
-                        ecb.AppendToBuffer(entity, bakeDataComponent);
-                    }
                     Animation4DComponent component = new()
                     {
                         StartValue = animation.StartValue,
@@ -767,9 +864,38 @@ namespace MNP.Core.DOTS.Systems
                         StartTime = animation.StartTime,
                         DurationTime = animation.DurationTime,
                         LerpType = animation.LerpType,
-                        SquadDataIndex = dataIndex
+                        BezierDataIndex = bezierDataIndex,
+                        SquadDataIndex = squadDataIndex
                     };
-                    if (animation.LerpType == UtilityHelper.Float4_SquadLerp)
+                    if (animation.LerpType == Float4LerpType.AverageBezier)
+                    {
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
+                        AnimationBezierBakeDataComponent bakeDataComponent = new()
+                        {
+                            BezierLengthMap = lengthMap
+                        };
+                        ecb.AppendToBuffer(entity, bakeDataComponent);
+                        bezierDataIndex++;
+                    }
+                    else if (animation.LerpType == Float4LerpType.Squad)
                     {
                         float4 q12 = QuaternionHelper.Mul(animation.Control0Value.Inverse(), animation.Control1Value);
                         float4 q23 = QuaternionHelper.Mul(animation.Control1Value.Inverse(), animation.EndValue);
@@ -785,7 +911,7 @@ namespace MNP.Core.DOTS.Systems
                             q12_1q23 = d
                         };
                         ecb.AppendToBuffer(entity, bakeDataComponent);
-                        dataIndex++;
+                        squadDataIndex++;
                     }
                     ecb.AppendToBuffer(entity, component);
                 }
@@ -829,4 +955,5 @@ namespace MNP.Core.DOTS.Systems
 
         #endregion
     }
+    */
 }

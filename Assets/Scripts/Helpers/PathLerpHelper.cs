@@ -1,4 +1,5 @@
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace MNP.Helpers
@@ -76,27 +77,36 @@ namespace MNP.Helpers
         }
         
         [BurstCompile]
-        public static float2 GetAverageBezierPoint2D(in float2 P0, in float2 P1, in float2 P2, in float2 P3, float length, float t)
+        public static float2 GetAverageBezierPoint2D(in float2 P0, in float2 P1, in float2 P2, in float2 P3, in FixedList128Bytes<float2> lengthMap, float t)
         {
-            float tLength = GetLengthAtParameter2D(P0, P1, P2, P3, 0, t);
-            float fixedT = tLength / length;
-            return GetBezierPoint2D(P0, P1, P2, P3, fixedT);
+            UtilityHelper.GetFloorIndexInNativeContainer(lengthMap, x => x.x, t, out int mapIndex);
+            float2 start = lengthMap[mapIndex];
+            float2 end = lengthMap[mapIndex + 1];
+            float delta = end.y - start.y;
+            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+            return GetBezierPoint2D(P0, P1, P2, P3, averageT);
         }
         
         [BurstCompile]
-        public static float3 GetAverageBezierPoint3D(in float3 P0, in float3 P1, in float3 P2, in float3 P3, float length, float t)
+        public static float3 GetAverageBezierPoint3D(in float3 P0, in float3 P1, in float3 P2, in float3 P3, in FixedList128Bytes<float2> lengthMap, float t)
         {
-            float tLength = GetLengthAtParameter3D(P0, P1, P2, P3, 0, t);
-            float fixedT = tLength / length;
-            return GetBezierPoint3D(P0, P1, P2, P3, fixedT);
+            UtilityHelper.GetFloorIndexInNativeContainer(lengthMap, x => x.y, t, out int mapIndex);
+            float2 start = lengthMap[mapIndex];
+            float2 end = lengthMap[mapIndex + 1];
+            float delta = end.y - start.y;
+            float averageT = start.y + (t - start.x) * delta;
+            return GetBezierPoint3D(P0, P1, P2, P3, averageT);
         }
         
         [BurstCompile]
-        public static float4 GetAverageBezierPoint4D(in float4 P0, in float4 P1, in float4 P2, in float4 P3, float length, float t)
+        public static float4 GetAverageBezierPoint4D(in float4 P0, in float4 P1, in float4 P2, in float4 P3, in FixedList128Bytes<float2> lengthMap, float t)
         {
-            float tLength = GetLengthAtParameter4D(P0, P1, P2, P3, 0, t);
-            float fixedT = tLength / length;
-            return GetBezierPoint4D(P0, P1, P2, P3, fixedT);
+            UtilityHelper.GetFloorIndexInNativeContainer(lengthMap, x => x.y, t, out int mapIndex);
+            float2 start = lengthMap[mapIndex];
+            float2 end = lengthMap[mapIndex + 1];
+            float delta = end.y - start.y;
+            float averageT = start.y + (t - start.x) * delta;
+            return GetBezierPoint4D(P0, P1, P2, P3, averageT);
         }
         
         [BurstCompile]

@@ -9,10 +9,12 @@ using Unity.Jobs;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    [UpdateAfter(typeof(BakeSystem))]
-    partial struct TimeSystem : ISystem, ISystemStartStop
+    [UpdateAfter(typeof(InputSystem))]
+    partial struct TimeSystem : ISystem
     {
         public UnmanagedTimer timer;
+
+        bool startTimer;
 
         bool resumeAllInterrupt;
         NativeArray<JobHandle> resumeJobs;
@@ -31,12 +33,6 @@ namespace MNP.Core.DOTS.Systems
         }
 
         [BurstCompile]
-        public void OnStartRunning(ref SystemState state)
-        {
-            timer.Start();
-        }
-
-        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             timer.Stop();
@@ -50,20 +46,17 @@ namespace MNP.Core.DOTS.Systems
                 resumeAllInterrupt = false;
             }
 
-            TimeSetterJob setterJob = new()
+            TimeDeltaSetterJob setterJob = new()
             {
                 DeltaValue = elapsedSeconds
             };
             state.Dependency = setterJob.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
 
-            timer.Start();
-        }
-
-        [BurstCompile]
-        public void OnStopRunning(ref SystemState state)
-        {
-            timer.Stop();
+            if (startTimer)
+            {
+                timer.Start();
+            }
         }
 
         [BurstCompile]
@@ -85,6 +78,16 @@ namespace MNP.Core.DOTS.Systems
         public void ResumeAll()
         {
             resumeAllInterrupt = true;
+        }
+
+        public void StartTime()
+        {
+            startTimer = true;
+        }
+
+        public void StopTime()
+        {
+            startTimer = false;
         }
     }
 }

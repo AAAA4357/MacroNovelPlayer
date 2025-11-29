@@ -1,3 +1,4 @@
+using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Helpers;
@@ -21,23 +22,22 @@ namespace MNP.Core.DOTS.Jobs
             }
             UtilityHelper.GetFloorIndexInBufferWithLength(animation4DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation4DBuffer[animationIndex].EaseKeyframeList, fixedT);
-            int lerpType = animation4DBuffer[animationIndex].LerpType;
             float4 result;
-            switch (lerpType)
+            switch (animation4DBuffer[animationIndex].LerpType)
             {
-                case UtilityHelper.Float4_LinearLerp:
+                case Float4LerpType.Linear:
                     result = PathLerpHelper.Lerp4DLinear(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].EndValue, ease);
                     break;
-                case UtilityHelper.Float4_LinearSLerp:
+                case Float4LerpType.SLinear:
                     result = PathLerpHelper.SLerp4DLinear(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].EndValue, ease);
                     break;
-                case UtilityHelper.Float4_BezierLerp:
+                case Float4LerpType.Bezier:
                     result = PathLerpHelper.GetBezierPoint4D(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].Control0, animation4DBuffer[animationIndex].Control1, animation4DBuffer[animationIndex].EndValue, ease);
                     break;
-                case UtilityHelper.Float4_AverageBezierLerp:
-                    result = PathLerpHelper.GetAverageBezierPoint4D(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].Control0, animation4DBuffer[animationIndex].Control1, animation4DBuffer[animationIndex].EndValue, bezierDataBuffer[animation4DBuffer[animationIndex].BezierDataIndex].BezierLength, ease);
+                case Float4LerpType.AverageBezier:
+                    result = PathLerpHelper.GetAverageBezierPoint4D(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].Control0, animation4DBuffer[animationIndex].Control1, animation4DBuffer[animationIndex].EndValue, bezierDataBuffer[animation4DBuffer[animationIndex].BezierDataIndex].BezierLengthMap, ease);
                     break;
-                case UtilityHelper.Float4_SquadLerp:
+                case Float4LerpType.Squad:
                     int index = animation4DBuffer[animationIndex].SquadDataIndex;
                     result = PathLerpHelper.GetSquadPoint4D(squadDataBuffer[index].q0, squadDataBuffer[index].q01, squadDataBuffer[index].q01_1q12, squadDataBuffer[index].q12_1q23, ease);
                     break;

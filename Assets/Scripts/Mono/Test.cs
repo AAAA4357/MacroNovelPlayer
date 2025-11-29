@@ -291,7 +291,7 @@ namespace MNP.Mono
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
                             Enabled = true,
-                            LerpType = UtilityHelper.Float2_BezierLerp
+                            LerpType = Float2LerpType.AverageBezier
                         });
                     }
                     else
@@ -306,7 +306,7 @@ namespace MNP.Mono
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
                             Enabled = true,
-                            LerpType = UtilityHelper.Float2_BezierLerp
+                            LerpType = Float2LerpType.AverageBezier
                         });
                     }
                 }
@@ -335,7 +335,7 @@ namespace MNP.Mono
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
                             Enabled = true,
-                            LerpType = UtilityHelper.Float3_BezierLerp
+                            LerpType = Float3LerpType.AverageBezier
                         });
                     }
                     else
@@ -350,7 +350,7 @@ namespace MNP.Mono
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
                             Enabled = true,
-                            LerpType = UtilityHelper.Float3_BezierLerp
+                            LerpType = Float3LerpType.AverageBezier
                         });
                     }
                 }
@@ -378,7 +378,7 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
-                            LerpType = UtilityHelper.Float4_BezierLerp,
+                            LerpType = Float4LerpType.Squad,
                             Enabled = true
                         });
                     }
@@ -393,7 +393,7 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
-                            LerpType = UtilityHelper.Float4_BezierLerp,
+                            LerpType = Float4LerpType.Squad,
                             Enabled = true
                         });
                     }

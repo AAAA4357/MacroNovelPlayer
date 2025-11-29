@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace MNP.Helpers
@@ -13,20 +16,6 @@ namespace MNP.Helpers
         public const string Transorm3DPositionID = "Transform3D_Position";
         public const string Transorm3DRotationID = "Transform3D_Rotation";
         public const string Transorm3DScaleID = "Transform3D_Scale";
-
-        public const int Float2_LinearLerp = 0;
-        public const int Float2_BezierLerp = 1;
-        public const int Float2_AverageBezierLerp = 2;
-
-        public const int Float3_LinearLerp = 0;
-        public const int Float3_BezierLerp = 1;
-        public const int Float3_AverageBezierLerp = 2;
-
-        public const int Float4_LinearLerp = 0;
-        public const int Float4_LinearSLerp = 1;
-        public const int Float4_BezierLerp = 2;
-        public const int Float4_AverageBezierLerp = 3;
-        public const int Float4_SquadLerp = 4;
 
         public const float InterruptTorloance = 0.005f;
 
@@ -53,6 +42,51 @@ namespace MNP.Helpers
             resultIndex = index;
             float duration = lengthConverter.Invoke(valueBuffer[index]);
             fixedT = (referenceValue - startConverter.Invoke(valueBuffer[index])) / duration;
+        }
+
+        [BurstCompile]
+        public static void GetFloorIndexInNativeContainer<T>(in INativeList<T> valueContainer, Func<T, float> converter, float referenceValue, out int resultIndex) where T : unmanaged
+        {
+            int index = 0;
+            for (int i = 1; i < valueContainer.Length; i++)
+            {
+                if (referenceValue.CompareTo(converter.Invoke(valueContainer[i])) < 0)
+                {
+                    index = i - 1;
+                    break;
+                }
+                else
+                {
+                    if (i >= valueContainer.Length - 2)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            resultIndex = index;
+        }
+
+        public static void GetFloorIndexInContainer<T>(IList<T> valueContainer, Func<T, float> converter, float referenceValue, out int resultIndex)
+        {
+            int index = 0;
+            for (int i = 1; i < valueContainer.Count; i++)
+            {
+                if (referenceValue.CompareTo(converter.Invoke(valueContainer[i])) < 0)
+                {
+                    index = i - 1;
+                    break;
+                }
+                else
+                {
+                    if (i >= valueContainer.Count - 2)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            resultIndex = index;
         }
     }
 }

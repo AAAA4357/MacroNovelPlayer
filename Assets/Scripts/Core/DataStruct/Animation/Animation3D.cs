@@ -13,6 +13,6 @@ namespace MNP.Core.DataStruct.Animation
         public float StartTime;
         public float DurationTime;
         public bool Enabled;
-        public int LerpType;
+        public Float3LerpType LerpType;
     }
 }
