@@ -1,8 +1,6 @@
 using MNP.Core.DOTS.Jobs;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 
 namespace MNP.Core.DOTS.Systems
 {

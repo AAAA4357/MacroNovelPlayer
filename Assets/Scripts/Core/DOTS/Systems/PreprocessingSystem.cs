@@ -1,7 +1,6 @@
 using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Jobs;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Entities;
 
 namespace MNP.Core.DOTS.Systems
@@ -19,21 +18,9 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            EntityCommandBuffer ecb = new(Allocator.TempJob);
-            PreprocessJob job = new()
-            {
-                ecbWriter = ecb.AsParallelWriter()
-            };
+            PreprocessJob job = new();
             state.Dependency = job.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
-        }
-
-        [BurstCompile]
-        public void OnDestroy(ref SystemState state)
-        {
-
         }
     }
 }

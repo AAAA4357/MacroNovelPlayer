@@ -4,7 +4,6 @@ using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace MNP.Core.DOTS.Systems
@@ -42,49 +41,6 @@ namespace MNP.Core.DOTS.Systems
                                        matrices,
                                        matrices.Length);
             elements.Dispose();
-            /*
-            MaterialPropertyBlock propertyBlock = new();
-            foreach (var elementComponent in SystemAPI.Query<RefRO<ElementComponent>>())
-            {
-                switch (elementComponent.ValueRO.ObjectType)
-                {
-                    case ObjectType.Object2D:
-                        if (!elementComponent.ValueRO.IsBlocked)
-                        {
-                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.ValueRO.TextureID]);
-                            Graphics.DrawMesh(
-                                Mesh2D,
-                                elementComponent.ValueRO.TransformMatrix,
-                                Material,
-                                0,                               // Layer
-                                null,                            // Camera (null = 主相机)
-                                0,                               // Submesh index
-                                propertyBlock                   // 实例特有的属性
-                            );
-                            propertyBlock.Clear();
-                        }
-                        break;
-                    case ObjectType.Object3D:
-                        if (!elementComponent.ValueRO.IsBlocked)
-                        {
-                            propertyBlock.SetTexture("_MainTex", Textures[elementComponent.ValueRO.TextureID]);
-                            Graphics.DrawMesh(
-                                Mesh3D,
-                                elementComponent.ValueRO.TransformMatrix,
-                                Material,
-                                0,                               // Layer
-                                null,                            // Camera (null = 主相机)
-                                0,                               // Submesh index
-                                propertyBlock                   // 实例特有的属性
-                            );
-                            propertyBlock.Clear();
-                        }
-                        break;
-                    case ObjectType.Text:
-                        break;
-                }
-            }
-            */
         }
     }
 }

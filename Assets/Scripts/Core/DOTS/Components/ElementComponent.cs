@@ -8,9 +8,9 @@ namespace MNP.Core.DOTS.Components
     [BurstCompile]
     public struct ElementComponent : IComponentData
     {
-        public int ID;
+        public uint ID;
         public int TextureID;
-        public bool IsBlocked;
+        public int MeshID;
         public ObjectType ObjectType;
         public int TransformPositionIndex;
         public int TransformRotationIndex;

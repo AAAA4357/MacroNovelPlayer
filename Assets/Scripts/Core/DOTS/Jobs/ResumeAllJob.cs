@@ -6,7 +6,7 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithPresent(typeof(InterruptComponent))]
-    public partial struct ResumeAllInterruptJob : IJobEntity
+    public partial struct ResumeAllJob : IJobEntity
     {
         public void Execute(EnabledRefRW<InterruptComponent> interruptComponent)
         {

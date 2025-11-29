@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using MNP.Core.DataStruct;
-using MNP.Core.DataStruct.Animation;
-using Unity.Entities;
 
-namespace MNP.Core.DOTS.Components.Managed
+namespace MNP.Core.DataStruct.Animation
 {
-    public class ManagedAnimationListComponent : IComponentData
+    public class AnimationList
     {
         public List<AnimationProperty1D> AnimationProperty1DList;
         public Dictionary<string, List<Animation1D>> Animation1DDictionary;
@@ -15,6 +12,5 @@ namespace MNP.Core.DOTS.Components.Managed
         public Dictionary<string, List<Animation3D>> Animation3DDictionary;
         public List<AnimationProperty4D> AnimationProperty4DList;
         public Dictionary<string, List<Animation4D>> Animation4DDictionary;
-        public ObjectType ObjectType;
     }
 }

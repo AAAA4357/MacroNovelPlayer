@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using MNP.Core.DataStruct;
 using MNP.Core.DataStruct.Animation;
-using MNP.Core.DOTS.Components;
-using MNP.Core.DOTS.Components.Managed;
 using MNP.Core.DOTS.Systems;
 using MNP.Helpers;
 using Unity.Entities;
@@ -22,36 +20,23 @@ namespace MNP.Mono
         [Range(0, 2000)]
         public int testCount3D = 20;
 
-        // Start is called before the first frame update
-        void Start()
+        public List<AnimationElement> TestElements
         {
-            World world = World.DefaultGameObjectInjectionWorld;
-            EntityManager manager = world.EntityManager;
-            OutputSystem system = world.GetExistingSystemManaged<OutputSystem>();
-            system.Textures = new()
+            get
             {
-                Texture
-            };
-            system.TestTexture = Texture;
-            system.Material = Material;
-            system.Mesh2D = Mesh2D;
-            system.Mesh3D = Mesh3D;
-            for (int i = 0; i < testCount2D; i++)
-            {
-                Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
-                                                     typeof(ElementComponent));
-                manager.SetComponentData(entity, GetInstance2D());
-                manager.SetComponentData(entity, GenerateAnimation2D(i));
-            }
-            for (int i = 0; i < testCount3D; i++)
-            {
-                Entity entity = manager.CreateEntity(typeof(ManagedAnimationListComponent),
-                                                     typeof(ElementComponent));
-                manager.SetComponentData(entity, GetInstance3D());
-                manager.SetComponentData(entity, GenerateAnimation3D(i));
+                List<AnimationElement> elements = new();
+                for (int i = 0; i < testCount2D; i++)
+                {
+                    elements.Add(GetInstance2D());
+                }
+                for (int i = 0; i < testCount3D; i++)
+                {
+                    elements.Add(GetInstance3D());
+                }
+                return elements;
             }
         }
-        
+
         public void ResumePlay()
         {
             World world = World.DefaultGameObjectInjectionWorld;
@@ -60,27 +45,29 @@ namespace MNP.Mono
             timeSystem.ResumeAll();
         }
 
-        private ElementComponent GetInstance2D()
+        private AnimationElement GetInstance2D()
         {
             return new()
             {
-                ID = new System.Random().Next(int.MinValue, int.MaxValue),
+                ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
                 TextureID = 0,
-                ObjectType = ObjectType.Object2D
+                Type = ObjectType.Object2D,
+                Animations = GenerateAnimation2D()
             };
         }
 
-        private ElementComponent GetInstance3D()
+        private AnimationElement GetInstance3D()
         {
             return new()
             {
-                ID = new System.Random().Next(int.MinValue, int.MaxValue),
+                ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
                 TextureID = 0,
-                ObjectType = ObjectType.Object3D
+                Type = ObjectType.Object3D,
+                Animations = GenerateAnimation2D()
             };
         }
 
-        private ManagedAnimationListComponent GenerateAnimation2D(int num)
+        private AnimationList GenerateAnimation2D()
         {
             return new()
             {
@@ -132,13 +119,12 @@ namespace MNP.Mono
                 AnimationProperty3DList = new(),
                 Animation3DDictionary = new(),
                 AnimationProperty4DList = new(),
-                Animation4DDictionary = new(),
-                ObjectType = ObjectType.Object2D
+                Animation4DDictionary = new()
             };
         }
         
 
-        private ManagedAnimationListComponent GenerateAnimation3D(int num)
+        private AnimationList GenerateAnimation3D()
         {
             return new()
             {
@@ -190,8 +176,7 @@ namespace MNP.Mono
                 Animation4DDictionary = new()
                 {
                     {UtilityHelper.Transorm3DRotationID, Generate4DAnimation()}
-                },
-                ObjectType = ObjectType.Object3D
+                }
             };
         }
 

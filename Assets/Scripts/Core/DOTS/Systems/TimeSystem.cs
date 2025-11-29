@@ -16,7 +16,11 @@ namespace MNP.Core.DOTS.Systems
 
         bool startTimer;
 
+        NativeList<uint> interruptIDList;
+        NativeList<uint> resumeIDList;
+
         bool resumeAllInterrupt;
+        bool interruptAll;
         NativeArray<JobHandle> resumeJobs;
         NativeArray<JobHandle> setterJobs;
         
@@ -30,6 +34,9 @@ namespace MNP.Core.DOTS.Systems
 
             timer.Initialize();
             timer.Reset();
+
+            interruptIDList = new(Allocator.Persistent);
+            resumeIDList = new(Allocator.Persistent);
         }
 
         [BurstCompile]
@@ -39,11 +46,36 @@ namespace MNP.Core.DOTS.Systems
 
             float elapsedSeconds = timer.GetElapsedSeconds();
 
-            if (resumeAllInterrupt)
+            if (interruptAll)
             {
-                state.Dependency = new ResumeAllInterruptJob().ScheduleParallel(state.Dependency);
+                state.Dependency = new InterruptAllJob().ScheduleParallel(state.Dependency);
                 state.CompleteDependency();
                 resumeAllInterrupt = false;
+            }
+            if (resumeAllInterrupt)
+            {
+                state.Dependency = new ResumeAllJob().ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+                resumeAllInterrupt = false;
+            }
+
+            if (interruptIDList.Length != 0)
+            {
+                state.Dependency = new InterruptJob()
+                {
+                    IDArray = interruptIDList.AsArray()
+                }.ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+                interruptIDList.Clear();
+            }
+            if (resumeIDList.Length != 0)
+            {
+                state.Dependency = new ResumeJob()
+                {
+                    IDArray = resumeIDList.AsArray()
+                }.ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+                interruptIDList.Clear();
             }
 
             TimeDeltaSetterJob setterJob = new()
@@ -65,14 +97,19 @@ namespace MNP.Core.DOTS.Systems
             timer.Dispose();
         }
 
-        public void Interrupt()
+        public void Interrupt(uint id)
         {
-            
+            interruptIDList.Add(id);
         }
 
-        public void Resume()
+        public void Resume(uint id)
         {
-            
+            resumeIDList.Add(id);
+        }
+
+        public void InterruptAll()
+        {
+            interruptAll = true;
         }
 
         public void ResumeAll()

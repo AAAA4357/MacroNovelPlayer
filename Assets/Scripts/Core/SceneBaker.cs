@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MNP.Core.DataStruct;
 using MNP.Core.DataStruct.Animation;
 using MNP.Core.DOTS.Components;
 using MNP.Core.DOTS.Components.LerpRuntime;
-using MNP.Core.DOTS.Components.Managed;
 using MNP.Core.DOTS.Components.Transform;
 using MNP.Helpers;
 using Unity.Collections;
@@ -12,45 +13,54 @@ using Unity.Mathematics;
 
 namespace MNP.Core
 {
-    /*
-    partial class SceneBaker
+    public class SceneBaker
     {
-        int counter;
+        int propertyIndexCounter;
 
-        protected void OnCreate()
-        {
-            counter = 0;
-        }
-
-        protected void OnUpdate()
+        public async Task BakeElements(IList<AnimationElement> elements, IProgress<float> progress)
         {
             World world = World.DefaultGameObjectInjectionWorld;
+            EntityManager manager = world.EntityManager;
             EntityCommandBuffer ecb = new(Allocator.Temp);
-            
-            foreach ((elementComponent, entity) in )
+            int index = 0;
+            foreach (AnimationElement element in elements)
             {
-                switch (animation.ObjectType)
+                await Task.Run(() =>
                 {
-                    case ObjectType.Object2D:
-                        SeperateAnimationObject2D(animation, ecb, entity, ref element);
-                        break;
-                    case ObjectType.Object3D:
-                        SeperateAnimationObject3D(animation, ecb, entity, ref element);
-                        break;
-                }
-                //ecb.RemoveComponent<ManagedAnimationListComponent>(entity);
-                ecb.AddComponent(entity, new InitializedPropertyComponent());
-            }).WithoutBurst().Run();
-            SystemHandle handle = World.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
-            ref PostprocessingSystem system = ref World.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(handle);
-            system.PropertyArray = new(counter, Allocator.Persistent);
-            ecb.Playback(EntityManager);
+                    Entity entity = ecb.CreateEntity();
+                    ElementComponent elementComponent = new()
+                    {
+                        ID = element.ID,
+                        TextureID = element.TextureID,
+                        MeshID = element.MeshID,
+                        ObjectType = element.Type
+                    };
+                    switch (element.Type)
+                    {
+                        case ObjectType.Object2D:
+                            SeperateAnimationObject2D(element.Animations, ecb, entity, ref elementComponent);
+                            break;
+                        case ObjectType.Object3D:
+                            SeperateAnimationObject3D(element.Animations, ecb, entity, ref elementComponent);
+                            break;
+                    }
+                    //ecb.RemoveComponent<ManagedAnimationListComponent>(entity);
+                    ecb.AddComponent(entity, new InitializedPropertyComponent());
+                });
+                progress?.Report(index / (elements.Count + 1));
+                index++;
+            }
+            await Task.Run(() =>
+            {
+                ecb.Playback(manager);
+            });
+            progress?.Report(1);
             ecb.Dispose();
         }
 
         #region 2D
 
-        private void SeperateAnimationObject2D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateAnimationObject2D(AnimationList animationListComponent,
                                                EntityCommandBuffer ecb,
                                                Entity entity,
                                                ref ElementComponent element)
@@ -61,7 +71,7 @@ namespace MNP.Core
             SeperateCustom4DProperty2D(animationListComponent, ecb);
             ecb.AddComponent(entity, new BakeReadyComponent());
         }
-        private void SeperateCustom1DProperty2D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom1DProperty2D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb,
                                                ref ElementComponent element)
         {
@@ -76,8 +86,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property1DComponent);
                     continue;
                 }
-                property1DComponent.Index = counter;
-                counter++;
+                property1DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
@@ -142,7 +152,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom2DProperty2D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom2DProperty2D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb,
                                                ref ElementComponent element)
         {
@@ -157,8 +167,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property2DComponent);
                     continue;
                 }
-                property2DComponent.Index = counter;
-                counter++;
+                property2DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
@@ -263,7 +273,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom3DProperty2D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom3DProperty2D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
@@ -277,8 +287,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property3DComponent);
                     continue;
                 }
-                property3DComponent.Index = counter;
-                counter++;
+                property3DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
@@ -371,7 +381,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom4DProperty2D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom4DProperty2D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
@@ -385,8 +395,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property4DComponent);
                     continue;
                 }
-                property4DComponent.Index = counter;
-                counter++;
+                property4DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
@@ -505,7 +515,7 @@ namespace MNP.Core
 
         #region 3D
 
-        private void SeperateAnimationObject3D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateAnimationObject3D(AnimationList animationListComponent,
                                                EntityCommandBuffer ecb,
                                                Entity entity,
                                                ref ElementComponent element)
@@ -517,7 +527,7 @@ namespace MNP.Core
             ecb.AddComponent(entity, new BakeReadyComponent());
         }
 
-        private void SeperateCustom1DProperty3D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom1DProperty3D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
@@ -531,8 +541,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property1DComponent);
                     continue;
                 }
-                property1DComponent.Index = counter;
-                counter++;
+                property1DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
@@ -591,7 +601,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom2DProperty3D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom2DProperty3D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb)
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
@@ -605,8 +615,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property2DComponent);
                     continue;
                 }
-                property2DComponent.Index = counter;
-                counter++;
+                property2DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
@@ -698,7 +708,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom3DProperty3D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom3DProperty3D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb,
                                                 ref ElementComponent element)
         {
@@ -713,8 +723,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property3DComponent);
                     continue;
                 }
-                property3DComponent.Index = counter;
-                counter++;
+                property3DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
@@ -817,7 +827,7 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom4DProperty3D(ManagedAnimationListComponent animationListComponent,
+        private void SeperateCustom4DProperty3D(AnimationList animationListComponent,
                                                 EntityCommandBuffer ecb,
                                                 ref ElementComponent element)
         {
@@ -832,8 +842,8 @@ namespace MNP.Core
                     ecb.AddComponent(entity, property4DComponent);
                     continue;
                 }
-                property4DComponent.Index = counter;
-                counter++;
+                property4DComponent.Index = propertyIndexCounter;
+                propertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
@@ -955,5 +965,4 @@ namespace MNP.Core
 
         #endregion
     }
-    */
 }

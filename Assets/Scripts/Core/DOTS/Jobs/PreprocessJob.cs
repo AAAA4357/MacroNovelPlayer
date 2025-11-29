@@ -7,12 +7,11 @@ namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
     [WithAll(typeof(TimeEnabledComponent))]
+    [WithPresent(typeof(LerpEnabledComponent))]
     public partial struct PreprocessJob : IJobEntity
     {
-        public EntityCommandBuffer.ParallelWriter ecbWriter;
-
         [BurstCompile]
-        public void Execute(ref PropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent, in Entity entity, [EntityIndexInQuery] int entityIndexInQuery)
+        public void Execute(ref PropertyInfoComponent propertyInfoComponent, in TimeComponent timeComponent, EnabledRefRW<LerpEnabledComponent> lerpEnabledComponent)
         {
             if (timeComponent.Time < propertyInfoComponent.StartTime ||
                 timeComponent.Time > propertyInfoComponent.EndTime)
@@ -21,7 +20,7 @@ namespace MNP.Core.DOTS.Jobs
                 {
                     return;
                 }
-                ecbWriter.RemoveComponent<LerpEnabledComponent>(entityIndexInQuery, entity);
+                lerpEnabledComponent.ValueRW = false;
                 propertyInfoComponent.LerpEnabled = false;
             }
             else
@@ -30,7 +29,7 @@ namespace MNP.Core.DOTS.Jobs
                 {
                     return;
                 }
-                ecbWriter.AddComponent<LerpEnabledComponent>(entityIndexInQuery, entity);
+                lerpEnabledComponent.ValueRW = true;
                 propertyInfoComponent.LerpEnabled = true;
             }
         }
