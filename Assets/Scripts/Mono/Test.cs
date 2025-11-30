@@ -20,6 +20,15 @@ namespace MNP.Mono
         [Range(0, 2000)]
         public int testCount3D = 20;
 
+        void Start()
+        {
+            OutputSystem system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<OutputSystem>();
+            system.TestTexture = Texture;
+            system.Material = Material;
+            system.Mesh2D = Mesh2D;
+            system.Mesh3D = Mesh3D;
+        }
+
         public MNProject TestProject
         {
             get => new()

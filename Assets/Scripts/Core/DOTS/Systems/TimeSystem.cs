@@ -10,11 +10,23 @@ namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     [UpdateAfter(typeof(InputSystem))]
-    partial struct TimeSystem : ISystem
+    public partial struct TimeSystem : ISystem
     {
-        public UnmanagedTimer timer;
+        public float _systemtime;
+        public float SystemTime
+        {
+            get => _systemtime;
+            set
+            {
+                resetTime = value;
+                _systemtime = value;
+            }
+        }
 
+        UnmanagedTimer timer;
         bool startTimer;
+        float? resetTime;
+        bool pauseTime;
 
         NativeList<uint> interruptIDList;
         NativeList<uint> resumeIDList;
@@ -37,6 +49,8 @@ namespace MNP.Core.DOTS.Systems
 
             interruptIDList = new(Allocator.Persistent);
             resumeIDList = new(Allocator.Persistent);
+
+            resetTime = null;
         }
 
         [BurstCompile]
@@ -48,7 +62,22 @@ namespace MNP.Core.DOTS.Systems
             }
 
             timer.Stop();
-            float elapsedSeconds = timer.GetElapsedSeconds();
+            float elapsedSeconds = pauseTime ? 0 : timer.GetElapsedSeconds();
+            if (resetTime is not null)
+            {
+                state.Dependency = new TimeSetterJob()
+                {
+                    TargetValue = resetTime.Value
+                }.ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+                resetTime = null;
+                pauseTime = true;
+                elapsedSeconds = 0;
+            }
+            else
+            {
+                _systemtime += elapsedSeconds;
+            }
 
             if (startTimer)
             {
@@ -57,8 +86,15 @@ namespace MNP.Core.DOTS.Systems
             }
             else
             {
+                state.Dependency = new TimeSetterJob()
+                {
+                    TargetValue = 0
+                }.ScheduleParallel(state.Dependency);
                 state.Dependency = new DisableAllTimeJob().ScheduleParallel(state.Dependency);
                 state.CompleteDependency();
+                timer.Reset();
+                _systemtime = 0;
+                return;
             }
 
             if (interruptAll)
@@ -139,6 +175,16 @@ namespace MNP.Core.DOTS.Systems
         {
             startTimer = false;
             timer.Reset();
+        }
+
+        public void PauseTime()
+        {
+            pauseTime = true;
+        }
+
+        public void ResumeTime()
+        {
+            pauseTime = false;
         }
     }
 }

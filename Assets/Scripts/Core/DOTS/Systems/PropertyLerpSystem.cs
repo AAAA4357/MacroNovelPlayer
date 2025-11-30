@@ -6,7 +6,7 @@ namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     [UpdateAfter(typeof(PreprocessingSystem))]
-    partial struct PropertyLerpSystem : ISystem
+    public partial struct PropertyLerpSystem : ISystem
     {
         [BurstCompile]
         public void OnUpdate(ref SystemState state)

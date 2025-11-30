@@ -4,7 +4,7 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
-    partial struct InputSystem : ISystem
+    public partial struct InputSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)

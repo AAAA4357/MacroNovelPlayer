@@ -44,6 +44,8 @@ namespace MNP.Core
                 }
                 manager.AddComponentData(entity, elementComponent);
                 manager.AddComponentData(entity, new BakeReadyComponent());
+                manager.AddComponentData(entity, new TimeEnabledComponent());
+                manager.SetComponentEnabled<TimeEnabledComponent>(entity, false);
                 progress?.Report((float)i / objects.Count);
                 await UniTask.Yield();
             }

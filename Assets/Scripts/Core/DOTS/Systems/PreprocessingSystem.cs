@@ -7,7 +7,7 @@ namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     [UpdateAfter(typeof(TimeSystem))]
-    partial struct PreprocessingSystem : ISystem
+    public partial struct PreprocessingSystem : ISystem
     {
         [BurstCompile]
         public void OnCreate(ref SystemState state)

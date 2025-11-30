@@ -25,9 +25,18 @@ namespace MNP.Core
             SceneBaker baker = new();
             await UniTask.RunOnThreadPool(() =>
             {
-                SystemHandle handle = World.DefaultGameObjectInjectionWorld.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
-                ref PostprocessingSystem system = ref World.DefaultGameObjectInjectionWorld.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(handle);
+                SystemHandle postprocessHandle = World.DefaultGameObjectInjectionWorld.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
+                ref PostprocessingSystem system = ref World.DefaultGameObjectInjectionWorld.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(postprocessHandle);
                 system.PropertyArray = new(project.TotalPropertyCount, Allocator.Persistent);
+                OutputSystem outputSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<OutputSystem>();
+                outputSystem.Matrix2DList = new(Allocator.Persistent)
+                {
+                    Capacity = project.TotalPropertyCount
+                };
+                outputSystem.Matrix3DList = new(Allocator.Persistent)
+                {
+                    Capacity = project.TotalPropertyCount
+                };
             });
             await baker.BakeElements(project.Objects, progress);
             canvas.enabled = false;

@@ -8,7 +8,7 @@ namespace MNP.Core.DOTS.Systems
 {
     [UpdateInGroup(typeof(MNPSystemGroup))]
     [UpdateAfter(typeof(PropertyLerpSystem))]
-    partial struct PostprocessingSystem : ISystem
+    public partial struct PostprocessingSystem : ISystem
     {
         public NativeArray<float4> PropertyArray;
         
