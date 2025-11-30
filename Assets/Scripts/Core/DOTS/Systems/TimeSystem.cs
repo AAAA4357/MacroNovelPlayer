@@ -23,6 +23,8 @@ namespace MNP.Core.DOTS.Systems
             }
         }
 
+        public bool TimePaused { get; private set; }
+
         UnmanagedTimer timer;
         bool startTimer;
         float? resetTime;
@@ -33,16 +35,11 @@ namespace MNP.Core.DOTS.Systems
 
         bool resumeAllInterrupt;
         bool interruptAll;
-        NativeArray<JobHandle> resumeJobs;
-        NativeArray<JobHandle> setterJobs;
         
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             state.RequireForUpdate<TimeEnabledComponent>();
-
-            resumeJobs = new(7, Allocator.Persistent);
-            setterJobs = new(7, Allocator.Persistent);
 
             timer.Initialize();
             timer.Reset();
@@ -56,13 +53,9 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            if (!startTimer)
-            {
-                return;
-            }
-
             timer.Stop();
             float elapsedSeconds = pauseTime ? 0 : timer.GetElapsedSeconds();
+            TimePaused = pauseTime;
             if (resetTime is not null)
             {
                 state.Dependency = new TimeSetterJob()
@@ -101,7 +94,7 @@ namespace MNP.Core.DOTS.Systems
             {
                 state.Dependency = new InterruptAllJob().ScheduleParallel(state.Dependency);
                 state.CompleteDependency();
-                resumeAllInterrupt = false;
+                interruptAll = false;
             }
             if (resumeAllInterrupt)
             {
@@ -126,7 +119,7 @@ namespace MNP.Core.DOTS.Systems
                     IDArray = resumeIDList.AsArray()
                 }.ScheduleParallel(state.Dependency);
                 state.CompleteDependency();
-                interruptIDList.Clear();
+                resumeIDList.Clear();
             }
 
             TimeDeltaSetterJob setterJob = new()

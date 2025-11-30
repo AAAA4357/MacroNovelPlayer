@@ -5,6 +5,7 @@ using MNP.Core.DOTS.Systems;
 using MNP.Helpers;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MNP.Mono
 {
@@ -14,6 +15,8 @@ namespace MNP.Mono
         public Material Material;
         public Mesh Mesh2D;
         public Mesh Mesh3D;
+
+        public Slider Changed;
 
         [Range(0, 10000)]
         public int testCount2D = 20;
@@ -27,6 +30,8 @@ namespace MNP.Mono
             system.Material = Material;
             system.Mesh2D = Mesh2D;
             system.Mesh3D = Mesh3D;
+
+            Changed.onValueChanged.AddListener(OnProgressChanged);
         }
 
         public MNProject TestProject
@@ -88,6 +93,30 @@ namespace MNP.Mono
             SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
             ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
             timeSystem.ResumeAll();
+        }
+
+        public void PausePlay()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.PauseTime();
+        }
+
+        public void ResumePausePlay()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.ResumeTime();
+        }
+
+        public void OnProgressChanged(float value)
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.SystemTime = 8 * value;
         }
 
         private MNObject GetInstance2D()

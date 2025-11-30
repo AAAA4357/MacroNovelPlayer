@@ -9,6 +9,7 @@ using UnityEngine;
 public class TestEditor : Editor
 {
     bool isPlaying;
+    bool pausePlay;
     AnimBool enterPlaying;
     AnimBool exitPlaying;
 
@@ -39,6 +40,8 @@ public class TestEditor : Editor
                 SystemHandle handle = World.DefaultGameObjectInjectionWorld.Unmanaged.GetExistingUnmanagedSystem<TimeSystem>();
                 ref TimeSystem timeSystem = ref World.DefaultGameObjectInjectionWorld.Unmanaged.GetUnsafeSystemRef<TimeSystem>(handle);
 
+                pausePlay = timeSystem.TimePaused;
+
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.FloatField("动画时间：", timeSystem.SystemTime);
                 EditorGUI.EndDisabledGroup();
@@ -51,18 +54,33 @@ public class TestEditor : Editor
                 }
                 EditorGUI.EndDisabledGroup();
                 EditorGUI.BeginDisabledGroup(!isPlaying);
+                EditorGUI.BeginDisabledGroup(pausePlay);
+                if (GUILayout.Button("暂停播放"))
+                {
+                    Test test = (Test)target;
+                    test.PausePlay();
+                }
+                EditorGUI.EndDisabledGroup();
+                EditorGUI.BeginDisabledGroup(!pausePlay);
+                if (GUILayout.Button("恢复播放"))
+                {
+                    Test test = (Test)target;
+                    test.ResumePausePlay();
+                    pausePlay = false;
+                }
+                EditorGUI.EndDisabledGroup();
                 if (GUILayout.Button("停止播放"))
                 {
                     Test test = (Test)target;
                     test.DisableTime();
                     isPlaying = false;
                 }
-                if (GUILayout.Button("中断所有播放"))
+                if (GUILayout.Button("中断所有元素动画"))
                 {
                     Test test = (Test)target;
                     test.InterruptPlay();
                 }
-                if (GUILayout.Button("恢复所有播放"))
+                if (GUILayout.Button("恢复所有元素动画"))
                 {
                     Test test = (Test)target;
                     test.ResumePlay();
