@@ -8,15 +8,18 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent))]
     public partial struct Postprocess2DJob : IJobEntity
     {
         [NativeDisableParallelForRestriction]
         [WriteOnly] public NativeArray<float4> OutputArray;
 
         [BurstCompile]
-        public void Execute(in Property2DComponent property2DComponent)
+        public void Execute(in Property2DComponent property2DComponent, EnabledRefRO<TimeEnabledComponent> enabled)
         {
+            if (!enabled.ValueRO)
+            {
+                return;
+            }
             OutputArray[property2DComponent.Index] = new(property2DComponent.Value, float2.zero);
         }
     }

@@ -20,21 +20,57 @@ namespace MNP.Mono
         [Range(0, 2000)]
         public int testCount3D = 20;
 
-        public List<AnimationElement> TestElements
+        public MNProject TestProject
+        {
+            get => new()
+            {
+                Name = "测试工程",
+                Description = "",
+                CreateTime = System.DateTime.Now,
+                Objects = objects
+            };
+        }
+
+        List<MNObject> objects
         {
             get
             {
-                List<AnimationElement> elements = new();
+                List<MNObject> objects = new();
                 for (int i = 0; i < testCount2D; i++)
                 {
-                    elements.Add(GetInstance2D());
+                    objects.Add(GetInstance2D());
                 }
                 for (int i = 0; i < testCount3D; i++)
                 {
-                    elements.Add(GetInstance3D());
+                    objects.Add(GetInstance3D());
                 }
-                return elements;
+                return objects;
             }
+        }
+
+        public void EnableTime()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.StartTime();
+        }
+
+        public void DisableTime()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.StopTime();
+        }
+
+
+        public void InterruptPlay()
+        {
+            World world = World.DefaultGameObjectInjectionWorld;
+            SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
+            ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
+            timeSystem.InterruptAll();
         }
 
         public void ResumePlay()
@@ -45,7 +81,7 @@ namespace MNP.Mono
             timeSystem.ResumeAll();
         }
 
-        private AnimationElement GetInstance2D()
+        private MNObject GetInstance2D()
         {
             return new()
             {
@@ -56,7 +92,7 @@ namespace MNP.Mono
             };
         }
 
-        private AnimationElement GetInstance3D()
+        private MNObject GetInstance3D()
         {
             return new()
             {
@@ -67,7 +103,7 @@ namespace MNP.Mono
             };
         }
 
-        private AnimationList GenerateAnimation2D()
+        private MNAnimation GenerateAnimation2D()
         {
             return new()
             {
@@ -124,7 +160,7 @@ namespace MNP.Mono
         }
         
 
-        private AnimationList GenerateAnimation3D()
+        private MNAnimation GenerateAnimation3D()
         {
             return new()
             {

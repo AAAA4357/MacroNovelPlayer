@@ -6,14 +6,13 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent))]
     [WithPresent(typeof(InterruptComponent))]
     public partial struct TimeDeltaSetterJob : IJobEntity
     {
         public float DeltaValue;
 
         [BurstCompile]
-        public void Execute(DynamicBuffer<InterruptTimeComponent> interruptTimeBuffer, ref TimeComponent timeComponent, EnabledRefRW<InterruptComponent> interruptComponent)
+        public void Execute(DynamicBuffer<InterruptTimeComponent> interruptTimeBuffer, ref TimeComponent timeComponent, EnabledRefRW<InterruptComponent> interruptComponent, EnabledRefRO<TimeEnabledComponent> _)
         {
             if (interruptComponent.ValueRO)
             {

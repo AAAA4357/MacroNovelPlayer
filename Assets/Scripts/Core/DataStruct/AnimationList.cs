@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using MNP.Core.DataStruct.Animation;
 
-namespace MNP.Core.DataStruct.Animation
+namespace MNP.Core.DataStruct
 {
-    public class AnimationList
+    public class MNAnimation
     {
         public List<AnimationProperty1D> AnimationProperty1DList;
         public Dictionary<string, List<Animation1D>> Animation1DDictionary;
@@ -12,5 +13,9 @@ namespace MNP.Core.DataStruct.Animation
         public Dictionary<string, List<Animation3D>> Animation3DDictionary;
         public List<AnimationProperty4D> AnimationProperty4DList;
         public Dictionary<string, List<Animation4D>> Animation4DDictionary;
+        public int TotalPropertyCount
+        {
+            get => AnimationProperty1DList.Count + AnimationProperty2DList.Count + AnimationProperty3DList.Count + AnimationProperty4DList.Count;
+        }
     }
 }

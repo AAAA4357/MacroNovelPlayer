@@ -9,14 +9,14 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(TimeEnabledComponent), typeof(LerpEnabledComponent))]
-    [WithPresent(typeof(InterruptComponent))]
+    [WithAll(typeof(TimeEnabledComponent))]
+    [WithPresent(typeof(InterruptComponent), typeof(LerpEnabledComponent))]
     public partial struct Animation2DLerpJob : IJobEntity
     {
         [BurstCompile]
-        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, DynamicBuffer<AnimationBezierBakeDataComponent> bezierDataBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent)
+        public void Execute(DynamicBuffer<Animation2DComponent> animation2DBuffer, DynamicBuffer<AnimationBezierBakeDataComponent> bezierDataBuffer, ref Property2DComponent property2DComponent, in TimeComponent timeComponent, EnabledRefRO<InterruptComponent> interruptComponent, EnabledRefRO<TimeEnabledComponent> _, EnabledRefRO<LerpEnabledComponent> lerpEnabledComponent)
         {
-            if (interruptComponent.ValueRO) 
+            if (interruptComponent.ValueRO || !lerpEnabledComponent.ValueRO) 
             {
                 return;
             }

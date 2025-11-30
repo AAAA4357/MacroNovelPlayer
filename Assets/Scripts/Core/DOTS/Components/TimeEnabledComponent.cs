@@ -4,5 +4,5 @@ using Unity.Entities;
 namespace MNP.Core.DOTS.Components
 {
     [BurstCompile]
-    public struct TimeEnabledComponent : IComponentData { }
+    public struct TimeEnabledComponent : IComponentData, IEnableableComponent { }
 }

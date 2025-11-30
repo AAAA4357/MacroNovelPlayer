@@ -11,7 +11,7 @@ namespace MNP.Core.DOTS.Systems
     partial struct PostprocessingSystem : ISystem
     {
         public NativeArray<float4> PropertyArray;
-
+        
         [BurstCompile]
         void OnUpdate(ref SystemState state)
         {
@@ -40,6 +40,12 @@ namespace MNP.Core.DOTS.Systems
                 InputArray = PropertyArray
             }.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
+        }
+
+        [BurstCompile]
+        void OnDestory(ref SystemState state)
+        {
+            PropertyArray.Dispose();
         }
     }
 }

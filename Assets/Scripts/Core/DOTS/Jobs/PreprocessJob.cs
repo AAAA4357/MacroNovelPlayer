@@ -16,21 +16,11 @@ namespace MNP.Core.DOTS.Jobs
             if (timeComponent.Time < propertyInfoComponent.StartTime ||
                 timeComponent.Time > propertyInfoComponent.EndTime)
             {
-                if (!propertyInfoComponent.LerpEnabled)
-                {
-                    return;
-                }
                 lerpEnabledComponent.ValueRW = false;
-                propertyInfoComponent.LerpEnabled = false;
             }
             else
             {
-                if (propertyInfoComponent.LerpEnabled)
-                {
-                    return;
-                }
                 lerpEnabledComponent.ValueRW = true;
-                propertyInfoComponent.LerpEnabled = true;
             }
         }
     }

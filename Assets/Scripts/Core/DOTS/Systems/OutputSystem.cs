@@ -26,6 +26,7 @@ namespace MNP.Core.DOTS.Systems
 
         protected override void OnUpdate()
         {
+            /*
             EntityQuery query = GetEntityQuery(typeof(ElementComponent));
             NativeArray<ElementComponent> elements = query.ToComponentDataArray<ElementComponent>(Allocator.Temp);
             Matrix4x4[] matrices = elements.Where(x => x.ObjectType == ObjectType.Object2D).Select(x => (Matrix4x4)x.TransformMatrix).ToArray();
@@ -41,6 +42,7 @@ namespace MNP.Core.DOTS.Systems
                                        matrices,
                                        matrices.Length);
             elements.Dispose();
+            */
         }
     }
 }

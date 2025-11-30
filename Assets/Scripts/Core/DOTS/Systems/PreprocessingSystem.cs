@@ -18,8 +18,7 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            PreprocessJob job = new();
-            state.Dependency = job.ScheduleParallel(state.Dependency);
+            state.Dependency = new PreprocessJob().ScheduleParallel(state.Dependency);
             state.CompleteDependency();
         }
     }

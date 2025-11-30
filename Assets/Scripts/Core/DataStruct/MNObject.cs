@@ -1,11 +1,11 @@
-namespace MNP.Core.DataStruct.Animation
+namespace MNP.Core.DataStruct
 {
-    public class AnimationElement
+    public class MNObject
     {
         public uint ID;
         public int TextureID;
         public int MeshID;
         public ObjectType Type;
-        public AnimationList Animations;
+        public MNAnimation Animations;
     }
 }

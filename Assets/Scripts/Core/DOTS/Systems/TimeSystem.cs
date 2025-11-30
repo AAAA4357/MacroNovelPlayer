@@ -42,9 +42,24 @@ namespace MNP.Core.DOTS.Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            timer.Stop();
+            if (!startTimer)
+            {
+                return;
+            }
 
+            timer.Stop();
             float elapsedSeconds = timer.GetElapsedSeconds();
+
+            if (startTimer)
+            {
+                state.Dependency = new EnableAllTimeJob().ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+            }
+            else
+            {
+                state.Dependency = new DisableAllTimeJob().ScheduleParallel(state.Dependency);
+                state.CompleteDependency();
+            }
 
             if (interruptAll)
             {
@@ -85,10 +100,7 @@ namespace MNP.Core.DOTS.Systems
             state.Dependency = setterJob.ScheduleParallel(state.Dependency);
             state.CompleteDependency();
 
-            if (startTimer)
-            {
-                timer.Start();
-            }
+            timer.Start();
         }
 
         [BurstCompile]
@@ -120,11 +132,13 @@ namespace MNP.Core.DOTS.Systems
         public void StartTime()
         {
             startTimer = true;
+            timer.Start();
         }
 
         public void StopTime()
         {
             startTimer = false;
+            timer.Reset();
         }
     }
 }

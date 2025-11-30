@@ -11,7 +11,7 @@ namespace MNP.Core.DOTS.Jobs
         public float TargetValue;
 
         [BurstCompile]
-        public void Execute(ref TimeComponent timeComponent)
+        public void Execute(ref TimeComponent timeComponent, EnabledRefRO<TimeEnabledComponent> _)
         {
             timeComponent.Time = TargetValue;
         }
