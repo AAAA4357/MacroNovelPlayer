@@ -1,3 +1,4 @@
+using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
 using Unity.Collections;
 using Unity.Entities;
@@ -10,7 +11,7 @@ public partial struct Output2DJob : IJobEntity
 
     public void Execute(in ElementComponent elementComponent, EnabledRefRO<TimeEnabledComponent> timeEnabledComponent)
     {
-        if (!timeEnabledComponent.ValueRO)
+        if (!timeEnabledComponent.ValueRO || elementComponent.ObjectType != ObjectType.Object2D)
         {
             return;
         }

@@ -14,8 +14,12 @@ namespace MNP.Core.DOTS.Jobs
         [WriteOnly] public NativeArray<float4> OutputArray;
 
         [BurstCompile]
-        public void Execute(in Property1DComponent property1DComponent, EnabledRefRO<TimeEnabledComponent> _)
+        public void Execute(in Property1DComponent property1DComponent, EnabledRefRO<TimeEnabledComponent> enabled)
         {
+            if (!enabled.ValueRO)
+            {
+                return;
+            }
             OutputArray[property1DComponent.Index] = new(property1DComponent.Value, float3.zero);
         }
     }

@@ -6,6 +6,7 @@ namespace MNP.Core.DataStruct
         SLinear,
         Bezier,
         AverageBezier,
-        Squad
+        Squad,
+        AverageSquad
     }
 }

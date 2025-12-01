@@ -14,11 +14,14 @@ public class TestEditor : Editor
     AnimBool exitPlaying;
 
     float resetTime;
+    float timeFactor;
 
     void OnEnable()
     {
         enterPlaying = new();
         exitPlaying = new();
+
+        timeFactor = 1;
     }
 
     public override void OnInspectorGUI()
@@ -45,6 +48,8 @@ public class TestEditor : Editor
                 EditorGUI.BeginDisabledGroup(true);
                 EditorGUILayout.FloatField("动画时间：", timeSystem.SystemTime);
                 EditorGUI.EndDisabledGroup();
+                timeFactor = EditorGUILayout.Slider("时间缩放因子", timeFactor, 0.1f, 2f);
+                timeSystem.TimeFactor = timeFactor;
                 EditorGUI.BeginDisabledGroup(isPlaying);
                 if (GUILayout.Button("开始播放"))
                 {

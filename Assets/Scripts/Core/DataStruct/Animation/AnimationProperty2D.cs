@@ -12,5 +12,7 @@ namespace MNP.Core.DataStruct.Animation
         public Vector2? StaticValue;
         public PropertyType Type;
         public List<float> AnimationInterruptTimeList;
+        public AnimationDependencyProeprty Dependency;
+        public int Index;
     }
 }

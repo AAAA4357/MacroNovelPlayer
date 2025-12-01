@@ -23,6 +23,7 @@ namespace MNP.Core.DOTS.Jobs
             UtilityHelper.GetFloorIndexInBufferWithLength(animation4DBuffer, v => v.StartTime, v => v.DurationTime, timeComponent.Time, out int animationIndex, out float fixedT);
             float ease = EasingFunctionHelper.GetEase(animation4DBuffer[animationIndex].EaseKeyframeList, fixedT);
             float4 result;
+            int index;
             switch (animation4DBuffer[animationIndex].LerpType)
             {
                 case Float4LerpType.Linear:
@@ -38,8 +39,12 @@ namespace MNP.Core.DOTS.Jobs
                     result = PathLerpHelper.GetAverageBezierPoint4D(animation4DBuffer[animationIndex].StartValue, animation4DBuffer[animationIndex].Control0, animation4DBuffer[animationIndex].Control1, animation4DBuffer[animationIndex].EndValue, bezierDataBuffer[animation4DBuffer[animationIndex].BezierDataIndex].BezierLengthMap, ease);
                     break;
                 case Float4LerpType.Squad:
-                    int index = animation4DBuffer[animationIndex].SquadDataIndex;
+                    index = animation4DBuffer[animationIndex].SquadDataIndex;
                     result = PathLerpHelper.GetSquadPoint4D(squadDataBuffer[index].q0, squadDataBuffer[index].q01, squadDataBuffer[index].q01_1q12, squadDataBuffer[index].q12_1q23, ease);
+                    break;
+                case Float4LerpType.AverageSquad:
+                    index = animation4DBuffer[animationIndex].SquadDataIndex;
+                    result = PathLerpHelper.GetAverageSquadPoint4D(squadDataBuffer[index].q0, squadDataBuffer[index].q01, squadDataBuffer[index].q01_1q12, squadDataBuffer[index].q12_1q23, bezierDataBuffer[animation4DBuffer[animationIndex].BezierDataIndex].BezierLengthMap, ease);
                     break;
                 default:
                     return;

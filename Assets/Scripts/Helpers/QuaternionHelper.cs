@@ -32,22 +32,6 @@ public static class QuaternionHelper
                    lhs.x * rhs.w + rhs.x * lhs.w + lhs.y * rhs.z - rhs.y * lhs.z);
     }
 
-    public static float GetTheta(float4 start, float4 end, out int inverse)
-    {
-        float dot = DotMul(start, end);
-        if (dot < 0) 
-        {
-            dot = -dot;
-            inverse = -1;
-        }
-        else
-        {
-            inverse = 1;
-        }
-        dot = math.clamp(dot, -1, 1);
-        return 2 * math.acos(dot);
-    }
-
     public static float DotMul(float4 lhs, float4 rhs)
     {
         return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w;

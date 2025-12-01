@@ -1,3 +1,4 @@
+using MNP.Core.DataStruct;
 using Unity.Burst;
 using Unity.Entities;
 
@@ -8,5 +9,6 @@ namespace MNP.Core.DOTS.Components.LerpRuntime
     {
         public float Value;
         public int Index;
+        public DependencyPropertyType? DependencyType;
     }
 }

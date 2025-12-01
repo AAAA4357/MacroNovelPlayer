@@ -23,6 +23,8 @@ namespace MNP.Mono
         [Range(0, 2000)]
         public int testCount3D = 20;
 
+        uint sourceID;
+
         void Start()
         {
             OutputSystem system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<OutputSystem>();
@@ -49,7 +51,10 @@ namespace MNP.Mono
         {
             get
             {
-                List<MNObject> objects = new();
+                List<MNObject> objects = new()
+                {
+                    GetEmpty2D()
+                };
                 for (int i = 0; i < testCount2D; i++)
                 {
                     objects.Add(GetInstance2D());
@@ -119,6 +124,54 @@ namespace MNP.Mono
             timeSystem.SystemTime = 8 * value;
         }
 
+        private MNObject GetEmpty2D()
+        {
+            sourceID =  (uint)new System.Random().Next(int.MinValue, int.MaxValue);
+            return new()
+            {
+                ID = sourceID,
+                Type = ObjectType.Empty2D,
+                Animations = new()
+                {
+                    AnimationProperty1DList = new(),
+                    Animation1DDictionary = new(),
+                    AnimationProperty2DList = new()
+                    {
+                        new AnimationProperty2D()
+                        {
+                            ID = UtilityHelper.Transorm2DPositionID,
+                            StartTime = 0,
+                            EndTime = 8,
+                            IsStatic = false,
+                            StaticValue = null,
+                            Type = PropertyType.Transform2DPosition,
+                            AnimationInterruptTimeList = new()
+                        }
+                    },
+                    Animation2DDictionary = new()
+                    {
+                        {UtilityHelper.Transorm2DPositionID, new()
+                        {
+                            new Animation2D()
+                            {
+                                StartValue = new(-3, -3),
+                                EndValue = new(3, 3),
+                                StartTime = 0,
+                                DurationTime = 8,
+                                Enabled = true,
+                                EaseKeyframeList = GenerateLinearEaseList(),
+                                LerpType = Float2LerpType.Linear
+                            }
+                        }}
+                    },
+                    AnimationProperty3DList = new(),
+                    Animation3DDictionary = new(),
+                    AnimationProperty4DList = new(),
+                    Animation4DDictionary = new(),
+                }
+            };
+        }
+
         private MNObject GetInstance2D()
         {
             return new()
@@ -137,7 +190,7 @@ namespace MNP.Mono
                 ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
                 TextureID = 0,
                 Type = ObjectType.Object3D,
-                Animations = GenerateAnimation2D()
+                Animations = GenerateAnimation3D()
             };
         }
 
@@ -172,7 +225,12 @@ namespace MNP.Mono
                         IsStatic = false,
                         StaticValue = null,
                         Type = PropertyType.Transform2DPosition,
-                        AnimationInterruptTimeList = new()
+                        AnimationInterruptTimeList = new(),
+                        Dependency = new()
+                        {
+                            ObjectID = sourceID,
+                            PropertyID = UtilityHelper.Transorm2DPositionID
+                        }
                     },
                     new AnimationProperty2D()
                     {
@@ -437,7 +495,7 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
-                            LerpType = Float4LerpType.Squad,
+                            LerpType = Float4LerpType.AverageSquad,
                             Enabled = true
                         });
                     }
@@ -452,7 +510,7 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
-                            LerpType = Float4LerpType.Squad,
+                            LerpType = Float4LerpType.AverageSquad,
                             Enabled = true
                         });
                     }

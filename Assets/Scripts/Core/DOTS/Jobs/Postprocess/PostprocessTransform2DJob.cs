@@ -11,7 +11,8 @@ namespace MNP.Core.DOTS.Jobs
     [WithAll(typeof(BakeReadyComponent))]
     public partial struct PostprocessTransform2DJob : IJobEntity
     {
-        [ReadOnly] public NativeArray<float4> InputArray;
+        [ReadOnly] 
+        public NativeArray<float4> InputArray;
         
         [BurstCompile]
         public void Execute(ref ElementComponent elementComponent)

@@ -23,6 +23,8 @@ namespace MNP.Core.DOTS.Systems
             }
         }
 
+        public float TimeFactor;
+
         public bool TimePaused { get; private set; }
 
         UnmanagedTimer timer;
@@ -48,6 +50,7 @@ namespace MNP.Core.DOTS.Systems
             resumeIDList = new(Allocator.Persistent);
 
             resetTime = null;
+            TimeFactor = 1;
         }
 
         [BurstCompile]
@@ -55,6 +58,7 @@ namespace MNP.Core.DOTS.Systems
         {
             timer.Stop();
             float elapsedSeconds = pauseTime ? 0 : timer.GetElapsedSeconds();
+            elapsedSeconds *= TimeFactor;
             TimePaused = pauseTime;
             if (resetTime is not null)
             {

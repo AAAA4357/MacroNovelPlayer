@@ -18,7 +18,7 @@ namespace MNP.Core
     {
         public int PropertyIndexCounter;
 
-        public async UniTask BakeElements(IList<MNObject> objects, IProgress<float> progress)
+        public async UniTask BakeElements(List<MNObject> objects, IProgress<float> progress)
         {
             World world = World.DefaultGameObjectInjectionWorld;
             EntityManager manager = world.EntityManager;
@@ -31,15 +31,20 @@ namespace MNP.Core
                     ID = mnObject.ID,
                     TextureID = mnObject.TextureID,
                     MeshID = mnObject.MeshID,
-                    ObjectType = mnObject.Type
+                    ObjectType = mnObject.Type,
+                    TransformPositionIndex = -1,
+                    TransformRotationIndex = -1,
+                    TransformScaleIndex = -1,
                 };
                 switch (mnObject.Type)
                 {
+                    case ObjectType.Empty2D:
                     case ObjectType.Object2D:
-                        SeperateAnimationObject2D(mnObject.Animations, manager, ref elementComponent);
+                        SeperateAnimationObject2D(objects, mnObject.Animations, manager, ref elementComponent);
                         break;
+                    case ObjectType.Empty3D:
                     case ObjectType.Object3D:
-                        SeperateAnimationObject3D(mnObject.Animations, manager, ref elementComponent);
+                        SeperateAnimationObject3D(objects, mnObject.Animations, manager, ref elementComponent);
                         break;
                 }
                 manager.AddComponentData(entity, elementComponent);
@@ -53,19 +58,21 @@ namespace MNP.Core
 
         #region 2D
 
-        private void SeperateAnimationObject2D(MNAnimation animationListComponent,
+        private void SeperateAnimationObject2D(List<MNObject> objects, 
+                                               MNAnimation animationListComponent,
                                                EntityManager manager,
                                                ref ElementComponent element)
         {
-            SeperateCustom1DProperty2D(animationListComponent, manager, ref element);
-            SeperateCustom2DProperty2D(animationListComponent, manager, ref element);
-            SeperateCustom3DProperty2D(animationListComponent, manager);
-            SeperateCustom4DProperty2D(animationListComponent, manager);
+            SeperateCustom1DProperty2D(objects, animationListComponent, manager, ref element);
+            SeperateCustom2DProperty2D(objects, animationListComponent, manager, ref element);
+            SeperateCustom3DProperty2D(objects, animationListComponent, manager);
+            SeperateCustom4DProperty2D(objects, animationListComponent, manager);
         }
 
-        private void SeperateCustom1DProperty2D(MNAnimation animationListComponent,
+        private void SeperateCustom1DProperty2D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager,
-                                               ref ElementComponent element)
+                                                ref ElementComponent element)
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
@@ -79,6 +86,7 @@ namespace MNP.Core
                     continue;
                 }
                 property1DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
@@ -118,6 +126,24 @@ namespace MNP.Core
                     };
                     interruptTimeBuffer.Add(component);
                 }
+
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property1DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty is not null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty1D property1D = mnObject.Animations.AnimationProperty1DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property1D.Index
+                    });
+                    dependencyProeprty = property1D.Dependency;
+                }
                 
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
@@ -148,9 +174,10 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom2DProperty2D(MNAnimation animationListComponent,
+        private void SeperateCustom2DProperty2D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager,
-                                               ref ElementComponent element)
+                                                ref ElementComponent element)
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
@@ -164,6 +191,7 @@ namespace MNP.Core
                     continue;
                 }
                 property2DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
@@ -237,6 +265,24 @@ namespace MNP.Core
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
                     interruptTimeBuffer.Add(component);
+                }
+
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property2DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty2D property2D = mnObject.Animations.AnimationProperty2DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property2D.Index
+                    });
+                    dependencyProeprty = property2D.Dependency;
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -274,7 +320,8 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom3DProperty2D(MNAnimation animationListComponent,
+        private void SeperateCustom3DProperty2D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager)
         {
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
@@ -289,6 +336,7 @@ namespace MNP.Core
                     continue;
                 }
                 property3DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
@@ -364,6 +412,24 @@ namespace MNP.Core
                     interruptTimeBuffer.Add(component);
                 }
 
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property3DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty3D property3D = mnObject.Animations.AnimationProperty3DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property3D.Index
+                    });
+                    dependencyProeprty = property3D.Dependency;
+                }
+
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     StartTime = property.StartTime,
@@ -387,7 +453,8 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom4DProperty2D(MNAnimation animationListComponent,
+        private void SeperateCustom4DProperty2D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager)
         {
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
@@ -402,6 +469,7 @@ namespace MNP.Core
                     continue;
                 }
                 property4DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
@@ -485,6 +553,49 @@ namespace MNP.Core
                         animationSquadBakeDataBuffer.Add(bakeDataComponent);
                         squadDataIndex++;
                     }
+                    else if (animation.LerpType == Float4LerpType.AverageSquad)
+                    {
+                        float4 q12 = QuaternionHelper.Mul(animation.Control0Value.Inverse(), animation.Control1Value);
+                        float4 q23 = QuaternionHelper.Mul(animation.Control1Value.Inverse(), animation.EndValue);
+                        float4 a = animation.StartValue; //q0
+                        float4 b = QuaternionHelper.Mul(animation.StartValue.Inverse(), animation.Control0Value); //q01
+                        float4 c = QuaternionHelper.Mul(b.Inverse(), q12); //q01^-1*q12
+                        float4 d = QuaternionHelper.Mul(c.Inverse(), q23); //q01^-1*q12
+                        AnimationSquadBakeDataComponent squadBakeDataComponent = new()
+                        {
+                            q0 = a,
+                            q01 = b,
+                            q01_1q12 = c,
+                            q12_1q23 = d
+                        };
+                        animationSquadBakeDataBuffer.Add(squadBakeDataComponent);
+                        squadDataIndex++;
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtSquadParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtSquadParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
+                        AnimationBezierBakeDataComponent bezierBakeDataComponent = new()
+                        {
+                            BezierLengthMap = lengthMap
+                        };
+                        animationBezierBakeDataBuffer.Add(bezierBakeDataComponent);
+                        bezierDataIndex++;
+                    }
                     animationBuffer.Add(component);
                 }
                 
@@ -497,6 +608,24 @@ namespace MNP.Core
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
                     interruptTimeBuffer.Add(component);
+                }
+
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property4DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty4D property4D = mnObject.Animations.AnimationProperty4DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property4D.Index
+                    });
+                    dependencyProeprty = property4D.Dependency;
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
@@ -527,17 +656,19 @@ namespace MNP.Core
 
         #region 3D
 
-        private void SeperateAnimationObject3D(MNAnimation animationListComponent,
+        private void SeperateAnimationObject3D(List<MNObject> objects, 
+                                               MNAnimation animationListComponent,
                                                EntityManager manager,
                                                ref ElementComponent element)
         {
-            SeperateCustom1DProperty3D(animationListComponent, manager);
-            SeperateCustom2DProperty3D(animationListComponent, manager);
-            SeperateCustom3DProperty3D(animationListComponent, manager, ref element);
-            SeperateCustom4DProperty3D(animationListComponent, manager, ref element);
+            SeperateCustom1DProperty3D(objects, animationListComponent, manager);
+            SeperateCustom2DProperty3D(objects, animationListComponent, manager);
+            SeperateCustom3DProperty3D(objects, animationListComponent, manager, ref element);
+            SeperateCustom4DProperty3D(objects, animationListComponent, manager, ref element);
         }
 
-        private void SeperateCustom1DProperty3D(MNAnimation animationListComponent,
+        private void SeperateCustom1DProperty3D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager)
         {
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
@@ -552,6 +683,7 @@ namespace MNP.Core
                     continue;
                 }
                 property1DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
@@ -591,6 +723,24 @@ namespace MNP.Core
                     };
                     interruptTimeBuffer.Add(component);
                 }
+
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property1DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty1D property1D = mnObject.Animations.AnimationProperty1DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property1D.Index
+                    });
+                    dependencyProeprty = property1D.Dependency;
+                }
                 
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
@@ -615,7 +765,8 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom2DProperty3D(MNAnimation animationListComponent,
+        private void SeperateCustom2DProperty3D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager)
         {
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
@@ -630,6 +781,7 @@ namespace MNP.Core
                     continue;
                 }
                 property2DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
@@ -705,6 +857,24 @@ namespace MNP.Core
                     interruptTimeBuffer.Add(component);
                 }
 
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property2DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty2D property2D = mnObject.Animations.AnimationProperty2DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property2D.Index
+                    });
+                    dependencyProeprty = property2D.Dependency;
+                }
+
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     StartTime = property.StartTime,
@@ -728,7 +898,8 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom3DProperty3D(MNAnimation animationListComponent,
+        private void SeperateCustom3DProperty3D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager,
                                                 ref ElementComponent element)
         {
@@ -744,6 +915,7 @@ namespace MNP.Core
                     continue;
                 }
                 property3DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
@@ -819,6 +991,24 @@ namespace MNP.Core
                     interruptTimeBuffer.Add(component);
                 }
 
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property3DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty3D property3D = mnObject.Animations.AnimationProperty3DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property3D.Index
+                    });
+                    dependencyProeprty = property3D.Dependency;
+                }
+
                 PropertyInfoComponent propertyInfoComponent = new()
                 {
                     StartTime = property.StartTime,
@@ -853,7 +1043,8 @@ namespace MNP.Core
             }
         }
 
-        private void SeperateCustom4DProperty3D(MNAnimation animationListComponent,
+        private void SeperateCustom4DProperty3D(List<MNObject> objects, 
+                                                MNAnimation animationListComponent,
                                                 EntityManager manager,
                                                 ref ElementComponent element)
         {
@@ -869,6 +1060,7 @@ namespace MNP.Core
                     continue;
                 }
                 property4DComponent.Index = PropertyIndexCounter;
+                property.Index = PropertyIndexCounter;
                 PropertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
@@ -952,6 +1144,49 @@ namespace MNP.Core
                         animationSquadBakeDataBuffer.Add(bakeDataComponent);
                         squadDataIndex++;
                     }
+                    else if (animation.LerpType == Float4LerpType.AverageSquad)
+                    {
+                        float4 q12 = QuaternionHelper.Mul(animation.Control0Value.Inverse(), animation.Control1Value);
+                        float4 q23 = QuaternionHelper.Mul(animation.Control1Value.Inverse(), animation.EndValue);
+                        float4 a = animation.StartValue; //q0
+                        float4 b = QuaternionHelper.Mul(animation.StartValue.Inverse(), animation.Control0Value); //q01
+                        float4 c = QuaternionHelper.Mul(b.Inverse(), q12); //q01^-1*q12
+                        float4 d = QuaternionHelper.Mul(c.Inverse(), q23); //q01^-1*q12
+                        AnimationSquadBakeDataComponent squadBakeDataComponent = new()
+                        {
+                            q0 = a,
+                            q01 = b,
+                            q01_1q12 = c,
+                            q12_1q23 = d
+                        };
+                        animationSquadBakeDataBuffer.Add(squadBakeDataComponent);
+                        squadDataIndex++;
+                        FixedList128Bytes<float2> map = new();
+                        FixedList128Bytes<float2> lengthMap = new();
+                        float totalLength = PathLerpHelper.GetLengthAtSquadParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue);
+                        for (int i = 0; i < map.Capacity; i++)
+                        {
+                            float t = (float)i / (map.Capacity - 1);
+                            float curveLength = PathLerpHelper.GetLengthAtSquadParameter4D(animation.StartValue, animation.Control0Value, animation.Control1Value, animation.EndValue, 0, t);
+                            map.Add(new(t, curveLength / totalLength));
+                        }
+                        for (int i = 0; i < lengthMap.Capacity; i++)
+                        {
+                            float t = (float)i / (lengthMap.Capacity - 1);
+                            UtilityHelper.GetFloorIndexInNativeContainer(map, x => x.y, t, out int mapIndex);
+                            float2 start = map[mapIndex].yx;
+                            float2 end = map[mapIndex + 1].yx;
+                            float delta = end.y - start.y;
+                            float averageT = start.y + (t - start.x) / (end.x - start.x) * delta;
+                            lengthMap.Add(new(t, averageT));
+                        }
+                        AnimationBezierBakeDataComponent bezierBakeDataComponent = new()
+                        {
+                            BezierLengthMap = lengthMap
+                        };
+                        animationBezierBakeDataBuffer.Add(bezierBakeDataComponent);
+                        bezierDataIndex++;
+                    }
                     animationBuffer.Add(component);
                 }
                 
@@ -964,6 +1199,24 @@ namespace MNP.Core
                         InterruptTime = property.AnimationInterruptTimeList[i]
                     };
                     interruptTimeBuffer.Add(component);
+                }
+
+                manager.AddBuffer<DependencyPropertyComponent>(entity);
+                DynamicBuffer<DependencyPropertyComponent> dependencyPropertyBuffer = manager.GetBuffer<DependencyPropertyComponent>(entity);
+                AnimationDependencyProeprty dependencyProeprty = property.Dependency;
+                if (dependencyProeprty is not null)
+                {
+                    property4DComponent.DependencyType = property.Dependency.Type;
+                }
+                while (dependencyProeprty != null)
+                {
+                    MNObject mnObject = objects.Find(x => x.ID == dependencyProeprty.ObjectID);
+                    AnimationProperty4D property4D = mnObject.Animations.AnimationProperty4DList.Find(x => x.ID == dependencyProeprty.PropertyID);
+                    dependencyPropertyBuffer.Add(new() 
+                    {
+                        PropertyIndex = property4D.Index
+                    });
+                    dependencyProeprty = property4D.Dependency;
                 }
 
                 PropertyInfoComponent propertyInfoComponent = new()
