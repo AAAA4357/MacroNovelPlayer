@@ -15,13 +15,20 @@ namespace MNP.Mono
         public Material Material;
         public Mesh Mesh2D;
         public Mesh Mesh3D;
+        public GameObject TextInstance;
 
         public Slider Changed;
+
+        public bool EnableDependency;
 
         [Range(0, 10000)]
         public int testCount2D = 20;
         [Range(0, 2000)]
         public int testCount3D = 20;
+        [Range(0, 200)]
+        public int testCountText2D = 2;
+        [Range(0, 100)]
+        public int testCountText3D = 2;
 
         uint sourceID;
 
@@ -51,10 +58,11 @@ namespace MNP.Mono
         {
             get
             {
-                List<MNObject> objects = new()
+                List<MNObject> objects = new();
+                if (EnableDependency)
                 {
-                    GetEmpty2D()
-                };
+                    objects.Add(GetEmpty2D());
+                }
                 for (int i = 0; i < testCount2D; i++)
                 {
                     objects.Add(GetInstance2D());
@@ -62,6 +70,14 @@ namespace MNP.Mono
                 for (int i = 0; i < testCount3D; i++)
                 {
                     objects.Add(GetInstance3D());
+                }
+                for (int i = 0; i < testCountText2D; i++)
+                {
+                    objects.Add(GetInstanceText2D());
+                }
+                for (int i = 0; i < testCountText3D; i++)
+                {
+                    objects.Add(GetInstanceText3D());
                 }
                 return objects;
             }
@@ -158,7 +174,6 @@ namespace MNP.Mono
                                 EndValue = new(3, 3),
                                 StartTime = 0,
                                 DurationTime = 8,
-                                Enabled = true,
                                 EaseKeyframeList = GenerateLinearEaseList(),
                                 LerpType = Float2LerpType.Linear
                             }
@@ -177,7 +192,6 @@ namespace MNP.Mono
             return new()
             {
                 ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
-                TextureID = 0,
                 Type = ObjectType.Object2D,
                 Animations = GenerateAnimation2D()
             };
@@ -188,9 +202,177 @@ namespace MNP.Mono
             return new()
             {
                 ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
-                TextureID = 0,
                 Type = ObjectType.Object3D,
                 Animations = GenerateAnimation3D()
+            };
+        }
+
+        private MNObject GetInstanceText2D()
+        {
+            return new()
+            {
+                ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
+                Type = ObjectType.Text2D,
+                Animations = GenerateAnimationText2D()
+            };
+        }
+
+        private MNObject GetInstanceText3D()
+        {
+            return new()
+            {
+                ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
+                Type = ObjectType.Text3D,
+                Animations = GenerateAnimationText3D()
+            };
+        }
+
+        private MNAnimation GenerateAnimationText2D()
+        {
+            return new()
+            {
+                AnimationProperty1DList = new()
+                {
+                    new AnimationProperty1D()
+                    {
+                        ID = UtilityHelper.Transorm2DRotationID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DRotation,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                Animation1DDictionary = new()
+                {
+                    {UtilityHelper.Transorm2DRotationID, Generate1DAnimation()}
+                },
+                AnimationProperty2DList = new()
+                {
+                    new AnimationProperty2D()
+                    {
+                        ID = UtilityHelper.Transorm2DPositionID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DPosition,
+                        AnimationInterruptTimeList = new(),
+                        Dependency = EnableDependency ? new()
+                        {
+                            ObjectID = sourceID,
+                            PropertyID = UtilityHelper.Transorm2DPositionID
+                        } : null
+                    },
+                    new AnimationProperty2D()
+                    {
+                        ID = UtilityHelper.Transorm2DScaleID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform2DScale,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                Animation2DDictionary = new()
+                {
+                    {UtilityHelper.Transorm2DPositionID, Generate2DAnimation(true)},
+                    {UtilityHelper.Transorm2DScaleID, Generate2DAnimation(false)}
+                },
+                AnimationProperty3DList = new(),
+                Animation3DDictionary = new(),
+                AnimationProperty4DList = new(),
+                Animation4DDictionary = new(),
+                AnimationPropertyStringList = new()
+                {
+                    new AnimationPropertyString()
+                    {
+                        ID = UtilityHelper.Text2DID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                AnimationStringDictionary = new()
+                {
+                    {UtilityHelper.Text2DID, GenerateTextAnimation()}
+                }
+            };
+        }
+        
+        private MNAnimation GenerateAnimationText3D()
+        {
+            return new()
+            {
+                AnimationProperty1DList = new(),
+                Animation1DDictionary = new(),
+                AnimationProperty2DList = new(),
+                Animation2DDictionary = new(),
+                AnimationProperty3DList = new()
+                {
+                    new AnimationProperty3D()
+                    {
+                        ID = UtilityHelper.Transorm3DPositionID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DPosition,
+                        AnimationInterruptTimeList = new()
+                    },
+                    new AnimationProperty3D()
+                    {
+                        ID = UtilityHelper.Transorm3DScaleID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DScale,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                Animation3DDictionary = new()
+                {
+                    {UtilityHelper.Transorm3DPositionID, Generate3DAnimation(true)},
+                    {UtilityHelper.Transorm3DScaleID, Generate3DAnimation(false)}
+                },
+                AnimationProperty4DList = new()
+                {
+                    new AnimationProperty4D()
+                    {
+                        ID = UtilityHelper.Transorm3DRotationID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        Type = PropertyType.Transform3DRotation,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                Animation4DDictionary = new()
+                {
+                    {UtilityHelper.Transorm3DRotationID, Generate4DAnimation()}
+                },
+                AnimationPropertyStringList = new()
+                {
+                    new AnimationPropertyString()
+                    {
+                        ID = UtilityHelper.Text3DID,
+                        StartTime = 0,
+                        EndTime = 8,
+                        IsStatic = false,
+                        StaticValue = null,
+                        AnimationInterruptTimeList = new()
+                    }
+                },
+                AnimationStringDictionary = new()
+                {
+                    {UtilityHelper.Text3DID, GenerateTextAnimation()}
+                }
             };
         }
 
@@ -226,11 +408,11 @@ namespace MNP.Mono
                         StaticValue = null,
                         Type = PropertyType.Transform2DPosition,
                         AnimationInterruptTimeList = new(),
-                        Dependency = new()
+                        Dependency = EnableDependency ? new()
                         {
                             ObjectID = sourceID,
                             PropertyID = UtilityHelper.Transorm2DPositionID
-                        }
+                        } : null
                     },
                     new AnimationProperty2D()
                     {
@@ -251,10 +433,11 @@ namespace MNP.Mono
                 AnimationProperty3DList = new(),
                 Animation3DDictionary = new(),
                 AnimationProperty4DList = new(),
-                Animation4DDictionary = new()
+                Animation4DDictionary = new(),
+                AnimationPropertyStringList = new(),
+                AnimationStringDictionary = new()
             };
         }
-        
 
         private MNAnimation GenerateAnimation3D()
         {
@@ -308,7 +491,9 @@ namespace MNP.Mono
                 Animation4DDictionary = new()
                 {
                     {UtilityHelper.Transorm3DRotationID, Generate4DAnimation()}
-                }
+                },
+                AnimationPropertyStringList = new(),
+                AnimationStringDictionary = new()
             };
         }
 
@@ -366,8 +551,7 @@ namespace MNP.Mono
                             EndValue = last,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
-                            DurationTime = 2,
-                            Enabled = true
+                            DurationTime = 2
                         });
                     }
                     else
@@ -378,8 +562,7 @@ namespace MNP.Mono
                             EndValue = RandomRotation2D,
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
-                            DurationTime = 2,
-                            Enabled = true
+                            DurationTime = 2
                         });
                     }
                 }
@@ -407,7 +590,6 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
-                            Enabled = true,
                             LerpType = Float2LerpType.AverageBezier
                         });
                     }
@@ -422,7 +604,6 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
-                            Enabled = true,
                             LerpType = Float2LerpType.AverageBezier
                         });
                     }
@@ -451,7 +632,6 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
-                            Enabled = true,
                             LerpType = Float3LerpType.AverageBezier
                         });
                     }
@@ -466,7 +646,6 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
-                            Enabled = true,
                             LerpType = Float3LerpType.AverageBezier
                         });
                     }
@@ -495,8 +674,7 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 0 : 4,
                             DurationTime = 2,
-                            LerpType = Float4LerpType.AverageSquad,
-                            Enabled = true
+                            LerpType = Float4LerpType.AverageSquad
                         });
                     }
                     else
@@ -510,12 +688,43 @@ namespace MNP.Mono
                             EaseKeyframeList = GenerateLinearEaseList(),
                             StartTime = i == 0 ? 2 : 6,
                             DurationTime = 2,
-                            LerpType = Float4LerpType.AverageSquad,
-                            Enabled = true
+                            LerpType = Float4LerpType.AverageSquad
                         });
                     }
                 }
             }
+            return result;
+        }
+
+        private List<AnimationString> GenerateTextAnimation()
+        {
+            List<AnimationString> result = new()
+            {
+                new AnimationString()
+                {
+                    Value = "测试1",
+                    StartTime = 0,
+                    DurationTime = 2
+                },
+                new AnimationString()
+                {
+                    Value = "测试2",
+                    StartTime = 2,
+                    DurationTime = 2
+                },
+                new AnimationString()
+                {
+                    Value = "测试3",
+                    StartTime = 4,
+                    DurationTime = 2
+                },
+                new AnimationString()
+                {
+                    Value = "测试4",
+                    StartTime = 6,
+                    DurationTime = 2
+                }
+            };
             return result;
         }
 

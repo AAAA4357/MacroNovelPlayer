@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MNP.Core.DOTS.Components;
+using TMPro;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -20,6 +21,7 @@ namespace MNP.Core.DOTS.Systems
 
         public NativeList<float4x4> Matrix2DList;
         public NativeList<float4x4> Matrix3DList;
+        public List<TextMeshPro> TextList;
 
         protected override void OnCreate()
         {
@@ -52,6 +54,16 @@ namespace MNP.Core.DOTS.Systems
                                        Material,
                                        matrix4X43Ds,
                                        matrix4X43Ds.Length);
+            SystemHandle handle = World.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
+            ref PostprocessingSystem system = ref World.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(handle);
+            new OutputText2DJob()
+            {
+                PropertyArray = system.PropertyArray
+            }.Run();
+            new OutputText3DJob()
+            {
+                PropertyArray = system.PropertyArray
+            }.Run();
         }
 
         protected override void OnDestroy()

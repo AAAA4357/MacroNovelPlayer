@@ -10,3 +10,6 @@
 200Cube(12triangles)-(190fps-200fps)
 200Sphere(768triangles)-(170fps-180fps)
 200teapot(12152triangles)-(100-120fps)
+
+1002D文本+1003D文本-(100fps-120fps)
+（文本为托管对象，不能过多生成）

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace MNP.Helpers
 {
@@ -16,6 +17,9 @@ namespace MNP.Helpers
         public const string Transorm3DPositionID = "Transform3D_Position";
         public const string Transorm3DRotationID = "Transform3D_Rotation";
         public const string Transorm3DScaleID = "Transform3D_Scale";
+        
+        public const string Text2DID = "2D_Text";
+        public const string Text3DID = "3D_Text";
 
         public const float InterruptTorloance = 0.005f;
 
@@ -79,7 +83,7 @@ namespace MNP.Helpers
                 }
                 else
                 {
-                    if (i >= valueContainer.Count - 2)
+                    if (i >= valueContainer.Count - 1)
                     {
                         index = i;
                         break;
@@ -87,6 +91,33 @@ namespace MNP.Helpers
                 }
             }
             resultIndex = index;
+        }
+        
+        [BurstCompile]
+        public static float4 CharToFloat4(char character)
+        {
+            byte[] utf8Bytes = System.Text.Encoding.UTF8.GetBytes(new[] { character });
+            float4 result = float4.zero;
+            for (int i = 0; i < math.min(3, utf8Bytes.Length); i++)
+            {
+                result[i] = utf8Bytes[i];
+            }
+            result.w = utf8Bytes.Length;
+            return result;
+        }
+        
+        [BurstCompile]
+        public static char Float4ToChar(float4 encoded)
+        {
+            int byteLength = (int)encoded.w;
+            byteLength = math.clamp(byteLength, 1, 4);
+            byte[] utf8Bytes = new byte[byteLength];
+            for (int i = 0; i < byteLength; i++)
+            {
+                utf8Bytes[i] = (byte)encoded[i];
+            }
+            string result = System.Text.Encoding.UTF8.GetString(utf8Bytes);
+            return result.Length > 0 ? result[0] : '\0';
         }
     }
 }

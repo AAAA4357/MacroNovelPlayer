@@ -14,5 +14,9 @@ namespace MNP.Core.DataStruct
         {
             get => Objects.Select(x => x.Animations.TotalPropertyCount).Sum();
         }
+        public int TotalStringCount
+        {
+            get => Objects.Select(x => x.Animations.AnimationPropertyStringList.Count).Sum();
+        }
     }
 }

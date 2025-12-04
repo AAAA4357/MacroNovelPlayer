@@ -12,7 +12,6 @@ namespace MNP.Core.DataStruct.Animation
         public List<AnimationEaseKeyframe> EaseKeyframeList;
         public float StartTime;
         public float DurationTime;
-        public bool Enabled;
         public Float4LerpType LerpType;
     }
 }

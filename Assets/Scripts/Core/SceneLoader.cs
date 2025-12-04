@@ -22,7 +22,10 @@ namespace MNP.Core
             Debug.Log($"加载开始，项目名称{project.Name}，预计耗时{project.TotalPropertyCount / (float)260:F2}s");
             float time = Time.time;
             IProgress<float> progress = new Progress<float>(UpdateBar);
-            SceneBaker baker = new();
+            SceneBaker baker = new()
+            {
+                TextInstance = test.TextInstance
+            };
             await UniTask.RunOnThreadPool(() =>
             {
                 SystemHandle postprocessHandle = World.DefaultGameObjectInjectionWorld.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
@@ -41,7 +44,7 @@ namespace MNP.Core
             await baker.BakeElements(project.Objects, progress);
             canvas.enabled = false;
             float totalTime = Time.time - time;
-            Debug.Log($"加载完成，共加载了{project.Objects.Count}个物体，共{project.TotalPropertyCount}个动画属性，共耗时{totalTime}s");
+            Debug.Log($"加载完成，共加载了{project.Objects.Count}个物体，共{project.TotalPropertyCount + project.TotalStringCount}个动画属性，共耗时{totalTime}s");
         }
 
         void UpdateBar(float progress)

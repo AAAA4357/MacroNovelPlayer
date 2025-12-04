@@ -4,8 +4,10 @@ namespace MNP.Core.DataStruct
     {
         Empty2D,
         Empty3D,
+        Layer,
         Object2D,
         Object3D,
-        Text
+        Text2D,
+        Text3D
     }
 }

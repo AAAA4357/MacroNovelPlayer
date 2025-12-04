@@ -13,9 +13,11 @@ namespace MNP.Core.DataStruct
         public Dictionary<string, List<Animation3D>> Animation3DDictionary;
         public List<AnimationProperty4D> AnimationProperty4DList;
         public Dictionary<string, List<Animation4D>> Animation4DDictionary;
+        public List<AnimationPropertyString> AnimationPropertyStringList;
+        public Dictionary<string, List<AnimationString>> AnimationStringDictionary;
         public int TotalPropertyCount
         {
-            get => AnimationProperty1DList.Count + AnimationProperty2DList.Count + AnimationProperty3DList.Count + AnimationProperty4DList.Count;
+            get => AnimationProperty1DList.Count + AnimationProperty2DList.Count + AnimationProperty3DList.Count + AnimationProperty4DList.Count + AnimationPropertyStringList.Count;
         }
     }
 }

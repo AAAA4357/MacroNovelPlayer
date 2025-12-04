@@ -10,13 +10,16 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Cysharp.Threading.Tasks;
-
+using TMPro;
+using UnityEngine;
 
 namespace MNP.Core
 {
     public class SceneBaker
     {
         public int PropertyIndexCounter;
+
+        public GameObject TextInstance;
 
         public async UniTask BakeElements(List<MNObject> objects, IProgress<float> progress)
         {
@@ -45,6 +48,12 @@ namespace MNP.Core
                     case ObjectType.Empty3D:
                     case ObjectType.Object3D:
                         SeperateAnimationObject3D(objects, mnObject.Animations, manager, ref elementComponent);
+                        break;
+                    case ObjectType.Text2D:
+                        SeperateAnimationText2D(objects, mnObject.Animations, manager, entity, ref elementComponent);
+                        break;
+                    case ObjectType.Text3D:
+                        SeperateAnimationText3D(objects, mnObject.Animations, manager, entity, ref elementComponent);
                         break;
                 }
                 manager.AddComponentData(entity, elementComponent);
@@ -77,17 +86,17 @@ namespace MNP.Core
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property1DComponent property1DComponent = new();
+                Property1DComponent property1DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property1DComponent.Value = property.StaticValue.Value;
-                    property1DComponent.Index = -1;
                     manager.AddComponentData(entity, property1DComponent);
                     continue;
                 }
-                property1DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
@@ -182,17 +191,17 @@ namespace MNP.Core
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property2DComponent property2DComponent = new();
+                Property2DComponent property2DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property2DComponent.Value = property.StaticValue.Value;
-                    property2DComponent.Index = -1;
                     manager.AddComponentData(entity, property2DComponent);
                     continue;
                 }
-                property2DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
@@ -327,17 +336,17 @@ namespace MNP.Core
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property3DComponent property3DComponent = new();
+                Property3DComponent property3DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property3DComponent.Value = property.StaticValue.Value;
-                    property3DComponent.Index = -1;
                     manager.AddComponentData(entity, property3DComponent);
                     continue;
                 }
-                property3DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
@@ -460,17 +469,17 @@ namespace MNP.Core
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property4DComponent property4DComponent = new();
+                Property4DComponent property4DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property4DComponent.Value = property.StaticValue.Value;
-                    property4DComponent.Index = -1;
                     manager.AddComponentData(entity, property4DComponent);
                     continue;
                 }
-                property4DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
@@ -653,7 +662,6 @@ namespace MNP.Core
 
         #endregion
 
-
         #region 3D
 
         private void SeperateAnimationObject3D(List<MNObject> objects, 
@@ -674,17 +682,17 @@ namespace MNP.Core
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property1DComponent property1DComponent = new();
+                Property1DComponent property1DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property1DComponent.Value = property.StaticValue.Value;
-                    property1DComponent.Index = -1;
                     manager.AddComponentData(entity, property1DComponent);
                     continue;
                 }
-                property1DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation1D> animationList = animationListComponent.Animation1DDictionary[property.ID];
 
@@ -772,17 +780,17 @@ namespace MNP.Core
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property2DComponent property2DComponent = new();
+                Property2DComponent property2DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property2DComponent.Value = property.StaticValue.Value;
-                    property2DComponent.Index = -1;
                     manager.AddComponentData(entity, property2DComponent);
                     continue;
                 }
-                property2DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation2D> animationList = animationListComponent.Animation2DDictionary[property.ID];
 
@@ -906,17 +914,17 @@ namespace MNP.Core
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property3DComponent property3DComponent = new();
+                Property3DComponent property3DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property3DComponent.Value = property.StaticValue.Value;
-                    property3DComponent.Index = -1;
                     manager.AddComponentData(entity, property3DComponent);
                     continue;
                 }
-                property3DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation3D> animationList = animationListComponent.Animation3DDictionary[property.ID];
 
@@ -1051,17 +1059,17 @@ namespace MNP.Core
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
                 Entity entity = manager.CreateEntity();
-                Property4DComponent property4DComponent = new();
+                Property4DComponent property4DComponent = new()
+                {
+                    Index = PropertyIndexCounter
+                };
+                PropertyIndexCounter++;
                 if (property.IsStatic)
                 {
                     property4DComponent.Value = property.StaticValue.Value;
-                    property4DComponent.Index = -1;
                     manager.AddComponentData(entity, property4DComponent);
                     continue;
                 }
-                property4DComponent.Index = PropertyIndexCounter;
-                property.Index = PropertyIndexCounter;
-                PropertyIndexCounter++;
 
                 List<Animation4D> animationList = animationListComponent.Animation4DDictionary[property.ID];
 
@@ -1247,6 +1255,98 @@ namespace MNP.Core
                 }
             }
         }
+
+        #endregion
+
+        #region Text
+
+        private void SeperateAnimationText2D(List<MNObject> objects, 
+                                             MNAnimation animationListComponent,
+                                             EntityManager manager,
+                                             Entity entity,
+                                             ref ElementComponent element)
+        {
+            SeperateCustom1DProperty2D(objects, animationListComponent, manager, ref element);
+            SeperateCustom2DProperty2D(objects, animationListComponent, manager, ref element);
+            SeperateCustom3DProperty2D(objects, animationListComponent, manager);
+            SeperateCustom4DProperty2D(objects, animationListComponent, manager);
+            SeperateCustomStringProperty(animationListComponent, entity, manager);
+        }
+
+        private void SeperateAnimationText3D(List<MNObject> objects, 
+                                             MNAnimation animationListComponent,
+                                             EntityManager manager,
+                                             Entity entity,
+                                             ref ElementComponent element)
+        {
+            SeperateCustom1DProperty3D(objects, animationListComponent, manager);
+            SeperateCustom2DProperty3D(objects, animationListComponent, manager);
+            SeperateCustom3DProperty3D(objects, animationListComponent, manager, ref element);
+            SeperateCustom4DProperty3D(objects, animationListComponent, manager, ref element);
+            SeperateCustomStringProperty(animationListComponent, entity, manager);
+        }
+
+        private void SeperateCustomStringProperty(MNAnimation animationListComponent,
+                                                  Entity elementEntity,
+                                                  EntityManager manager)
+        {
+            foreach (AnimationPropertyString property in animationListComponent.AnimationPropertyStringList)
+            {
+                Entity entity = manager.CreateEntity();
+                TextMeshPro tmp = UnityEngine.Object.Instantiate(TextInstance).GetComponent<TextMeshPro>();
+                PropertyStringComponent propertyStringComponent = new()
+                {
+                    Value = property.StaticValue,
+                    OutputText = tmp
+                };
+                if (property.IsStatic)
+                {
+                    manager.AddComponentData(entity, propertyStringComponent);
+                    continue;
+                }
+
+                List<AnimationString> animationList = animationListComponent.AnimationStringDictionary[property.ID];
+                AnimationStringListComponent animationComponent = new()
+                {
+                    Animations = animationList
+                };
+                
+                manager.AddBuffer<InterruptTimeComponent>(entity);
+                DynamicBuffer<InterruptTimeComponent> interruptTimeBuffer = manager.GetBuffer<InterruptTimeComponent>(entity);
+                for (int i = 0; i < property.AnimationInterruptTimeList.Count; i++)
+                {
+                    InterruptTimeComponent component = new()
+                    {
+                        InterruptTime = property.AnimationInterruptTimeList[i]
+                    };
+                    interruptTimeBuffer.Add(component);
+                }
+                
+                PropertyInfoComponent propertyInfoComponent = new()
+                {
+                    StartTime = property.StartTime,
+                    EndTime = property.EndTime
+                };
+                TimeComponent timeComponent = new()
+                {
+                    Time = 0,
+                    InterrputedTime = 0
+                };
+
+                manager.AddComponentData(entity, animationComponent);
+                manager.AddComponentData(elementEntity, propertyStringComponent);
+                manager.AddComponentData(entity, propertyStringComponent);
+                manager.AddComponentData(entity, propertyInfoComponent);
+                manager.AddComponentData(entity, timeComponent);
+                manager.AddComponentData(entity, new InitializedPropertyComponent());
+                manager.AddComponentData(entity, new TimeEnabledComponent());
+                manager.AddComponentData(entity, new LerpEnabledComponent());
+                manager.AddComponentData(entity, new InterruptComponent());
+                manager.SetComponentEnabled<InterruptComponent>(entity, false);
+                manager.SetComponentEnabled<TimeEnabledComponent>(entity, false);
+            }
+        }
+
 
         #endregion
     }

@@ -1407,9 +1407,13 @@ MonoBehaviour:
   Material: {fileID: 2100000, guid: 89e3e0fa8e500a24a8645067f944288a, type: 2}
   Mesh2D: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   Mesh3D: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  TextInstance: {fileID: 6843151015684476109, guid: 99e043abc07f45546b29efb057ad6e38, type: 3}
   Changed: {fileID: 1490221154}
-  testCount2D: 2825
+  EnableDependency: 0
+  testCount2D: 0
   testCount3D: 0
+  testCountText2D: 100
+  testCountText3D: 100
 --- !u!4 &1565316417
 Transform:
   m_ObjectHideFlags: 0

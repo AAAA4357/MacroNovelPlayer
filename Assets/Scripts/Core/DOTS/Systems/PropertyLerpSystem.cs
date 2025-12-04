@@ -16,6 +16,7 @@ namespace MNP.Core.DOTS.Systems
             state.Dependency = new Animation3DLerpJob().ScheduleParallel(state.Dependency);
             state.Dependency = new Animation4DLerpJob().ScheduleParallel(state.Dependency);
             state.CompleteDependency();
+            new AnimationStringJob().Run();
         }
     }
 }
