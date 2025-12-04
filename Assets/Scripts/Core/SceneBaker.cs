@@ -29,6 +29,7 @@ namespace MNP.Core
             {
                 MNObject mnObject = objects[i];
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 ElementComponent elementComponent = new()
                 {
                     ID = mnObject.ID,
@@ -86,6 +87,7 @@ namespace MNP.Core
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
                 Entity entity = manager.CreateEntity();
+manager.AddComponentData(entity, new CleanComponent());
                 Property1DComponent property1DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -191,6 +193,7 @@ namespace MNP.Core
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property2DComponent property2DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -336,6 +339,7 @@ namespace MNP.Core
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property3DComponent property3DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -469,6 +473,7 @@ namespace MNP.Core
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property4DComponent property4DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -682,6 +687,7 @@ namespace MNP.Core
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property1DComponent property1DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -780,6 +786,7 @@ namespace MNP.Core
             foreach (AnimationProperty2D property in animationListComponent.AnimationProperty2DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property2DComponent property2DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -914,6 +921,7 @@ namespace MNP.Core
             foreach (AnimationProperty3D property in animationListComponent.AnimationProperty3DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property3DComponent property3DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -1059,6 +1067,7 @@ namespace MNP.Core
             foreach (AnimationProperty4D property in animationListComponent.AnimationProperty4DList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 Property4DComponent property4DComponent = new()
                 {
                     Index = PropertyIndexCounter
@@ -1293,6 +1302,7 @@ namespace MNP.Core
             foreach (AnimationPropertyString property in animationListComponent.AnimationPropertyStringList)
             {
                 Entity entity = manager.CreateEntity();
+                manager.AddComponentData(entity, new CleanComponent());
                 TextMeshPro tmp = UnityEngine.Object.Instantiate(TextInstance).GetComponent<TextMeshPro>();
                 PropertyStringComponent propertyStringComponent = new()
                 {
@@ -1346,7 +1356,6 @@ namespace MNP.Core
                 manager.SetComponentEnabled<TimeEnabledComponent>(entity, false);
             }
         }
-
 
         #endregion
     }

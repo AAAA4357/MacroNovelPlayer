@@ -7,5 +7,7 @@ namespace MNP.Core.DataStruct
         public int TextureID;
         public ObjectType Type;
         public MNAnimation Animations;
+        public uint? DependencyLayerID;
+        public int? DependencyLayerIndex;
     }
 }

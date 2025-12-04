@@ -1,4 +1,5 @@
 using MNP.Core.DOTS.Components;
+using MNP.Core.DOTS.Components.LerpRuntime;
 using MNP.Core.DOTS.Jobs;
 using MNP.Core.Misc;
 using Unity.Burst;
@@ -24,8 +25,8 @@ namespace MNP.Core.DOTS.Systems
         }
 
         public float TimeFactor;
-
         public bool TimePaused { get; private set; }
+        public bool StopEnd;
 
         UnmanagedTimer timer;
         bool startTimer;
@@ -57,9 +58,28 @@ namespace MNP.Core.DOTS.Systems
         public void OnUpdate(ref SystemState state)
         {
             timer.Stop();
+
+            bool stop = true;
+            foreach (EnabledRefRO<LerpEnabledComponent> lerpEnabled in SystemAPI.Query<EnabledRefRO<LerpEnabledComponent>>())
+            {
+                stop &= !lerpEnabled.ValueRO;
+            }
+            if (stop)
+            {
+                if (StopEnd)
+                {
+                    startTimer = false;
+                }
+                else
+                {
+                    pauseTime = true;
+                }
+            }
+
             float elapsedSeconds = pauseTime ? 0 : timer.GetElapsedSeconds();
             elapsedSeconds *= TimeFactor;
             TimePaused = pauseTime;
+
             if (resetTime is not null)
             {
                 state.Dependency = new TimeSetterJob()
