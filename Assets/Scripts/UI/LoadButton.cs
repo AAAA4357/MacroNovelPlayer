@@ -15,8 +15,8 @@ public class LoadButton : MonoBehaviour
         {
             Bar = bar.Bar,
             canvas = bar.canvas,
-            test = test
+            TextInstance = test.TextInstance
         };
-        _ = loader.LoadScene();
+        _ = loader.LoadProject(test.TestProject);
     }
 }

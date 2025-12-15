@@ -10,13 +10,15 @@ namespace MNP.Core.DataStruct
         public string Description;
         public DateTime CreateTime;
         public List<MNObject> Objects;
+        public MNResource Resource;
+        public float TotalTime;
         public int TotalPropertyCount
         {
-            get => Objects.Select(x => x.Animations.TotalPropertyCount).Sum();
+            get => Objects.Sum(x => x.Animations.TotalPropertyCount);
         }
         public int TotalStringCount
         {
-            get => Objects.Select(x => x.Animations.AnimationPropertyStringList.Count).Sum();
+            get => Objects.Sum(x => x.Animations.AnimationPropertyStringList.Count);
         }
     }
 }

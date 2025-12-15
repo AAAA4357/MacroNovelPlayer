@@ -17,6 +17,8 @@ namespace MNP.Mono
         public Mesh Mesh3D;
         public GameObject TextInstance;
 
+        public Texture2D TestTexture;
+
         public Slider Changed;
 
         public bool EnableDependency;
@@ -38,7 +40,6 @@ namespace MNP.Mono
             system.TestTexture = Texture;
             system.Material = Material;
             system.Mesh2D = Mesh2D;
-            system.Mesh3D = Mesh3D;
 
             Changed.onValueChanged.AddListener(OnProgressChanged);
         }
@@ -50,7 +51,21 @@ namespace MNP.Mono
                 Name = "测试工程",
                 Description = "",
                 CreateTime = System.DateTime.Now,
-                Objects = objects
+                Objects = objects,
+                Resource = TestResource,
+                TotalTime = 8
+            };
+        }
+
+        public MNResource TestResource
+        {
+            get => new()
+            {
+                Textures = new()
+                {
+                    TestTexture
+                },
+                Object3DMeshs = new()
             };
         }
 
@@ -69,7 +84,7 @@ namespace MNP.Mono
                 }
                 for (int i = 0; i < testCount3D; i++)
                 {
-                    objects.Add(GetInstance3D());
+                    //objects.Add(GetInstance3D());
                 }
                 for (int i = 0; i < testCountText2D; i++)
                 {
@@ -137,7 +152,7 @@ namespace MNP.Mono
             World world = World.DefaultGameObjectInjectionWorld;
             SystemHandle systemHandle = world.GetExistingSystem<TimeSystem>();
             ref TimeSystem timeSystem = ref world.Unmanaged.GetUnsafeSystemRef<TimeSystem>(systemHandle);
-            timeSystem.SystemTime = 8 * value;
+            timeSystem.SystemTime = TestProject.TotalTime * value;
         }
 
         private MNObject GetEmpty2D()
@@ -192,6 +207,9 @@ namespace MNP.Mono
             return new()
             {
                 ID = (uint)new System.Random().Next(int.MinValue, int.MaxValue),
+                TextureID = 0,
+                Object2DSize = new(1, 1),
+                Object2DUV = new(0, 0, 1, 1),
                 Type = ObjectType.Object2D,
                 Animations = GenerateAnimation2D()
             };

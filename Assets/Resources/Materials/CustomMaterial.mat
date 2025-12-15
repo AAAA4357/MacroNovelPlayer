@@ -30,6 +30,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Cutoff: 0.1
+    - _UVClamp: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _UVRect: {r: 0, g: 0, b: 1, a: 1}
   m_BuildTextureStacks: []

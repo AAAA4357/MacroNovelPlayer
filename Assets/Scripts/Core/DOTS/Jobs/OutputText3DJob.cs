@@ -5,7 +5,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-[WithAll(typeof(BakeReadyComponent))]
+[WithAll(typeof(BakeReadyComponent), typeof(Text3DComponent))]
 public partial struct OutputText3DJob : IJobEntity
 {
     [ReadOnly]
@@ -13,7 +13,7 @@ public partial struct OutputText3DJob : IJobEntity
 
     public void Execute(in ElementComponent elementComponent, PropertyStringComponent stringComponent, EnabledRefRO<TimeEnabledComponent> timeEnabledComponent)
     {
-        if (!timeEnabledComponent.ValueRO|| elementComponent.ObjectType != ObjectType.Text3D)
+        if (!timeEnabledComponent.ValueRO)
         {
             return;
         }

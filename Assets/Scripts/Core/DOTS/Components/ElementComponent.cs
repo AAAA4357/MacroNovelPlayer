@@ -1,4 +1,3 @@
-using MNP.Core.DataStruct;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -9,9 +8,9 @@ namespace MNP.Core.DOTS.Components
     public struct ElementComponent : IComponentData
     {
         public uint ID;
-        public int TextureID;
-        public int MeshID;
-        public ObjectType ObjectType;
+        public int Object3DTextureID;
+        public int Object3DMeshID;
+        public float2 Object2DSize;
         public int TransformPositionIndex;
         public int TransformRotationIndex;
         public int TransformScaleIndex;

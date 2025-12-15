@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using MNP.Core.DOTS.Components;
 using TMPro;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace MNP.Core.DOTS.Systems
@@ -15,13 +13,15 @@ namespace MNP.Core.DOTS.Systems
     {
         public Texture2D TestTexture;
         public List<Texture2D> Textures;
+        public List<Mesh> Mesh3Ds;
         public Material Material;
         public Mesh Mesh2D;
-        public Mesh Mesh3D;
 
-        public NativeList<float4x4> Matrix2DList;
-        public NativeList<float4x4> Matrix3DList;
+        public List<Matrix4x4> Matrix4x42Ds;
+        public List<Vector4> UVs;
         public List<TextMeshPro> TextList;
+        
+        MaterialPropertyBlock PropertyBlock = new();
 
         protected override void OnCreate()
         {
@@ -31,29 +31,44 @@ namespace MNP.Core.DOTS.Systems
 
         protected override void OnUpdate()
         {
-            Matrix2DList.Clear();
-            Matrix3DList.Clear();
-            Dependency = new Output2DJob()
+            EntityManager.GetAllUniqueSharedComponents(out NativeList<TextureComponent> textures, Allocator.TempJob);
+
+            Matrix4x42Ds.Clear();
+            UVs = new();
+            foreach (TextureComponent component in textures)
             {
-                ListWriter = Matrix2DList.AsParallelWriter()
-            }.ScheduleParallel(Dependency);
-            Dependency = new Output3DJob()
+                PropertyBlock.Clear();
+                PropertyBlock.SetTexture("_MainTex", Textures[component.TextureID]);
+                foreach ((var element, var uv) in SystemAPI.Query<RefRO<ElementComponent>, RefRO<UVComponent>>()
+                                                 .WithSharedComponentFilter(component)
+                                                 .WithAll<Object2DComponent>())
+                {
+                    Matrix4x42Ds.Add(element.ValueRO.TransformMatrix);
+                    UVs.Add(uv.ValueRO.UV);
+                }
+                PropertyBlock.SetVectorArray("_UVRect", UVs);
+                Graphics.DrawMeshInstanced(Mesh2D,
+                                           0,
+                                           Material,
+                                           Matrix4x42Ds.ToArray(),
+                                           Matrix4x42Ds.Count,
+                                           PropertyBlock);
+            }
+            
+            foreach (var element in SystemAPI.Query<RefRO<ElementComponent>>()
+                                             .WithAll<Object3DComponent>())
             {
-                ListWriter = Matrix3DList.AsParallelWriter()
-            }.ScheduleParallel(Dependency);
-            CompleteDependency();
-            Matrix4x4[] matrix4X42Ds = Matrix2DList.AsArray().Select(x => (Matrix4x4)x).ToArray();
-            Graphics.DrawMeshInstanced(Mesh2D,
-                                       0,
-                                       Material,
-                                       matrix4X42Ds,
-                                       matrix4X42Ds.Length);
-            Matrix4x4[] matrix4X43Ds = Matrix3DList.AsArray().Select(x => (Matrix4x4)x).ToArray();
-            Graphics.DrawMeshInstanced(Mesh3D,
-                                       0,
-                                       Material,
-                                       matrix4X43Ds,
-                                       matrix4X43Ds.Length);
+                PropertyBlock.Clear();
+                PropertyBlock.SetTexture("_MainTex", Textures[element.ValueRO.Object3DTextureID]);
+                Graphics.DrawMesh(Mesh3Ds[element.ValueRO.Object3DMeshID],
+                                  element.ValueRO.TransformMatrix,
+                                  Material,
+                                  0,                               // Layer
+                                  null,                            // Camera (null = 主相机)
+                                  0,                               // Submesh index
+                                  PropertyBlock);
+            }
+            
             SystemHandle handle = World.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
             ref PostprocessingSystem system = ref World.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(handle);
             new OutputText2DJob()
@@ -64,12 +79,6 @@ namespace MNP.Core.DOTS.Systems
             {
                 PropertyArray = system.PropertyArray
             }.Run();
-        }
-
-        protected override void OnDestroy()
-        {
-            Matrix2DList.Dispose();
-            Matrix3DList.Dispose();
         }
     }
 }

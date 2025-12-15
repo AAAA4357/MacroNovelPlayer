@@ -6,6 +6,8 @@ Shader "Custom/UnlitInstancedTransparent"
         _MainTex ("_MainTex", 2D) = "white" {}
         _Color ("Color", Color) = (1,1,1,1)
         _Cutoff ("Alpha Cutoff", Range(0.0, 1.0)) = 0.1
+        _UVRect ("UV Rectangle", Vector) = (0,0,1,1)
+        [Toggle]_UVClamp ("Clamp UV", Float) = 1
     }
     
     SubShader
@@ -30,6 +32,7 @@ Shader "Custom/UnlitInstancedTransparent"
             #pragma multi_compile_instancing
             #pragma multi_compile_fog
             #pragma multi_compile _ _ALPHATEST_ON
+            #pragma multi_compile _ _UVCLAMP_ON
             
             #include "UnityCG.cginc"
 
@@ -50,6 +53,7 @@ Shader "Custom/UnlitInstancedTransparent"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float4 _UVRect;
             float _Cutoff;
             
             UNITY_INSTANCING_BUFFER_START(Props)
@@ -71,11 +75,21 @@ Shader "Custom/UnlitInstancedTransparent"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 
+                float2 remappedUV = i.uv;
+                
+                float2 uvSize = float2(_UVRect.z - _UVRect.x, _UVRect.w - _UVRect.y);
+                float2 uvOffset = float2(_UVRect.x, _UVRect.y);
+                
+                remappedUV = i.uv * uvSize + uvOffset;
+                
+                #if defined(_UVCLAMP_ON)
+                    remappedUV = clamp(remappedUV, float2(_UVRect.x, _UVRect.y), float2(_UVRect.z, _UVRect.w));
+                #endif
+                
                 fixed4 instanceColor = UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
-                fixed4 texColor = tex2D(_MainTex, i.uv);
+                fixed4 texColor = tex2D(_MainTex, remappedUV);
                 fixed4 finalColor = texColor * instanceColor;
                 
-                // Alpha测试（可选）
                 #if defined(_ALPHATEST_ON)
                     clip(finalColor.a - _Cutoff);
                 #endif

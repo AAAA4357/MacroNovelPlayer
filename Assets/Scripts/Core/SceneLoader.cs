@@ -2,8 +2,6 @@ using System;
 using Cysharp.Threading.Tasks;
 using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Systems;
-using MNP.Mono;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,33 +11,24 @@ namespace MNP.Core
     public class SceneLoader
     {
         public Slider Bar;
-        public Test test;
         public Canvas canvas;
+        public GameObject TextInstance;
 
-        public async UniTask LoadScene()
+        public async UniTask LoadProject(MNProject project)
         {
-            MNProject project = test.TestProject;
-            Debug.Log($"加载开始，项目名称{project.Name}，预计耗时{project.TotalPropertyCount / (float)260:F2}s");
+            Debug.Log($"加载开始，项目名称{project.Name}");
             float time = Time.time;
             IProgress<float> progress = new Progress<float>(UpdateBar);
             SceneBaker baker = new()
             {
-                TextInstance = test.TextInstance
+                TextInstance = TextInstance
             };
             await UniTask.RunOnThreadPool(() =>
             {
-                SystemHandle postprocessHandle = World.DefaultGameObjectInjectionWorld.Unmanaged.GetExistingUnmanagedSystem<PostprocessingSystem>();
-                ref PostprocessingSystem system = ref World.DefaultGameObjectInjectionWorld.Unmanaged.GetUnsafeSystemRef<PostprocessingSystem>(postprocessHandle);
-                system.PropertyArray = new(project.TotalPropertyCount, Allocator.Persistent);
-                OutputSystem outputSystem = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<OutputSystem>();
-                outputSystem.Matrix2DList = new(Allocator.Persistent)
-                {
-                    Capacity = project.TotalPropertyCount
-                };
-                outputSystem.Matrix3DList = new(Allocator.Persistent)
-                {
-                    Capacity = project.TotalPropertyCount
-                };
+                OutputSystem system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<OutputSystem>();
+                system.Textures = project.Resource.Textures;
+                system.Mesh3Ds = project.Resource.Object3DMeshs;
+                Debug.Log($"项目{project.Name}资源加载完毕，共{system.Textures.Count}张贴图，{system.Mesh3Ds.Count}份模型网格");
             });
             await baker.BakeElements(project.Objects, progress);
             canvas.enabled = false;

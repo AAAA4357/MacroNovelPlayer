@@ -1,4 +1,3 @@
-using MNP.Core.DataStruct;
 using MNP.Core.DOTS.Components;
 using Unity.Burst;
 using Unity.Collections;
@@ -8,7 +7,7 @@ using Unity.Mathematics;
 namespace MNP.Core.DOTS.Jobs
 {
     [BurstCompile]
-    [WithAll(typeof(BakeReadyComponent))]
+    [WithAll(typeof(BakeReadyComponent), typeof(Object3DComponent))]
     public partial struct PostprocessTransform3DJob : IJobEntity
     {
         [ReadOnly] 
@@ -17,10 +16,6 @@ namespace MNP.Core.DOTS.Jobs
         [BurstCompile]
         public void Execute(ref ElementComponent elementComponent)
         {
-            if (elementComponent.ObjectType != ObjectType.Object3D)
-            {
-                return;
-            }
             float3 pos = InputArray[elementComponent.TransformPositionIndex].xyz;
             quaternion rot = InputArray[elementComponent.TransformRotationIndex];
             float3 scl = InputArray[elementComponent.TransformScaleIndex].xyz;

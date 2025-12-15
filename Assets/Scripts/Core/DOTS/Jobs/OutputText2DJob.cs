@@ -6,7 +6,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 
-[WithAll(typeof(BakeReadyComponent))]
+[WithAll(typeof(BakeReadyComponent), typeof(Text2DComponent))]
 public partial struct OutputText2DJob : IJobEntity
 {
     [ReadOnly]
@@ -14,7 +14,7 @@ public partial struct OutputText2DJob : IJobEntity
 
     public void Execute(in ElementComponent elementComponent, PropertyStringComponent stringComponent, EnabledRefRO<TimeEnabledComponent> timeEnabledComponent)
     {
-        if (!timeEnabledComponent.ValueRO || elementComponent.ObjectType != ObjectType.Text2D)
+        if (!timeEnabledComponent.ValueRO)
         {
             return;
         }

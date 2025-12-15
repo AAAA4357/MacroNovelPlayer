@@ -33,9 +33,9 @@ namespace MNP.Core
                 ElementComponent elementComponent = new()
                 {
                     ID = mnObject.ID,
-                    TextureID = mnObject.TextureID,
-                    MeshID = mnObject.MeshID,
-                    ObjectType = mnObject.Type,
+                    Object3DMeshID = -1,
+                    Object3DTextureID = -1,
+                    Object2DSize = new(float.NaN, float.NaN),
                     TransformPositionIndex = -1,
                     TransformRotationIndex = -1,
                     TransformScaleIndex = -1,
@@ -44,11 +44,11 @@ namespace MNP.Core
                 {
                     case ObjectType.Empty2D:
                     case ObjectType.Object2D:
-                        SeperateAnimationObject2D(objects, mnObject.Animations, manager, ref elementComponent);
+                        SeperateAnimationObject2D(objects, mnObject, mnObject.Animations, manager, entity, ref elementComponent);
                         break;
                     case ObjectType.Empty3D:
                     case ObjectType.Object3D:
-                        SeperateAnimationObject3D(objects, mnObject.Animations, manager, ref elementComponent);
+                        SeperateAnimationObject3D(objects, mnObject, mnObject.Animations, manager, entity, ref elementComponent);
                         break;
                     case ObjectType.Text2D:
                         SeperateAnimationText2D(objects, mnObject.Animations, manager, entity, ref elementComponent);
@@ -69,14 +69,26 @@ namespace MNP.Core
         #region 2D
 
         private void SeperateAnimationObject2D(List<MNObject> objects, 
+                                               MNObject current,
                                                MNAnimation animationListComponent,
                                                EntityManager manager,
+                                               Entity entity,
                                                ref ElementComponent element)
         {
             SeperateCustom1DProperty2D(objects, animationListComponent, manager, ref element);
             SeperateCustom2DProperty2D(objects, animationListComponent, manager, ref element);
             SeperateCustom3DProperty2D(objects, animationListComponent, manager);
             SeperateCustom4DProperty2D(objects, animationListComponent, manager);
+            manager.AddComponent(entity, typeof(Object2DComponent));
+            manager.AddComponentData(entity, new UVComponent()
+            {
+                UV = current.Object2DUV
+            });
+            manager.AddSharedComponent(entity, new TextureComponent()
+            {
+                TextureID = current.TextureID
+            });
+            element.Object2DSize = current.Object2DSize;
         }
 
         private void SeperateCustom1DProperty2D(List<MNObject> objects, 
@@ -670,14 +682,18 @@ manager.AddComponentData(entity, new CleanComponent());
         #region 3D
 
         private void SeperateAnimationObject3D(List<MNObject> objects, 
+                                               MNObject current,
                                                MNAnimation animationListComponent,
                                                EntityManager manager,
+                                               Entity entity,
                                                ref ElementComponent element)
         {
             SeperateCustom1DProperty3D(objects, animationListComponent, manager);
             SeperateCustom2DProperty3D(objects, animationListComponent, manager);
             SeperateCustom3DProperty3D(objects, animationListComponent, manager, ref element);
             SeperateCustom4DProperty3D(objects, animationListComponent, manager, ref element);
+            manager.AddComponent(entity, typeof(Object3DComponent));
+            element.Object3DMeshID = current.Object3DMeshID;
         }
 
         private void SeperateCustom1DProperty3D(List<MNObject> objects, 
@@ -1280,6 +1296,7 @@ manager.AddComponentData(entity, new CleanComponent());
             SeperateCustom3DProperty2D(objects, animationListComponent, manager);
             SeperateCustom4DProperty2D(objects, animationListComponent, manager);
             SeperateCustomStringProperty(animationListComponent, entity, manager);
+            manager.AddComponent(entity, typeof(Text2DComponent));
         }
 
         private void SeperateAnimationText3D(List<MNObject> objects, 
@@ -1293,6 +1310,7 @@ manager.AddComponentData(entity, new CleanComponent());
             SeperateCustom3DProperty3D(objects, animationListComponent, manager, ref element);
             SeperateCustom4DProperty3D(objects, animationListComponent, manager, ref element);
             SeperateCustomStringProperty(animationListComponent, entity, manager);
+            manager.AddComponent(entity, typeof(Text3DComponent));
         }
 
         private void SeperateCustomStringProperty(MNAnimation animationListComponent,
