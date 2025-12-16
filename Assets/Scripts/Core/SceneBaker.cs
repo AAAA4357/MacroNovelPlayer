@@ -99,7 +99,7 @@ namespace MNP.Core
             foreach (AnimationProperty1D property in animationListComponent.AnimationProperty1DList)
             {
                 Entity entity = manager.CreateEntity();
-manager.AddComponentData(entity, new CleanComponent());
+                manager.AddComponentData(entity, new CleanComponent());
                 Property1DComponent property1DComponent = new()
                 {
                     Index = PropertyIndexCounter

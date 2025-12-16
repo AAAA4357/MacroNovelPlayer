@@ -27,6 +27,7 @@ namespace MNP.Core.DOTS.Systems
         public float TimeFactor;
         public bool TimePaused { get; private set; }
         public bool StopEnd;
+        public bool Ended;
 
         UnmanagedTimer timer;
         bool startTimer;
@@ -103,6 +104,7 @@ namespace MNP.Core.DOTS.Systems
             }
             else
             {
+                //停止播放-动画结束
                 state.Dependency = new TimeSetterJob()
                 {
                     TargetValue = 0

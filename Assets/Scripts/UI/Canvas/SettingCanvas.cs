@@ -11,7 +11,7 @@ public class SettingCanvas : CanvasBase
     public override void EnterCanvas()
     {
         float sizeY = Title.GetComponent<RectTransform>().sizeDelta.y;
-        DOTween.To(() => Title.GetComponent<RectTransform>().sizeDelta.x, x => Title.GetComponent<RectTransform>().sizeDelta = new(x, sizeY), 400, 1f).SetEase(Ease.OutCubic);
+        DOTween.To(() => Title.GetComponent<RectTransform>().sizeDelta.x, x => Title.GetComponent<RectTransform>().sizeDelta = new(x, sizeY), 410, 1f).SetEase(Ease.OutCubic);
         Back.transform.DOLocalMoveX(880, 0.5f).SetEase(Ease.OutQuad);
     }
 

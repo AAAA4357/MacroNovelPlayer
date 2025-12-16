@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class LoadCanvas : CanvasBase
 {
     public TextMeshProUGUI Title;
+    public ScrollRect List;
+    public LoadList LoadList;
     public Button Load;
     public Button Back;
 
@@ -13,6 +15,7 @@ public class LoadCanvas : CanvasBase
     {
         float sizeY = Title.GetComponent<RectTransform>().sizeDelta.y;
         DOTween.To(() => Title.GetComponent<RectTransform>().sizeDelta.x, x => Title.GetComponent<RectTransform>().sizeDelta = new(x, sizeY), 500, 1f).SetEase(Ease.OutCubic);
+        List.transform.DOLocalMoveX(0, 0.5f).SetEase(Ease.OutQuad);
         Load.transform.DOLocalMoveX(630, 0.5f).SetEase(Ease.OutQuad);
         Back.transform.DOLocalMoveX(880, 0.5f).SetEase(Ease.OutQuad).SetDelay(0.1f);
     }
@@ -21,6 +24,7 @@ public class LoadCanvas : CanvasBase
     {
         float sizeY = Title.GetComponent<RectTransform>().sizeDelta.y;
         DOTween.To(() => Title.GetComponent<RectTransform>().sizeDelta.x, x => Title.GetComponent<RectTransform>().sizeDelta = new(x, sizeY), 0, 1f).SetEase(Ease.OutCubic);
+        List.transform.DOLocalMoveX(1920, 0.5f).SetEase(Ease.OutQuad);
         Load.transform.DOLocalMoveX(1260, 0.5f).SetEase(Ease.OutQuad).SetDelay(0.1f);
         Back.transform.DOLocalMoveX(1510, 0.5f).SetEase(Ease.OutQuad);
     }

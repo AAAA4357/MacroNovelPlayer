@@ -61,10 +61,7 @@ namespace MNP.Mono
         {
             get => new()
             {
-                Textures = new()
-                {
-                    TestTexture
-                },
+                Textures = new(),
                 Object3DMeshs = new()
             };
         }

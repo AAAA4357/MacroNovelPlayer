@@ -3,16 +3,14 @@ using MNP.Core;
 using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayingSceneManager : MonoBehaviour
 {
     public GameObject TextInstance;
 
-    [SerializeField]
     [DisableInPlayMode]
     [DisableInEditorMode]
-    UIState state;
+    public UIState state;
 
     [Title("各Canvas")]
     public MainMenuCanvas MainCanvas;
@@ -47,6 +45,7 @@ public class PlayingSceneManager : MonoBehaviour
         state = UIState.Load;
         MainCanvas.ExitCanvas();
         LoadCanvas.EnterCanvas();
+        LoadCanvas.LoadList.ScanFolder();
     }
 
     public void OnMenuSettingClick()
