@@ -10,8 +10,7 @@ namespace MNP.Core
 {
     public class SceneLoader
     {
-        public Slider Bar;
-        public Canvas canvas;
+        public Slider ProgressBar;
         public GameObject TextInstance;
 
         public async UniTask LoadProject(MNProject project)
@@ -31,14 +30,13 @@ namespace MNP.Core
                 Debug.Log($"项目{project.Name}资源加载完毕，共{system.Textures.Count}张贴图，{system.Mesh3Ds.Count}份模型网格");
             });
             await baker.BakeElements(project.Objects, progress);
-            canvas.enabled = false;
             float totalTime = Time.time - time;
             Debug.Log($"加载完成，共加载了{project.Objects.Count}个物体，共{project.TotalPropertyCount + project.TotalStringCount}个动画属性，共耗时{totalTime}s");
         }
 
         void UpdateBar(float progress)
         {
-            Bar.value = progress;
+            ProgressBar.value = progress;
         }
     }
 }
